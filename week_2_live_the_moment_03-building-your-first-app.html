@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3 · Building Your First App with AI — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── ACTIVITY 1: ORDER THE BUILD LOOP (chain) ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.84rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-slot-tag{font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.05em;color:var(--orange);text-transform:uppercase;display:block;margin-bottom:.15rem}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── ACTIVITY 2: DIAGNOSE THE BROKEN APP (drag to layer) ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.88rem;color:var(--text-primary);line-height:1.5;font-weight:600}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE (build approaches) CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.05rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#8E6BC0,#6D4CA0)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-card ul{list-style:none;padding:0;margin-top:.6rem;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-card li{font-size:.74rem;color:var(--text-secondary);padding:.15rem 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.45}
+.compare-card li::before{content:'•';color:var(--orange);font-weight:700;flex-shrink:0}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 3: TRACE THE FEATURE (layer builder) ── */
+.tag-pool{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}
+.tag-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:50px;padding:.45rem .95rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;color:var(--text-primary)}
+.tag-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.tag-chip.picked-good{background:var(--green-light);border-color:var(--green);color:#256B29}
+.tag-chip.picked-bad{background:var(--red-light);border-color:var(--red);color:#933}
+.tag-chip[disabled]{cursor:not-allowed;opacity:.55}
+.trace-slots{margin-top:1.3rem;display:flex;flex-direction:column;gap:.7rem}
+.trace-slot{display:flex;align-items:flex-start;gap:.8rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;background:rgba(255,255,255,0.5);transition:all .25s;min-height:56px}
+.trace-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light)}
+.trace-layer{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--navy);border-radius:6px;padding:.35rem .55rem;flex-shrink:0;min-width:66px;text-align:center}
+.trace-slot.filled .trace-layer{background:var(--green)}
+.trace-slot-body{flex:1}
+.trace-slot-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700;display:block;margin-bottom:.2rem}
+.trace-slot-text{font-size:.82rem;color:var(--text-muted);font-style:italic;line-height:1.5}
+.trace-slot.filled .trace-slot-text{color:var(--text-primary);font-style:normal;font-weight:500}
+.tag-counter{margin-top:.9rem;font-size:.8rem;color:var(--text-secondary);font-weight:600}
+.tag-counter span{font-family:var(--mono);color:var(--orange)}
+
+/* ── ACTIVITY 4: STATE QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 3 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 2 · AI App Development</div>
+  <h1>Building your first app with AI — <em>one small screen at a time</em></h1>
+  <p class="hero-sub">Four hands-on activities. Order the build loop that keeps you unstuck, pick the right build approach for a project, trace how a single button click travels through the three layers of every app, then diagnose which layer broke when something goes wrong. You don't need to memorize code — you need to think clearly about what an app is made of.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ORDER THE BUILD LOOP ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Order the build loop — the rhythm that keeps you unstuck</h2>
+    <p class="lesson-intro">Beginners get overwhelmed because they try to build the whole app at once. Experienced builders (and AI working with them) move in a tight, repeating loop: build <strong>one small piece</strong>, run it, look at it, fix what's off, save the working version, and only then move on. The seven steps below are shuffled. Click them <strong>in the order a calm builder follows</strong> &mdash; a wrong click shakes red and hints at what comes next.</p>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Shuffled build-loop steps &mdash; click the next one</h4>
+          <div class="chain-pool" id="chainPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Your build loop, start to repeat</h4>
+          <div class="chain-slots" id="chainSlots"></div>
+        </div>
+      </div>
+      <div class="chain-hintbox" id="chainHint"></div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetChain()">&#8635; Reset the loop</button>
+      </div>
+      <div class="tip-note">&#128161; <strong>Small steps, seen often:</strong> the whole point of the loop is that you never write more than you can run and check. When something breaks, only the last little change could be at fault &mdash; so it's easy to find. AI can generate a whole screen in seconds, but you still drive the loop: run it, look, and confirm each piece works before asking for the next.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: MATCH THE BUILD APPROACH ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Match the project to the right build approach</h2>
+    <p class="lesson-intro">There isn't one "right" way to build an app &mdash; there's a right way <em>for this project</em>. A drag-and-drop no-code tool, an AI app builder, and a real code framework each fit different needs. Read what each project actually requires, then drag it to the approach that fits best. Choosing the lightest tool that can do the job is a skill on its own. Wrong answers carry a hover hint.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">N</div>
+        <h4>No-code / AI builder</h4>
+        <p>Assemble screens by dragging blocks or describing them in plain language. Fastest path when the app is <strong>standard and simple</strong>.</p>
+        <ul>
+          <li>Forms, simple databases, basic dashboards</li>
+          <li>No custom logic the tool can't express</li>
+          <li>Fewest moving parts, quickest to a demo</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">L</div>
+        <h4>Low-code</h4>
+        <p>A visual tool that lets you <strong>drop in small pieces of custom code</strong> when the standard blocks aren't quite enough.</p>
+        <ul>
+          <li>Mostly standard, with a few special rules</li>
+          <li>Custom calculation, integration, or logic</li>
+          <li>More control than pure no-code</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">C</div>
+        <h4>Code framework</h4>
+        <p>Build with real code (AI writing most of it) for <strong>full control</strong> when the app is unusual or needs to grow.</p>
+        <ul>
+          <li>Custom behavior no tool supports</li>
+          <li>Needs to scale or be maintained long-term</li>
+          <li>Most power, most responsibility</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-note">&#128161; <strong>Pick the lightest tool that fits:</strong> reaching for a full code framework when a no-code form would do wastes time; forcing an unusual app into a rigid no-code tool wastes even more. The durable skill is matching the approach to the actual requirements &mdash; not chasing whichever tool is trendiest.</div>
+
+    <div class="lesson-card" style="margin-top:1.5rem">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="scenarioList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="nocode">
+            <div class="bucket-title">No-code / AI builder</div>
+            <div class="bucket-sub">Standard &middot; drag or describe it</div>
+            <div class="bucket-drop" data-drop="nocode"></div>
+          </div>
+          <div class="bucket" data-bucket="lowcode">
+            <div class="bucket-title">Low-code</div>
+            <div class="bucket-sub">Mostly standard &middot; a little custom logic</div>
+            <div class="bucket-drop" data-drop="lowcode"></div>
+          </div>
+          <div class="bucket" data-bucket="framework">
+            <div class="bucket-title">Code framework</div>
+            <div class="bucket-sub">Unusual or growing &middot; full control</div>
+            <div class="bucket-drop" data-drop="framework"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity2()">&#8635; Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers2()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: TRACE THE FEATURE ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">3</span>
+    <h2 class="lesson-title">Trace one click through the three layers</h2>
+    <p class="lesson-intro">Almost every app has the same three layers: the <strong>UI</strong> (what the user sees and taps), the <strong>logic</strong> (the rules that decide what to do), and the <strong>data</strong> (what gets stored and read back). Picture a to-do app. A user types "Buy milk" and clicks <em>Add</em>. Click the step that belongs at each layer &mdash; the right ones snap into place; steps that belong to a different layer turn red and don't count.</p>
+
+    <div class="lesson-card">
+      <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem">The scattered steps &mdash; click the one that fits each layer</h4>
+      <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:.4rem">One correct step per layer. Ask yourself: is this about what the user sees, a rule being applied, or something being stored?</p>
+      <div class="tag-pool" id="tagPool"></div>
+      <div class="tag-counter">Layers correctly traced: <span id="tagCount">0</span> / 3</div>
+      <div class="trace-slots" id="tagSlots"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetTags()">&#8635; Clear the trace</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: STATE QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">4</span>
+    <h2 class="lesson-title">What does this app need to remember? — the state quiz</h2>
+    <p class="lesson-intro">An app's <strong>state</strong> is simply everything it has to remember while it's running: what the user typed, which tab is open, whether they're logged in. Getting state right is what separates an app that feels solid from one that forgets your work. Five real decisions, one best answer each &mdash; and every option comes with an explanation.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">&#8635; Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect &mdash; make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of a small app you'd like to build (a habit tracker, a tip calculator, a reading list). Name one thing at each layer: what the user sees (UI), one rule it follows (logic), and one thing it stores (data).</div>
+        <textarea placeholder="Reading list app — UI: a list of book titles with an Add button; logic: don't add an empty title; data: store each book's title and whether it's finished..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Why is building one small screen, running it, and checking it &mdash; before asking AI for the next piece &mdash; easier than generating the whole app at once?</div>
+        <textarea placeholder="Because when something breaks, only the last small change could be the cause, so it's fast to find and fix, whereas a whole-app generation hides the bug..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 4 &middot; Testing, Shipping &amp; Iterating</h3>
+      <p>You can build it one screen at a time and name every layer. Final lesson of the week: prove it actually works by testing the paths that break, then ship it safely and improve it &mdash; without leaving secrets in your code or shipping an untested sad path.</p>
+      <a href="04-testing-shipping-iterating.html" class="btn btn-primary">Continue to Lesson 4 &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Order the Build Loop (ordered chain) ─── */
+const CHAIN = [
+  {tag:'Build one screen', text:'BUILD ONE SMALL PIECE: describe a single screen or feature to AI and let it generate just that &mdash; not the whole app.', hint:'Start as small as possible. One screen, one feature &mdash; something you can actually run and look at.'},
+  {tag:'Run it', text:'RUN IT: actually launch the app (or preview it) so the piece you just built is live in front of you.', hint:'Nothing is real until you run it. Launch the app before you judge whether the piece works.'},
+  {tag:'Click through', text:'CLICK THROUGH: use the feature like a real user &mdash; type in the box, press the button, see what happens.', hint:'Once it&rsquo;s running, try it yourself. Poke the buttons and inputs the way a real person would.'},
+  {tag:'Fix what&rsquo;s off', text:'FIX WHAT&rsquo;S OFF: if something looks wrong or misbehaves, describe the exact problem to AI and correct just that.', hint:'After clicking through, patch whatever didn&rsquo;t behave &mdash; describe the specific symptom, don&rsquo;t rewrite everything.'},
+  {tag:'Confirm it works', text:'CONFIRM IT WORKS: run and click through once more to check the fix actually solved it and broke nothing else.', hint:'Right after a fix, re-run and re-test. A fix isn&rsquo;t done until you&rsquo;ve seen it work.'},
+  {tag:'Commit / save', text:'COMMIT THE WORKING VERSION: save this known-good state so you can always come back to a version that runs.', hint:'Before moving on, save the working version. That&rsquo;s your safe point to return to if the next step goes wrong.'},
+  {tag:'Repeat', text:'REPEAT: pick the next small piece and run the same loop again &mdash; the app grows one confident step at a time.', hint:'The loop is the last step: go back to the top with the next small feature and do it all again.'}
+];
+let chainNext = 0;
+function renderChain(){
+  const pool = $('chainPool');
+  const slots = $('chainSlots');
+  const order = CHAIN.map((_, i) => i).sort(()=>Math.random()-0.5);
+  pool.innerHTML = order.map(i => `<div class="chain-chip" data-step="${i}" onclick="clickChain(${i})">${CHAIN[i].text}</div>`).join('');
+  slots.innerHTML = CHAIN.map((_, i) => `
+    <div class="chain-slot" id="slot${i}">
+      <span class="chain-slot-num">${i+1}</span>
+      <span class="chain-slot-text">Waiting for step ${i+1}…</span>
+    </div>`).join('');
+}
+function clickChain(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('chainHint');
+  if (!chip || chip.classList.contains('used')) return;
+  if (i !== chainNext) {
+    chip.classList.remove('shake');
+    void chip.offsetWidth;
+    chip.classList.add('shake');
+    hintBox.className = 'chain-hintbox show';
+    hintBox.innerHTML = `<strong>Not yet.</strong> That step comes later. Think about step ${chainNext+1}: ${CHAIN[chainNext].hint}`;
+    setTimeout(() => chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('slot' + i);
+  slot.classList.add('filled');
+  slot.querySelector('.chain-slot-text').innerHTML = `<span class="chain-slot-tag">${CHAIN[i].tag}</span>${CHAIN[i].text}`;
+  hintBox.className = 'chain-hintbox';
+  chainNext++;
+  if (chainNext >= CHAIN.length) {
+    const fb = $('feedback1');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Build loop assembled &mdash; all 7 steps in order.</strong> Notice the shape: <em>build small &rarr; run &rarr; click through &rarr; fix &rarr; confirm &rarr; commit &rarr; repeat.</em> You never get more than one small step ahead of what you&rsquo;ve actually seen working. That&rsquo;s why experienced builders rarely get stuck &mdash; and why "commit the working version" matters: it&rsquo;s the safe point you return to when the next experiment goes sideways.`;
+    $('prog1').classList.add('done');
+  }
+}
+function resetChain(){
+  chainNext = 0;
+  $('feedback1').className = 'activity-feedback';
+  $('chainHint').className = 'chain-hintbox';
+  renderChain();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Match the Build Approach ─── */
+const PROJECTS = [
+  {id:'k1', text:'A simple contact form that emails you what people submit', hint:'Standard building blocks — a no-code tool can assemble this in minutes.', bucket:'nocode', why:'A form + email is the most standard app there is. A no-code or AI builder assembles it instantly with no custom logic. Reaching for real code here just wastes time.'},
+  {id:'k2', text:'A basic event sign-up page with a list of who registered', hint:'Forms plus a simple list — no special rules. Classic no-code territory.', bucket:'nocode', why:'Collecting sign-ups into a list is exactly what no-code / AI builders are made for. Standard blocks, no unusual behavior &mdash; the lightest tool wins.'},
+  {id:'k3', text:'An order form that also applies a custom bulk-discount rule you invented', hint:'Mostly standard, but that one special pricing rule needs a snippet of custom logic.', bucket:'lowcode', why:'The form is standard, but your invented discount rule is custom logic a pure no-code tool can&rsquo;t express. Low-code lets you keep the visual build AND drop in that one calculation.'},
+  {id:'k4', text:'A dashboard that pulls in numbers from another service and does its own math', hint:'The visual part is easy; the integration + calculation needs a little code.', bucket:'lowcode', why:'Pulling data from an outside service and running your own math is beyond drag-and-drop, but doesn&rsquo;t need a full framework. Low-code &mdash; visual shell, custom logic where needed &mdash; is the fit.'},
+  {id:'k5', text:'A multiplayer app with unusual real-time behavior, meant to grow to many users', hint:'Custom behavior no tool supports, plus it has to scale — that&rsquo;s a code framework.', bucket:'framework', why:'Unusual real-time behavior that no tool offers, and it must scale and be maintained. That&rsquo;s a real code framework (with AI writing most of the code) &mdash; the full-control approach.'},
+  {id:'k6', text:'A product with custom behavior no existing tool supports, built to last for years', hint:'One-of-a-kind and long-lived — only a real code framework gives that control.', bucket:'framework', why:'One-of-a-kind behavior plus a years-long lifespan means you need full control over the code. A code framework is the right home &mdash; more power, and more responsibility to maintain it.'}
+];
+const BUCKET_NAMES = {nocode:'No-code / AI builder', lowcode:'Low-code', framework:'Code framework'};
+let placed2 = {};
+function renderProjects(){
+  const list = $('scenarioList');
+  const shuffled = [...PROJECTS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(k => `
+    <div class="scenario-card" draggable="true" data-id="${k.id}">
+      <div class="scenario-text">${k.text}</div>
+      <div class="scenario-hint">${k.hint}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop2(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop2(id, bucket){
+  const kw = PROJECTS.find(k => k.id === id);
+  if (!kw || placed2[id]) return;
+  const correct = kw.bucket === bucket;
+  placed2[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + kw.text.substring(0, 34) + (kw.text.length > 34 ? '…' : '');
+  pill.title = correct ? kw.why : `Better fit: ${BUCKET_NAMES[kw.bucket]}. ${kw.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity2Done();
+}
+function checkActivity2Done(){
+  if (Object.keys(placed2).length === PROJECTS.length) {
+    const right = Object.values(placed2).filter(p => p.correct).length;
+    const fb = $('feedback2');
+    if (right === PROJECTS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six correct.</strong> You&rsquo;ve got the instinct: <em>standard app &rarr; no-code / AI builder</em>, <em>standard-plus-a-rule &rarr; low-code</em>, <em>unusual or built-to-grow &rarr; code framework</em>. The lightest tool that can do the job is almost always the right one &mdash; and AI helps in all three, from generating no-code layouts to writing framework code. Your job is picking the fit.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for the reasoning. The tell: how <em>standard</em> is the app? Fully standard is no-code; standard with a custom rule is low-code; unusual or built-to-scale is a code framework. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetActivity2(){
+  placed2 = {};
+  $('feedback2').className = 'activity-feedback';
+  document.querySelectorAll('.bucket-drop').forEach(d => d.innerHTML = '');
+  renderProjects();
+  $('prog2').classList.remove('done');
+}
+function showAnswers2(){
+  PROJECTS.forEach(k => { if (!placed2[k.id]) handleDrop2(k.id, k.bucket); });
+}
+
+/* ─── ACTIVITY 3: Trace the Feature (UI → logic → data) ─── */
+/* A user types "Buy milk" and clicks Add in a to-do app.
+   Exactly one correct step per layer; distractors belong to a different layer. */
+const LAYERS = [
+  {key:'ui',    label:'UI',    layerName:'What the user sees & taps'},
+  {key:'logic', label:'Logic', layerName:'The rule that decides what to do'},
+  {key:'data',  label:'Data',  layerName:'What gets stored & read back'}
+];
+const STEPS = [
+  {id:'t1', text:'The user types "Buy milk" into the text box and clicks the Add button', layer:'ui',    good:true},
+  {id:'t2', text:'The code checks that the box isn&rsquo;t empty before adding the task', layer:'logic', good:true},
+  {id:'t3', text:'The new task "Buy milk" is saved to the app&rsquo;s stored list of to-dos', layer:'data',  good:true},
+  {id:'t4', text:'The typed task is thrown away and nothing is ever remembered', layer:'data',  good:false, why:'Data&rsquo;s job is to <em>store</em> the task so it survives &mdash; throwing it away is the opposite of the data layer working.'},
+  {id:'t5', text:'The button silently does nothing, no matter what you click', layer:'ui',    good:false, why:'A button that does nothing is a broken UI, not the correct step. The UI&rsquo;s job here is to capture the input and the click.'},
+  {id:'t6', text:'The app adds the task even when the box is completely empty', layer:'logic', good:false, why:'Adding an empty task is the logic layer failing to apply its rule. The correct logic step is to <em>check</em> the box isn&rsquo;t empty.'}
+];
+let usedLayers = [];
+function renderTrace(){
+  usedLayers = [];
+  $('tagPool').innerHTML = STEPS.map(t =>
+    `<button class="tag-chip" id="tag-${t.id}" onclick="pickStep('${t.id}')">${t.text}</button>`
+  ).join('');
+  $('tagSlots').innerHTML = LAYERS.map(l => `
+    <div class="trace-slot" id="traceslot-${l.key}">
+      <span class="trace-layer">${l.label}</span>
+      <div class="trace-slot-body">
+        <span class="trace-slot-label">${l.layerName}</span>
+        <span class="trace-slot-text" id="tracetext-${l.key}">Click the step that belongs here…</span>
+      </div>
+    </div>`).join('');
+  $('tagCount').textContent = '0';
+  $('feedback3').className = 'activity-feedback';
+}
+function pickStep(id){
+  const t = STEPS.find(x => x.id === id);
+  const chip = $('tag-' + id);
+  if (!t || chip.hasAttribute('disabled')) return;
+  if (!t.good) {
+    chip.classList.add('picked-bad');
+    chip.setAttribute('disabled','');
+    const fb = $('feedback3');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>That&rsquo;s a broken version of the ${t.layer.toUpperCase()} layer, not the correct step.</strong> ${t.why} Look for the step that describes each layer doing its job properly.`;
+    return;
+  }
+  const slot = $('traceslot-' + t.layer);
+  if (slot.classList.contains('filled')) return;
+  usedLayers.push(t.layer);
+  chip.classList.add('picked-good');
+  chip.setAttribute('disabled','');
+  slot.classList.add('filled');
+  $('tracetext-' + t.layer).textContent = t.text.replace(/&rsquo;/g, '’');
+  $('tagCount').textContent = usedLayers.length;
+  if (usedLayers.length === 3) finishTrace();
+}
+function finishTrace(){
+  const fb = $('feedback3');
+  fb.className = 'activity-feedback show success';
+  fb.innerHTML = `<strong>All three layers traced.</strong> One click travels through every app the same way: the <em>UI</em> captures what the user did, the <em>logic</em> applies a rule (here: don&rsquo;t add an empty task), and the <em>data</em> layer stores the result so it&rsquo;s still there next time. When you can name these three layers, you can describe features to AI clearly &mdash; and you already know where to look when something breaks.`;
+  $('prog3').classList.add('done');
+}
+function resetTags(){
+  document.querySelectorAll('.tag-chip').forEach(c => { c.classList.remove('picked-good','picked-bad'); c.removeAttribute('disabled'); });
+  renderTrace();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: State Quiz ─── */
+const QUIZ = [
+  {
+    q:'In a to-do app, the user has typed three tasks but hasn&rsquo;t saved yet. What must the app "remember" for the screen to stay correct?',
+    opts:[
+      {t:'Nothing &mdash; the screen redraws itself from scratch every second', ok:false, ex:'If the app remembered nothing, the three typed tasks would vanish on every redraw. The current list of tasks is exactly the kind of thing state exists to hold.'},
+      {t:'The current list of tasks the user has entered so far (that&rsquo;s the app&rsquo;s state)', ok:true, ex:'Right. State is everything the app must remember while running. The in-progress task list is core state &mdash; lose it and the user&rsquo;s work disappears.'},
+      {t:'Only the color of the Add button', ok:false, ex:'A static color isn&rsquo;t state &mdash; it never changes. State is the information that changes as the user interacts, like the list of tasks they&rsquo;ve entered.'}
+    ]
+  },
+  {
+    q:'Your app has a light/dark theme toggle. Where does the user&rsquo;s chosen theme belong?',
+    opts:[
+      {t:'Nowhere &mdash; ask them to pick the theme again on every single click', ok:false, ex:'Re-asking on every click would be maddening. The chosen theme is a small piece of state the app should hold so the screen stays the way the user set it.'},
+      {t:'In the app&rsquo;s state &mdash; remember the choice so the whole app stays in that theme', ok:true, ex:'Correct. The current theme is state: the app remembers it and every screen reads from it. (Storing it more permanently so it survives a refresh is a good next step.)'},
+      {t:'Hard-coded to dark so it can never change', ok:false, ex:'Hard-coding removes the choice entirely &mdash; then it&rsquo;s not a toggle at all. A user preference like theme is meant to live in state so it can change.'}
+    ]
+  },
+  {
+    q:'Which of these is a sign your app is missing or mishandling its state?',
+    opts:[
+      {t:'The app forgets what you typed the moment you click elsewhere', ok:true, ex:'Right. "It forgets what I just did" is the classic symptom of missing state. The app isn&rsquo;t holding onto the information it needs between interactions.'},
+      {t:'The app has more than one screen', ok:false, ex:'Multiple screens is normal and has nothing to do with a state problem. The tell-tale sign is the app <em>forgetting</em> things it should remember.'},
+      {t:'The app uses colors and images', ok:false, ex:'Visual design isn&rsquo;t related to state. A state bug shows up as lost information &mdash; typed text vanishing, a toggle resetting &mdash; not as how the app looks.'}
+    ]
+  },
+  {
+    q:'A shopping-cart app "forgets" everything the second you refresh the page. What&rsquo;s actually going on?',
+    opts:[
+      {t:'That&rsquo;s just how all apps work &mdash; nothing to fix', ok:false, ex:'It&rsquo;s not inevitable. The cart was held only in temporary in-memory state, which resets on refresh. Real carts also save to storage so they survive a reload.'},
+      {t:'The cart lived only in temporary state; it needs to be stored so it survives a refresh', ok:true, ex:'Correct. In-memory state disappears on refresh. To persist the cart, the app must also write it to storage (like the data layer) and read it back on load.'},
+      {t:'The app has too many buttons', ok:false, ex:'Button count is unrelated. The issue is that the cart&rsquo;s state was never persisted &mdash; it existed only in memory and vanished when the page reloaded.'}
+    ]
+  },
+  {
+    q:'You&rsquo;re describing a login feature to AI. Which piece of state is essential to name?',
+    opts:[
+      {t:'The exact pixel width of the login button', ok:false, ex:'Button width is styling, not state that drives behavior. The essential state is whether the user is currently logged in &mdash; that changes what the whole app shows.'},
+      {t:'Whether the user is currently logged in &mdash; it decides what the app shows them', ok:true, ex:'Right. "Logged in or not" is a central piece of state: it gates which screens appear. Naming it clearly helps AI build the correct show/hide behavior.'},
+      {t:'The user&rsquo;s favorite color', ok:false, ex:'A favorite color is a nice-to-have preference, not the state that runs a login. The must-name state is the logged-in status that controls access to the app.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 &mdash; you can spot state, and spot when it&rsquo;s broken.</strong> The whole idea in one line: <em>state is everything the app must remember while it runs &mdash; the current list, the chosen theme, whether you&rsquo;re logged in &mdash; and "it forgot what I did" is almost always a state problem.</em> Name the state clearly and AI can build the behavior around it.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations &mdash; the wrong options confuse styling (color, button width) with state. State is the changing information the app remembers to behave correctly. When an app "forgets" what you did, look at its state. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderChain();
+  renderProjects();
+  setupBuckets();
+  renderTrace();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

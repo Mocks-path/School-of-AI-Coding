@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4 · Testing, Shipping &amp; Iterating Your App — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── SHARED FEEDBACK / BUTTONS ── */
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* ── ACTIVITY 1: APP STATES → WHEN THEY SHOW (drag into labeled slots) ── */
+.priority-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.priority-grid{grid-template-columns:1fr}}
+.priority-pool{display:flex;flex-direction:column;gap:.6rem}
+.priority-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.9rem 1rem;cursor:grab;transition:all .25s;user-select:none}
+.priority-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.priority-card.dragging{opacity:.4}
+.priority-card.placed{opacity:.35;pointer-events:none}
+.priority-card-title{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.25rem}
+.priority-card-meta{font-size:.74rem;color:var(--text-secondary);line-height:1.45}
+.priority-slots{display:flex;flex-direction:column;gap:.6rem}
+.priority-slot{display:flex;align-items:center;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.7rem .85rem;min-height:56px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.priority-slot.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.priority-slot.filled{border-style:solid;background:var(--bg-card)}
+.priority-slot.filled.correct{border-color:var(--green);background:var(--green-light)}
+.priority-slot.filled.wrong{border-color:var(--red);background:var(--red-light)}
+.priority-rank{width:auto;min-width:30px;height:30px;padding:0 .5rem;border-radius:16px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+.priority-slot-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:.15rem}
+.priority-drop-text{font-size:.82rem;color:var(--text-muted);font-style:italic}
+.priority-drop-text.set{font-style:normal;color:var(--text-primary);font-weight:600}
+
+/* ── ACTIVITY 2: DEPLOY CONCEPTS SORT (match drop to bucket) ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:600}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:84px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:30px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+
+/* ── ACTIVITY 3: PICK THE SAD PATH (table) ── */
+.analytics-wrap{overflow-x:auto;margin-top:1rem}
+.analytics-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:560px}
+.analytics-table th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:.6rem .7rem;border-bottom:2px solid var(--border);font-weight:700}
+.analytics-table th.num,.analytics-table td.num{text-align:center;font-family:var(--mono)}
+.analytics-table td{padding:.7rem;border-bottom:1px dashed var(--border);color:var(--text-secondary)}
+.analytics-table tr.pickrow{cursor:pointer;transition:background .2s}
+.analytics-table tr.pickrow:hover{background:var(--bg-light)}
+.analytics-table tr.pickrow.reveal-right td{background:var(--green-light);color:#1F5723}
+.analytics-table tr.pickrow.reveal-wrong td{background:var(--red-light);color:#7A2A1E}
+.analytics-table .prod-name{font-weight:700;color:var(--navy)}
+.pick-btn{background:var(--bg-light);border:1.5px solid var(--border);border-radius:6px;padding:.35rem .8rem;font-size:.74rem;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text-secondary);transition:all .2s}
+.pick-btn:hover{border-color:var(--orange);color:var(--orange)}
+.analytics-hint{font-size:.78rem;color:var(--text-secondary);margin-top:1rem;line-height:1.6;background:var(--bg-light);border-radius:var(--radius-sm);padding:.8rem 1rem}
+.analytics-hint code{font-family:var(--mono);color:var(--orange);font-weight:600}
+.happy-path{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:1rem;padding:.9rem 1rem;background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-sm)}
+.happy-path .hp-step{background:#fff;border:1px solid var(--green);border-radius:50px;padding:.35rem .8rem;font-size:.76rem;font-weight:600;color:#256B29}
+.happy-path .hp-arrow{color:var(--green);font-weight:700}
+.happy-label{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#256B29;width:100%;margin-bottom:.2rem}
+
+/* ── ACTIVITY 4: SHIPPING-READINESS QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 4 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 2 · AI App Development</div>
+  <h1>Testing, shipping &amp; iterating — <em>prove it works, then let people use it</em></h1>
+  <p class="hero-sub">Four hands-on activities. Match each app state to the moment it should appear, sort the concepts you need to ship safely, walk a happy path and pick the sad path most worth testing, then run a shipping-readiness check. An app that only works when everything goes perfectly isn't finished &mdash; testing the ways it can break is what makes it real.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: APP STATES → WHEN THEY SHOW ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Match each app state to the moment it should show</h2>
+    <p class="lesson-intro">A polished app doesn&rsquo;t just have a "working" screen &mdash; it has a screen for <strong>every</strong> situation. The four states below (<em>empty, loading, error, success</em>) each belong to a specific moment. Beginners build only the success state and their app looks broken the rest of the time. Drag each state into the moment it should appear. Get all four right to finish.</p>
+
+    <div class="lesson-card">
+      <div class="priority-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The four app states</h4>
+          <div class="priority-pool" id="priorityPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">When does it show? &mdash; drag each here</h4>
+          <div class="priority-slots" id="prioritySlots"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetPriority()">&#8635; Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+      <div class="tip-note">&#128161; <strong>Design the whole story, not just the happy ending:</strong> what shows before any data arrives (empty)? While it&rsquo;s fetching (loading)? When something goes wrong (error)? And when it works (success)? Ask AI to build all four states, then look at each one yourself. An app that only has a success screen feels broken the moment reality isn&rsquo;t perfect.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: DEPLOY CONCEPTS SORT ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Sort the shipping concepts — from your machine to the world</h2>
+    <p class="lesson-intro">"It works on my computer" isn&rsquo;t the same as "people can use it." Shipping means moving your app from your <strong>local</strong> machine to a <strong>hosted</strong> home on the internet &mdash; and handling <strong>config &amp; secrets</strong> so nothing sensitive ends up in your code. Drag each idea into the group it belongs to. Wrong answers carry a hover hint.</p>
+
+    <div class="classify-grid">
+      <div class="classify-scenarios" id="scenarioList"></div>
+      <div class="bucket-stack">
+        <div class="bucket" data-bucket="local">
+          <div class="bucket-title">Local (your machine)</div>
+          <div class="bucket-sub">Where you build &amp; test &middot; only you can see it</div>
+          <div class="bucket-drop" data-drop="local"></div>
+        </div>
+        <div class="bucket" data-bucket="hosted">
+          <div class="bucket-title">Hosted (live for users)</div>
+          <div class="bucket-sub">On the internet &middot; anyone with the link can use it</div>
+          <div class="bucket-drop" data-drop="hosted"></div>
+        </div>
+        <div class="bucket" data-bucket="config">
+          <div class="bucket-title">Config &amp; secrets</div>
+          <div class="bucket-sub">Kept out of code &middot; different per environment</div>
+          <div class="bucket-drop" data-drop="config"></div>
+        </div>
+      </div>
+    </div>
+    <div class="activity-feedback" id="feedback2"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetActivity2()">&#8635; Try again</button>
+      <button class="btn btn-primary" onclick="showAnswers2()">Show me the answers</button>
+    </div>
+    <div class="tip-note" style="max-width:none">&#128161; <strong>The golden rule of shipping:</strong> secret keys and passwords never go in your code &mdash; they live in environment config that stays out of what you publish. And "works on my machine" only counts once it also works on the hosted version, where the settings can differ. AI can set most of this up for you; knowing what belongs where is how you keep it safe.</div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: WALK THE HAPPY PATH, PICK THE SAD PATH ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Walk the happy path, then pick the sad path to test</h2>
+    <p class="lesson-intro">The <strong>happy path</strong> is when everything goes right &mdash; and it&rsquo;s the one thing beginners test. Real users take <em>sad paths</em>: they leave fields blank, type the wrong thing, or lose their connection. Here&rsquo;s the happy path for a sign-up form. Below it are four sad paths you could test next. Click the one that&rsquo;s the <strong>highest-risk gap most worth testing first</strong>.</p>
+
+    <div class="lesson-card">
+      <div class="happy-path">
+        <span class="happy-label">Happy path (already works)</span>
+        <span class="hp-step">User opens the form</span>
+        <span class="hp-arrow">&rarr;</span>
+        <span class="hp-step">Types a valid name &amp; email</span>
+        <span class="hp-arrow">&rarr;</span>
+        <span class="hp-step">Clicks Sign up</span>
+        <span class="hp-arrow">&rarr;</span>
+        <span class="hp-step">Sees "You&rsquo;re in!"</span>
+      </div>
+      <div class="analytics-wrap">
+        <table class="analytics-table">
+          <thead>
+            <tr>
+              <th>Sad path to test</th>
+              <th class="num">Likely?</th>
+              <th class="num">Damage if it breaks</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="analyticsBody"></tbody>
+        </table>
+      </div>
+      <div class="analytics-hint">
+        <strong>How to prioritize:</strong> test the sad path that is both <code>likely to happen</code> AND <code>damaging when it does</code>. A rare, harmless glitch can wait; a common mistake that lets bad or empty data through &mdash; or crashes the app &mdash; needs testing before you ship.
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetAnalytics()">&#8635; Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: SHIPPING-READINESS QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Shipping-readiness check &mdash; trust or verify?</h2>
+    <p class="lesson-intro">Before an app goes live, you run a quick mental checklist &mdash; and when AI writes code, you learn to spot the green flags to trust and the red flags to fix. Five real pre-launch decisions, one best answer each. The wrong options are the exact shortcuts that turn a demo into a disaster.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">&#8635; Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect &mdash; make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Pick any small app. Write its happy path in one line, then name the single sad path you&rsquo;d test first &mdash; and why that one.</div>
+        <textarea placeholder="Tip calculator — happy path: enter a bill amount, pick a tip %, see the total. First sad path: someone leaves the bill blank or types letters, because that would crash the math or show a wrong total..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">AI generated code for your app that pastes a secret key directly into the file. Why is that a red flag, and what should happen instead?</div>
+        <textarea placeholder="A hard-coded secret is a red flag because anyone who sees the code sees the key; it should live in environment config kept out of what you publish, so..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP / WRAP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Week 2 complete &mdash; you can build, ship, and improve an app</h3>
+      <p>You understand what an app is made of, build it one small screen at a time, name every layer and state, and test the sad paths before shipping safely. That&rsquo;s a real app-development skill set &mdash; and none of it depends on any single tool. Next week: turning these skills into projects you can show and keep improving.</p>
+      <a href="../week_3_live_the_moment/01-intro.html" class="btn btn-primary">On to Week 3 &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: App States → When They Show ─── */
+/* Four states, four labeled slots. Each card's correct slot is matched by id === slot dataset. */
+const STATES = [
+  {id:'empty',   title:'Empty state', meta:'A friendly "nothing here yet" screen with a hint on what to do next', slot:'nodata',
+   why:'The empty state shows when there&rsquo;s no data yet &mdash; a brand-new list, a first-time user. Without it, the app looks broken instead of simply new.'},
+  {id:'loading', title:'Loading state', meta:'A spinner or skeleton while the app is fetching or working', slot:'waiting',
+   why:'The loading state shows while the app is waiting on data. Without it the screen freezes blankly and the user thinks it crashed.'},
+  {id:'error',   title:'Error state', meta:'A clear message + a way to retry when something goes wrong', slot:'failed',
+   why:'The error state shows when something fails &mdash; no connection, a bad response. A clear message with a retry beats a blank or frozen screen.'},
+  {id:'success', title:'Success state', meta:'The normal working screen with the data the user wanted', slot:'worked',
+   why:'The success state is the happy path &mdash; data loaded, everything working. It&rsquo;s the only state beginners build, which is why their apps feel broken the rest of the time.'}
+];
+const SLOTS = [
+  {key:'nodata',  label:'There&rsquo;s no data yet (first time / nothing added)'},
+  {key:'waiting', label:'The app is still fetching or working'},
+  {key:'failed',  label:'Something went wrong (no connection / bad response)'},
+  {key:'worked',  label:'It all worked &mdash; show the real content'}
+];
+let ranking = {};
+function renderPriority(){
+  ranking = {};
+  const pool = $('priorityPool');
+  const shuffled = [...STATES].sort(()=>Math.random()-0.5);
+  pool.innerHTML = shuffled.map(d => `
+    <div class="priority-card" draggable="true" data-id="${d.id}">
+      <div class="priority-card-title">${d.title}</div>
+      <div class="priority-card-meta">${d.meta}</div>
+    </div>`).join('');
+  const slots = $('prioritySlots');
+  slots.innerHTML = SLOTS.map(s => `
+    <div class="priority-slot" data-rank="${s.key}">
+      <span class="priority-rank">${s.key}</span>
+      <div>
+        <span class="priority-slot-label">When?</span>
+        <span class="priority-drop-text" data-text="${s.key}">${s.label}</span>
+      </div>
+    </div>`).join('');
+  bindPriorityDnd();
+  $('feedback1').className = 'activity-feedback';
+}
+function bindPriorityDnd(){
+  document.querySelectorAll('.priority-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.priority-slot').forEach(slot => {
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      placeRank(e.dataTransfer.getData('id'), slot.dataset.rank);
+    });
+  });
+}
+function placeRank(id, slotKey){
+  const state = STATES.find(d => d.id === id);
+  if (!state || ranking[slotKey]) return;
+  if (Object.values(ranking).includes(id)) return;
+  ranking[slotKey] = id;
+  const card = document.querySelector(`.priority-card[data-id="${id}"]`);
+  card.classList.add('placed');
+  const txt = document.querySelector(`.priority-drop-text[data-text="${slotKey}"]`);
+  txt.textContent = state.title;
+  txt.classList.add('set');
+  if (Object.keys(ranking).length === STATES.length) checkPriority();
+}
+function checkPriority(){
+  let right = 0;
+  SLOTS.forEach(s => {
+    const slot = document.querySelector(`.priority-slot[data-rank="${s.key}"]`);
+    slot.classList.add('filled');
+    const state = STATES.find(d => d.id === ranking[s.key]);
+    const correct = state && state.slot === s.key;
+    slot.classList.add(correct ? 'correct' : 'wrong');
+    if (correct) right++;
+    const txt = document.querySelector(`.priority-drop-text[data-text="${s.key}"]`);
+    if (state) txt.title = state.why;
+  });
+  const fb = $('feedback1');
+  if (right === 4) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>All four matched.</strong> Empty when there&rsquo;s nothing yet, loading while it fetches, error when it fails, success when it works. Design the whole story and the app feels solid in every situation &mdash; not just when everything goes perfectly. Hover any slot to see the reasoning.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You matched ${right} of 4.</strong> Green slots are right; hover any slot for the reasoning. The map: <em>no data &rarr; empty</em>, <em>still fetching &rarr; loading</em>, <em>something failed &rarr; error</em>, <em>it worked &rarr; success</em>. Building only the success state is the classic beginner gap. Hit <em>Try again</em> to re-match.`;
+  }
+  $('prog1').classList.add('done');
+}
+function resetPriority(){
+  document.querySelectorAll('.priority-card').forEach(c => c.classList.remove('placed'));
+  renderPriority();
+  $('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  renderPriority();
+  STATES.forEach(d => { if (!Object.values(ranking).includes(d.id)) placeRank(d.id, d.slot); });
+}
+
+/* ─── ACTIVITY 2: Deploy Concepts Sort ─── */
+const CONCEPTS = [
+  {id:'s1', text:'The preview running on your own laptop while you build', hint:'This is where you develop and test — only you can see it.', bucket:'local', why:'Your local preview is the version running on your machine while you build. It&rsquo;s private to you &mdash; the starting point, not the finished, published app.'},
+  {id:'s2', text:'Running the app with test data before anyone else touches it', hint:'Trying it yourself, on your machine, before it&rsquo;s live — that&rsquo;s local.', bucket:'local', why:'Testing with sample data on your own setup is local work. It happens before you host anything &mdash; you&rsquo;re still the only user.'},
+  {id:'s3', text:'Publishing the app to a service so anyone with the link can open it', hint:'Once real users can reach it over the internet, it&rsquo;s hosted.', bucket:'hosted', why:'Publishing to a hosting service makes the app reachable over the internet. That&rsquo;s the hosted version &mdash; the one real users actually use.'},
+  {id:'s4', text:'Giving your app a public web address people can visit', hint:'A live URL anyone can open means it&rsquo;s hosted, not local.', bucket:'hosted', why:'A public web address is the hallmark of a hosted app: it lives online, not just on your machine, so anyone with the link can reach it.'},
+  {id:'s5', text:'Keeping your secret API key out of the code, in a separate settings value', hint:'Secrets never go in code — they belong in environment config.', bucket:'config', why:'A secret key belongs in environment config, never pasted into code. Kept separate, it stays out of anything you publish &mdash; the core rule of shipping safely.'},
+  {id:'s6', text:'Using a different database address for testing than for the live app', hint:'Settings that change per environment are configuration, not code.', bucket:'config', why:'Values that differ between your test setup and the live app (like which database to use) are environment configuration. They&rsquo;re set outside the code so each environment gets the right one.'}
+];
+const BUCKET_NAMES = {local:'Local (your machine)', hosted:'Hosted (live for users)', config:'Config & secrets'};
+let placed2 = {};
+function renderConcepts(){
+  const list = $('scenarioList');
+  const shuffled = [...CONCEPTS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+      <div class="scenario-hint">${s.hint}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop2(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop2(id, bucket){
+  const s = CONCEPTS.find(x => x.id === id);
+  if (!s || placed2[id]) return;
+  const correct = s.bucket === bucket;
+  placed2[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + s.text.substring(0, 30) + (s.text.length > 30 ? '…' : '');
+  pill.title = correct ? s.why : `Correct group: ${BUCKET_NAMES[s.bucket]}. ${s.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity2Done();
+}
+function checkActivity2Done(){
+  if (Object.keys(placed2).length === CONCEPTS.length) {
+    const right = Object.values(placed2).filter(p => p.correct).length;
+    const fb = $('feedback2');
+    if (right === CONCEPTS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six correct.</strong> You&rsquo;ve got the shape of shipping: <em>local</em> is where you build and test privately, <em>hosted</em> is the live version real users reach, and <em>config &amp; secrets</em> live outside the code so nothing sensitive gets published and each environment gets the right settings. That last group is the one beginners skip &mdash; and the one that keeps you out of trouble.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for the right group. The test: is it running only on your machine (local), reachable by real users online (hosted), or a setting/secret kept out of the code (config)? Secret keys always go in config &mdash; never in the code. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetActivity2(){
+  placed2 = {};
+  $('feedback2').className = 'activity-feedback';
+  document.querySelectorAll('.bucket-drop').forEach(d => d.innerHTML = '');
+  renderConcepts();
+  $('prog2').classList.remove('done');
+}
+function showAnswers2(){
+  CONCEPTS.forEach(s => { if (!placed2[s.id]) handleDrop2(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 3: Pick the Sad Path to Test ─── */
+const SADPATHS = [
+  {id:'a1', name:'User submits the form with the email field left blank', likely:'Very likely', damage:'High — bad/empty data saved, may crash', winner:true,
+   note:'A rare, cosmetic glitch can wait; this one is both very likely (people skip fields constantly) and high-damage (empty or invalid data gets saved, and unvalidated input can crash the app). Input validation on the sad path is the first thing to test before shipping.'},
+  {id:'a2', name:'User&rsquo;s browser window is resized to an unusual width', likely:'Sometimes', damage:'Low — layout looks slightly off', winner:false,
+   note:'Worth polishing eventually, but low-damage: at worst the layout looks a little off. It doesn&rsquo;t corrupt data or crash anything, so it&rsquo;s not the first sad path to test.'},
+  {id:'a3', name:'User loads the page on an old browser theme', likely:'Rare', damage:'Low — minor color mismatch', winner:false,
+   note:'Rare and harmless &mdash; a minor visual mismatch at most. This is far down the priority list; it neither breaks the flow nor risks bad data.'},
+  {id:'a4', name:'User clicks Sign up twice very quickly', likely:'Sometimes', damage:'Medium — could create a duplicate', winner:false,
+   note:'A real bug worth handling (a double-click could create a duplicate entry), but medium-damage and less certain than a blank required field. Test it &mdash; just after the blank-field case, which is both more likely and more damaging.'}
+];
+let analyticsDone = false;
+function renderAnalytics(){
+  analyticsDone = false;
+  $('analyticsBody').innerHTML = SADPATHS.map(a => `
+    <tr class="pickrow" id="arow-${a.id}">
+      <td class="prod-name">${a.name}</td>
+      <td class="num">${a.likely}</td>
+      <td class="num">${a.damage}</td>
+      <td><button class="pick-btn" onclick="pickAnalytics('${a.id}')">Test this first</button></td>
+    </tr>`).join('');
+  $('feedback3').className = 'activity-feedback';
+}
+function pickAnalytics(id){
+  if (analyticsDone) return;
+  analyticsDone = true;
+  const chosen = SADPATHS.find(a => a.id === id);
+  SADPATHS.forEach(a => {
+    const row = $('arow-' + a.id);
+    row.querySelector('.pick-btn').disabled = true;
+    if (a.winner) row.classList.add('reveal-right');
+    else if (a.id === id) row.classList.add('reveal-wrong');
+  });
+  const fb = $('feedback3');
+  if (chosen.winner) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Correct &mdash; the blank required field is the sad path to test first.</strong> It&rsquo;s the one that&rsquo;s both very likely AND high-damage: users skip required fields all the time, and letting empty or invalid input through can save bad data or crash the app. This is why input validation is a shipping must-do. ${SADPATHS.find(a=>a.id==='a4').note}`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Not the top priority.</strong> ${chosen.note} <br><br>The one to test <strong>first</strong> is the <strong>blank email field</strong>: very likely AND high-damage, because unvalidated input can save bad data or crash the app. Prioritize the sad path that is both common and costly &mdash; that&rsquo;s where testing pays off most.`;
+  }
+  $('prog3').classList.add('done');
+}
+function resetAnalytics(){
+  renderAnalytics();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Shipping-Readiness Quiz ─── */
+const QUIZ = [
+  {
+    q:'AI generated code that pastes your secret API key directly into a file you&rsquo;re about to publish. Green flag or red flag?',
+    opts:[
+      {t:'Green flag &mdash; the key is right there, nice and convenient', ok:false, ex:'A hard-coded secret is a classic red flag. Anyone who sees the published code sees the key &mdash; and can misuse it. Convenience here is a security hole.'},
+      {t:'Red flag &mdash; move the key into environment config, out of the published code', ok:true, ex:'Right. A hard-coded secret is a red flag every time. Secrets belong in environment config that stays out of what you publish. Ask AI to fix it before you ship.'},
+      {t:'Doesn&rsquo;t matter &mdash; secrets in code are totally fine', ok:false, ex:'It matters a lot. Once a secret is in published code, treat it as leaked. Keys live in config, never in the code you share or deploy.'}
+    ]
+  },
+  {
+    q:'Your form takes whatever the user types and saves it with no checks at all. Green flag or red flag?',
+    opts:[
+      {t:'Green flag &mdash; trusting the user keeps the code simpler', ok:false, ex:'No input validation is a red flag. Users leave fields blank, paste the wrong thing, or send junk &mdash; and unchecked input leads to bad data or crashes. Simplicity isn&rsquo;t worth that.'},
+      {t:'Red flag &mdash; add basic input validation before it saves anything', ok:true, ex:'Right. Missing input validation is a red flag. A quick check (not empty, right format) on the sad path prevents bad data and crashes. It&rsquo;s a shipping essential, not a nice-to-have.'},
+      {t:'Green flag &mdash; validation is only for big companies', ok:false, ex:'Validation isn&rsquo;t about company size; it&rsquo;s about not saving garbage or crashing on the first odd input. Even the smallest app needs it.'}
+    ]
+  },
+  {
+    q:'You tested the happy path and it works. A teammate asks, "Did you test what happens when someone submits it empty?" You realize you didn&rsquo;t. What&rsquo;s the mature move?',
+    opts:[
+      {t:'Ship it anyway &mdash; it worked when I tried it the normal way', ok:false, ex:'"Works when I do it right" is the untested-sad-path trap. Real users won&rsquo;t all follow the happy path. An untested sad path is a red flag &mdash; test it before shipping.'},
+      {t:'Test the empty/invalid submissions first, then ship once they behave', ok:true, ex:'Right. An untested sad path is exactly what breaks in front of real users. Testing the empty and invalid cases before shipping is what separates a demo from a real, trustworthy app.'},
+      {t:'Assume AI already handled it and move on', ok:false, ex:'Assuming without checking is how sad paths slip through. AI often handles the happy path well; confirming the sad paths yourself is your job before shipping.'}
+    ]
+  },
+  {
+    q:'"It works perfectly on my machine!" you tell a friend. They open the link and it&rsquo;s broken. What does that tell you?',
+    opts:[
+      {t:'Their computer is the problem &mdash; my code is fine', ok:false, ex:'"Works only on my machine" is a red flag, not proof your code is fine. The hosted version has different settings or missing config &mdash; that&rsquo;s where the real test is.'},
+      {t:'The hosted version differs from my local one &mdash; likely missing config or a setting', ok:true, ex:'Right. "Works on my machine" only counts once the hosted version works too. The gap is usually environment config &mdash; a setting or secret present locally but missing where it&rsquo;s hosted.'},
+      {t:'Nothing &mdash; if it runs for me, it&rsquo;s shippable', ok:false, ex:'Running locally isn&rsquo;t shippable. The whole point of shipping is that it works where <em>users</em> are, not just on your setup. "Works only on my machine" means you&rsquo;re not done.'}
+    ]
+  },
+  {
+    q:'A week after launch, users report a small annoyance. What does "iterating" actually mean here?',
+    opts:[
+      {t:'Never touch it again &mdash; it&rsquo;s shipped, so it&rsquo;s finished forever', ok:false, ex:'Shipping isn&rsquo;t the end. Iterating means improving the app after real people use it &mdash; refusing to update it lets small annoyances fester into reasons people leave.'},
+      {t:'Use the real feedback to make a small fix, test it, and ship the improved version', ok:true, ex:'Right. Iterating is the loop after launch: real usage reveals what to improve, you make a focused change, test it (including the sad paths), and ship again. Good apps are shipped many times, not once.'},
+      {t:'Rebuild the entire app from scratch over one small complaint', ok:false, ex:'A full rebuild over a minor annoyance is overkill. Iterating favors small, tested improvements &mdash; you keep what works and refine the rough edge, not throw it all away.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 &mdash; you&rsquo;re shipping-ready, and you can tell trust from verify.</strong> The whole checklist in one line: <em>no hard-coded secrets, real input validation, sad paths tested, works where users are (not just on your machine), and improve it after launch.</em> AI writes the code fast; this judgment is what makes it safe to ship. That&rsquo;s a wrap on Week 2 &mdash; well done.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations &mdash; the red flags are always the same four: a hard-coded secret, no input validation, an untested sad path, and "works only on my machine." Spot those and fix them, and your app is genuinely ready to ship. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderPriority();
+  renderConcepts();
+  setupBuckets();
+  renderAnalytics();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

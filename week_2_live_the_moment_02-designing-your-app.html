@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2 · Designing the App Before You Build — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── ACTIVITY 1: FLOW BUILDER ── */
+.prompt-pool{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.frag-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.8rem;line-height:1.45;cursor:pointer;transition:all .2s;max-width:340px;user-select:none;font-weight:500}
+.frag-chip:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.frag-chip.used{opacity:0;pointer-events:none;position:absolute;visibility:hidden}
+.frag-chip.shake{animation:shake .35s ease;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.prompt-slots{margin-top:1.4rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:90px;background:rgba(255,255,255,0.5)}
+.slot-line{display:flex;align-items:flex-start;gap:.6rem;padding:.45rem .2rem;font-size:.83rem;line-height:1.5;animation:fadeIn .35s ease}
+.slot-tag{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.05em;color:#fff;background:var(--navy);padding:.18rem .5rem;border-radius:4px;flex-shrink:0;margin-top:.1rem;text-transform:uppercase}
+.slot-line.t-start .slot-tag{background:#5B8FE0}
+.slot-line.t-action .slot-tag{background:var(--orange)}
+.slot-line.t-confirm .slot-tag{background:#66BB6A}
+.slot-line.t-end .slot-tag{background:#8E6BC0}
+.prompt-hint{margin-top:.8rem;padding:.7rem .9rem;background:var(--red-light);border-left:3px solid var(--red);border-radius:4px;font-size:.78rem;color:#7A2A1E;line-height:1.55;display:none}
+.prompt-hint.show{display:block;animation:fadeIn .3s ease}
+.prompt-preview{margin-top:1.2rem;background:#1A1B2E;border-radius:var(--radius-sm);padding:1.2rem 1.4rem;font-family:var(--mono);font-size:.78rem;line-height:1.75;color:#E8E8EC;display:none;border:1px solid var(--navy)}
+.prompt-preview.show{display:block;animation:fadeIn .4s ease}
+.prompt-preview .pp-label{color:var(--orange-light);font-weight:600;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+.structure-bar{display:flex;gap:.4rem;margin-top:1rem;flex-wrap:wrap}
+.structure-step{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3rem .7rem;border-radius:50px;color:#fff}
+.structure-step:nth-child(1){background:#5B8FE0}.structure-step:nth-child(3){background:var(--orange)}
+.structure-step:nth-child(5){background:#66BB6A}.structure-step:nth-child(7){background:#8E6BC0}
+.structure-arrow{color:var(--text-muted);font-weight:700;align-self:center;font-size:.75rem}
+
+/* ── ACTIVITY 2: MVP SORTER ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE / DEFINITION CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.05rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#9597A6,#6B6D7B)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-card ul{list-style:none;padding:0;margin-top:.6rem;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-card li{font-size:.74rem;color:var(--text-secondary);padding:.15rem 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.45}
+.compare-card li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.compare-card.warn li::before{content:'○';color:var(--orange)}
+.compare-card.muted li::before{content:'⌛';color:var(--text-muted)}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 3: USER-STORY BUILDER (checkbox) ── */
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+#critiqueList{display:grid;gap:.5rem}
+.story-preview{margin-top:0;margin-bottom:1.2rem}
+
+/* ── ACTIVITY 4: SCOPE QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 2 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 2 · AI App Development</div>
+  <h1>Designing the App Before You Build — <em>think first, build fast</em></h1>
+  <p class="hero-sub">Four hands-on activities. Put the screens of a user flow in order, build a clear user story block by block, learn the plain-English words for how data fits together, and decide which features belong in the first version. Because building is now fast, thinking is where your leverage is &mdash; five minutes of design saves an hour of AI building the wrong thing.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ORDER THE USER FLOW ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Order the screens of a user flow</h2>
+    <p class="lesson-intro">Before you build a screen, you map the <strong>flow</strong> &mdash; the path a user walks from &ldquo;I want to do this&rdquo; to &ldquo;done&rdquo;. A good flow has four beats: an <strong>ENTRY</strong> (where they start), the <strong>ACTION</strong> (what they do), a <strong>CONFIRM</strong> (the app checks &amp; agrees), and an <strong>END</strong> (they see it worked). Below are the eight screens of &ldquo;book a slot at the community badminton court,&rdquo; scrambled. Click them in the order a user actually moves through them.</p>
+
+    <div class="structure-bar">
+      <span class="structure-step">1 &middot; Entry</span><span class="structure-arrow">&rarr;</span>
+      <span class="structure-step">2 &middot; Action</span><span class="structure-arrow">&rarr;</span>
+      <span class="structure-step">3 &middot; Confirm</span><span class="structure-arrow">&rarr;</span>
+      <span class="structure-step">4 &middot; End</span>
+    </div>
+
+    <div class="lesson-card">
+      <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy)">Click the next screen in the flow</h4>
+      <div class="prompt-pool" id="fragPool"></div>
+      <div class="prompt-hint" id="promptHint"></div>
+      <div class="prompt-slots" id="promptSlots">
+        <div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your user flow will build up here, screen by screen…</div>
+      </div>
+      <div class="prompt-preview" id="promptPreview"></div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">&#8635; Start over</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: MVP vs NICE-TO-HAVE ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Must-have or nice-to-have? — scope the first version</h2>
+    <p class="lesson-intro">The number-one reason beginner apps never get finished is trying to build everything at once. The cure is the <strong>MVP</strong> &mdash; the smallest version that actually solves the core problem. Sort each proposed feature for our badminton-booking app into <strong>must-have</strong> (the app is useless without it), <strong>nice-to-have</strong> (great later), or <strong>not now</strong> (a whole different project). Wrong answers carry a hover hint.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card good">
+        <div class="compare-icon">M1</div>
+        <h4>Must-have (MVP)</h4>
+        <p>Remove it and the app <strong>can&rsquo;t do its one core job</strong>. This is the shortlist you build first.</p>
+        <ul>
+          <li>See available slots</li>
+          <li>Book a slot</li>
+          <li>Save that booking so it&rsquo;s not double-booked</li>
+        </ul>
+      </div>
+      <div class="compare-card warn">
+        <div class="compare-icon">N2</div>
+        <h4>Nice-to-have</h4>
+        <p>Genuinely useful, but the app <strong>still works without it</strong>. Add it once the core is solid.</p>
+        <ul>
+          <li>A reminder email the day before</li>
+          <li>A profile photo for each player</li>
+          <li>Dark mode</li>
+        </ul>
+      </div>
+      <div class="compare-card muted">
+        <div class="compare-icon">X3</div>
+        <h4>Not now</h4>
+        <p>A different app in disguise &mdash; huge scope for a first build. <strong>Note it, park it.</strong></p>
+        <ul>
+          <li>In-app payments &amp; refunds</li>
+          <li>A social feed for players</li>
+          <li>Multi-city franchise support</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-note">&#128161; <strong>The MVP question for every feature:</strong> &ldquo;If this were missing, could a user still do the one thing this app exists for?&rdquo; If yes, it&rsquo;s not a must-have &mdash; no matter how nice it sounds. Ruthless scoping is what gets a first version <em>finished</em> instead of endlessly &ldquo;almost ready.&rdquo;</div>
+
+    <div class="lesson-card" style="margin-top:1.5rem">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="scenarioList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="must">
+            <div class="bucket-title">Must-have (MVP)</div>
+            <div class="bucket-sub">App is useless without it</div>
+            <div class="bucket-drop" data-drop="must"></div>
+          </div>
+          <div class="bucket" data-bucket="nice">
+            <div class="bucket-title">Nice-to-have</div>
+            <div class="bucket-sub">Great later, not now</div>
+            <div class="bucket-drop" data-drop="nice"></div>
+          </div>
+          <div class="bucket" data-bucket="later">
+            <div class="bucket-title">Not now</div>
+            <div class="bucket-sub">A whole other project</div>
+            <div class="bucket-drop" data-drop="later"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity2()">&#8635; Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers2()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: BUILD THE USER STORY ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Build the user story — role, goal, reason</h2>
+    <p class="lesson-intro">A <strong>user story</strong> is the one-sentence recipe designers use to keep a feature honest: <em>&ldquo;As a [role], I want to [goal], so that [reason].&rdquo;</em> It names who it&rsquo;s for, what they do, and why they care &mdash; and nothing else. Below is a jumble of phrases. Tick the <strong>three</strong> that belong in a good user story for our booking app, and leave out the traps.</p>
+
+    <div class="lesson-card">
+      <div class="prompt-preview show story-preview">
+        <span class="pp-label">The user story template you&rsquo;re filling</span>
+        As a <strong style="color:#5B8FE0">[role]</strong>, I want to <strong style="color:var(--orange-light)">[goal]</strong>, so that <strong style="color:#66BB6A">[reason]</strong>.
+      </div>
+      <div style="margin-top:1.2rem">
+        <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Tick the three phrases that make a clear user story.</h4>
+        <div id="critiqueList"></div>
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkCritique()">Get verdict</button>
+        <button class="btn btn-ghost" onclick="resetCritique()">&#8635; Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: DATA-MODEL + SCOPE QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Data words &amp; right-sized scope — the design quiz</h2>
+    <p class="lesson-intro">Two things separate a plan that builds smoothly from one that stalls: knowing the plain-English words for your <strong>data model</strong> (entity, field, relationship), and scoping the first version so it&rsquo;s <em>actually finishable</em>. Five questions, one honest answer each. The wrong options are the traps that quietly sink beginner projects.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">&#8635; Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect &mdash; make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of an app you&rsquo;d like to build. Write one user story for it: &ldquo;As a [role], I want to [goal], so that [reason].&rdquo;</div>
+        <textarea placeholder="As a busy parent, I want to see this week's school lunch menu on my phone, so that I can plan what to pack..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">For that same app, name one must-have feature for the first version &mdash; and one tempting feature you&rsquo;ll deliberately push to &ldquo;not now.&rdquo;</div>
+        <textarea placeholder="Must-have: show this week's menu. Not now: let parents rate the meals and comment — that's a whole social layer I don't need yet..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 3 &middot; Building Your First Screens</h3>
+      <p>You&rsquo;ve got a flow, a user story, a data model, and a scoped first version. Next: turn that plan into real screens with AI &mdash; describing what you want clearly, building interface piece by piece, and checking what the AI hands back.</p>
+      <a href="03-building-your-first-app.html" class="btn btn-primary">Continue to Lesson 3 &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Order the User Flow ─── */
+const FRAGMENTS = [
+  {order:1, tag:'start',   text:'User opens the app and lands on the home screen showing this week.'},
+  {order:2, tag:'start',   text:'They tap &ldquo;Book a court&rdquo; to begin.'},
+  {order:3, tag:'action',  text:'They pick a day and see the open time slots for it.'},
+  {order:4, tag:'action',  text:'They tap the 6&ndash;7pm slot they want.'},
+  {order:5, tag:'confirm', text:'The app double-checks that slot is still free (no one grabbed it first).'},
+  {order:6, tag:'confirm', text:'A summary appears &mdash; &ldquo;Tuesday, 6&ndash;7pm&rdquo; &mdash; and they tap &ldquo;Confirm booking.&rdquo;'},
+  {order:7, tag:'end',     text:'The app saves the booking and marks that slot as taken for everyone.'},
+  {order:8, tag:'end',     text:'A &ldquo;You&rsquo;re booked!&rdquo; screen shows, with the details and a way to cancel.'}
+];
+const STAGE_HINTS = {
+  start:'Start at the ENTRY &mdash; where the user opens the app and begins the task, before they do anything.',
+  action:'ACTION comes next: the actual choices the user makes &mdash; picking the day, then the slot.',
+  confirm:'CONFIRM comes after the choice: the app checks it&rsquo;s valid and the user agrees before anything is saved.',
+  end:'END comes last: the app saves the result and shows the user it worked.'
+};
+let promptStep = 0, promptMistakes = 0;
+function renderFragments(){
+  const shuffled = [...FRAGMENTS].sort(()=>Math.random()-0.5);
+  $('fragPool').innerHTML = shuffled.map(f =>
+    `<div class="frag-chip" data-order="${f.order}" onclick="pickFragment(${f.order}, this)">${f.text}</div>`
+  ).join('');
+}
+function pickFragment(order, chip){
+  const hint = $('promptHint');
+  if (order !== promptStep + 1) {
+    promptMistakes++;
+    chip.classList.remove('shake'); void chip.offsetWidth;
+    chip.classList.add('shake');
+    const expected = FRAGMENTS.find(f => f.order === promptStep + 1);
+    hint.innerHTML = `<strong>Not yet.</strong> ${STAGE_HINTS[expected.tag]} (Screen ${promptStep + 1} of 8 &mdash; you&rsquo;re in the <strong>${expected.tag.toUpperCase()}</strong> stage.)`;
+    hint.classList.add('show');
+    return;
+  }
+  hint.classList.remove('show');
+  promptStep++;
+  chip.classList.add('used');
+  const frag = FRAGMENTS.find(f => f.order === order);
+  const ph = $('slotPlaceholder');
+  if (ph) ph.remove();
+  const line = document.createElement('div');
+  line.className = 'slot-line t-' + frag.tag;
+  line.innerHTML = `<span class="slot-tag">${frag.tag}</span><span>${frag.text}</span>`;
+  $('promptSlots').appendChild(line);
+  if (promptStep === FRAGMENTS.length) finishPrompt();
+}
+function finishPrompt(){
+  const preview = $('promptPreview');
+  preview.innerHTML = `<span class="pp-label">Your assembled user flow &mdash; the map you&rsquo;d hand an AI before building</span>` +
+    FRAGMENTS.map((f,i) => `${i+1}. ${f.text}`).join('<br>');
+  preview.classList.add('show');
+  const fb = $('feedback1');
+  const whys = `<ul style="margin:.6rem 0 0 1.1rem;line-height:1.7">
+    <li><strong>Entry</strong> is where the user starts &mdash; open the app, tap &ldquo;Book a court&rdquo;.</li>
+    <li><strong>Action</strong> is the real work &mdash; choosing the day, then the slot.</li>
+    <li><strong>Confirm</strong> is the safety beat &mdash; the app checks it&rsquo;s free and the user agrees.</li>
+    <li><strong>End</strong> is the payoff &mdash; it&rsquo;s saved, and the user sees &ldquo;You&rsquo;re booked!&rdquo;.</li>
+    <li>Skip the confirm beat and you get double-bookings &mdash; the flow&rsquo;s order <em>is</em> the design.</li></ul>`;
+  if (promptMistakes === 0) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Perfect flow &mdash; zero wrong clicks.</strong> You&rsquo;ve internalized the ENTRY &rarr; ACTION &rarr; CONFIRM &rarr; END shape that almost every task in every app follows. Why each beat earns its place:${whys}`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Flow assembled &mdash; with ${promptMistakes} wrong click${promptMistakes > 1 ? 's' : ''} along the way.</strong> That&rsquo;s fine: the order <em>is</em> the lesson &mdash; you can&rsquo;t confirm before the user has chosen, and you don&rsquo;t save before you confirm. Why each beat matters:${whys} Hit <em>Start over</em> for a clean run.`;
+  }
+  $('prog1').classList.add('done');
+}
+function resetActivity1(){
+  promptStep = 0; promptMistakes = 0;
+  $('promptHint').classList.remove('show');
+  $('promptPreview').className = 'prompt-preview';
+  $('feedback1').className = 'activity-feedback';
+  $('promptSlots').innerHTML = '<div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your user flow will build up here, screen by screen…</div>';
+  renderFragments();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: MVP vs Nice-to-have Sorter ─── */
+const DESIGNS = [
+  {id:'d1', text:'A screen that shows which court slots are open this week.', hint:'Without seeing what&rsquo;s free, no one can book anything — this is the core.', bucket:'must', why:'Must-have: if a user can&rsquo;t see available slots, the app can&rsquo;t do its one job. It&rsquo;s the heart of the MVP.'},
+  {id:'d2', text:'Tapping a slot to book it, and saving that booking so nobody double-books.', hint:'This IS the app&rsquo;s core action — booking a slot reliably.', bucket:'must', why:'Must-have: booking a slot and storing it so it can&rsquo;t be double-booked is the whole point of the app.'},
+  {id:'d3', text:'A reminder email sent the day before your booking.', hint:'Lovely, but the app fully works without it — add it later.', bucket:'nice', why:'Nice-to-have: reminders reduce no-shows and delight users, but bookings still work perfectly without them.'},
+  {id:'d4', text:'A profile photo and short bio for each player.', hint:'A pleasant touch, not needed to book a court.', bucket:'nice', why:'Nice-to-have: personalization is nice polish, but nobody needs a bio to reserve a slot. Save it for later.'},
+  {id:'d5', text:'In-app card payments with automatic refunds for cancellations.', hint:'Payments are a big, risky project on their own — not for v1.', bucket:'later', why:'Not now: payments and refunds are a whole complex, high-risk system. A first version can take bookings and handle money separately.'},
+  {id:'d6', text:'A social feed where players post match photos and comment on each other.', hint:'That&rsquo;s a different app entirely — huge scope for a booking tool.', bucket:'later', why:'Not now: a social network is a completely separate product. Bolting it onto a booking MVP guarantees you never finish either.'}
+];
+const BUCKET_NAMES = {must:'Must-have (MVP)', nice:'Nice-to-have', later:'Not now'};
+let placed2 = {};
+function renderDesigns(){
+  const list = $('scenarioList');
+  const shuffled = [...DESIGNS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(d => `
+    <div class="scenario-card" draggable="true" data-id="${d.id}">
+      <div class="scenario-text">${d.text}</div>
+      <div class="scenario-hint">${d.hint}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop2(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop2(id, bucket){
+  const design = DESIGNS.find(d => d.id === id);
+  if (!design || placed2[id]) return;
+  const correct = design.bucket === bucket;
+  placed2[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + design.text.substring(0, 34) + (design.text.length > 34 ? '…' : '');
+  pill.title = correct ? design.why : `Correct bucket: ${BUCKET_NAMES[design.bucket]}. ${design.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity2Done();
+}
+function checkActivity2Done(){
+  if (Object.keys(placed2).length === DESIGNS.length) {
+    const right = Object.values(placed2).filter(p => p.correct).length;
+    const fb = $('feedback2');
+    if (right === DESIGNS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six correct.</strong> You now scope like a builder who actually ships: <em>must-haves</em> (see slots, book, save) are the whole first version; <em>nice-to-haves</em> (reminders, photos) wait until the core is solid; and <em>not now</em> items (payments, a social feed) are separate projects you note and park. Cutting scope isn&rsquo;t giving up &mdash; it&rsquo;s the only way a first version ever gets finished.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for why. The test: remove the feature &mdash; can the user still book a court? If no, it&rsquo;s a <em>must-have</em>. If yes but it clearly helps, it&rsquo;s <em>nice-to-have</em>. If it&rsquo;s really a different app (payments, social), it&rsquo;s <em>not now</em>. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetActivity2(){
+  placed2 = {};
+  $('feedback2').className = 'activity-feedback';
+  document.querySelectorAll('.bucket-drop').forEach(d => d.innerHTML = '');
+  renderDesigns();
+  $('prog2').classList.remove('done');
+}
+function showAnswers2(){
+  DESIGNS.forEach(d => { if (!placed2[d.id]) handleDrop2(d.id, d.bucket); });
+}
+
+/* ─── ACTIVITY 3: Build the User Story ─── */
+const CRITIQUE = [
+  {key:'role',   good:true,  label:'ROLE — &ldquo;As a club member,&rdquo; naming exactly who this feature is for.'},
+  {key:'goal',   good:true,  label:'GOAL — &ldquo;I want to book a court slot,&rdquo; the concrete thing they want to do.'},
+  {key:'reason', good:true,  label:'REASON — &ldquo;so that I&rsquo;m guaranteed a court when I arrive,&rdquo; the why behind it.'},
+  {key:'tech',   good:false, label:'&ldquo;Store the booking in a database table with an indexed timestamp column.&rdquo;'},
+  {key:'vague',  good:false, label:'&ldquo;Make the app really good and easy and modern and fast.&rdquo;'},
+  {key:'wish',   good:false, label:'&ldquo;And also add chat, payments, and a leaderboard while we&rsquo;re at it.&rdquo;'}
+];
+function renderCritique(){
+  $('critiqueList').innerHTML = CRITIQUE.map(c => `
+    <label class="quiz-opt" style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer" id="crow-${c.key}">
+      <input type="checkbox" data-key="${c.key}" style="margin-top:.15rem;accent-color:var(--orange);width:16px;height:16px;flex-shrink:0">
+      <span>${c.label}</span>
+    </label>`).join('');
+}
+function checkCritique(){
+  let right = 0;
+  CRITIQUE.forEach(c => {
+    const box = document.querySelector(`input[data-key="${c.key}"]`);
+    const row = $('crow-' + c.key);
+    row.classList.remove('right','wrong');
+    const shouldTick = c.good;
+    if (box.checked === shouldTick) { right++; row.classList.add('right'); }
+    else { row.classList.add('wrong'); }
+  });
+  const fb = $('feedback3');
+  if (right === CRITIQUE.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>6/6 &mdash; that&rsquo;s a clean user story.</strong> The three green ticks assemble into: <em>&ldquo;As a club member, I want to book a court slot, so that I&rsquo;m guaranteed a court when I arrive.&rdquo;</em> The three you left out are the classic traps: <em>technical detail</em> (how, not what &mdash; that&rsquo;s the AI&rsquo;s job later), <em>vague fluff</em> (&ldquo;good and modern&rdquo; tells no one anything), and <em>scope creep</em> (chat + payments + leaderboard is three more stories, not one).`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>${right}/6 rows matched.</strong> A user story is exactly three parts: <em>role</em>, <em>goal</em>, <em>reason</em> &mdash; those are the green ticks. Leave out how it&rsquo;s stored (technical detail), empty adjectives (&ldquo;good and modern&rdquo;), and extra features piled on (chat, payments, leaderboard). Fix your ticks and hit <em>Get verdict</em> again.`;
+  }
+  $('prog3').classList.add('done');
+}
+function resetCritique(){
+  document.querySelectorAll('#critiqueList input').forEach(b => b.checked = false);
+  document.querySelectorAll('#critiqueList .quiz-opt').forEach(r => r.classList.remove('right','wrong'));
+  $('feedback3').className = 'activity-feedback';
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Data-model + Scope Quiz ─── */
+const QUIZ = [
+  {
+    q:'In our booking app, &ldquo;Booking&rdquo; and &ldquo;Player&rdquo; are the main <em>things</em> the app keeps track of. In data-model terms, each of those is called a:',
+    opts:[
+      {t:'Field — because it holds a piece of information', ok:false, ex:'A field is a single detail <em>inside</em> a thing (like a player&rsquo;s email). &ldquo;Booking&rdquo; and &ldquo;Player&rdquo; are the whole things themselves, so they&rsquo;re entities, not fields.'},
+      {t:'Entity — the main kind of thing the app stores, like a category of records', ok:true, ex:'Correct. An <strong>entity</strong> is a core &ldquo;thing&rdquo; your app tracks &mdash; Player, Booking, Court. Each entity becomes a table of records. Naming your entities is usually the first step in a data model.'},
+      {t:'Relationship — because they connect to each other', ok:false, ex:'A relationship is the <em>link between</em> two entities, not the entities themselves. &ldquo;Player&rdquo; and &ldquo;Booking&rdquo; are the things; &ldquo;a player HAS bookings&rdquo; is the relationship.'}
+    ]
+  },
+  {
+    q:'A Player entity stores a name, an email, and a phone number. Each of those individual details is a:',
+    opts:[
+      {t:'Field — a single attribute stored inside an entity', ok:true, ex:'Right. A <strong>field</strong> (or attribute) is one piece of information a record holds &mdash; name, email, phone. An entity is the thing; its fields are the details about it.'},
+      {t:'Entity — because each one is important', ok:false, ex:'Importance doesn&rsquo;t make something an entity. Name and email are details <em>about</em> a Player, so they&rsquo;re fields of the Player entity, not entities of their own.'},
+      {t:'Relationship — because they describe the player', ok:false, ex:'Describing a player is what fields do. A relationship links two <em>entities</em> together (Player to Booking); a single detail like &ldquo;email&rdquo; is a field.'}
+    ]
+  },
+  {
+    q:'&ldquo;One Player can have many Bookings, and each Booking belongs to one Player.&rdquo; That connection between the two entities is called a:',
+    opts:[
+      {t:'Field — since it&rsquo;s stored somewhere', ok:false, ex:'Though a link is often stored via a field under the hood, the <em>concept</em> of &ldquo;a Player has many Bookings&rdquo; is the relationship. The field is just how it&rsquo;s recorded.'},
+      {t:'Entity — because it involves two things', ok:false, ex:'Involving two things doesn&rsquo;t make it an entity. The two things (Player, Booking) are the entities; the connection between them is the relationship.'},
+      {t:'Relationship — the defined link between two entities', ok:true, ex:'Correct. A <strong>relationship</strong> describes how entities connect &mdash; one-to-many (a Player has many Bookings) is the most common. Getting relationships right is what stops data from getting tangled later.'}
+    ]
+  },
+  {
+    q:'Two teammates describe the first version of a to-do app. Which one is scoped right for a finishable MVP?',
+    opts:[
+      {t:'&ldquo;Add a task, see my list, mark a task done. That&rsquo;s it for v1.&rdquo;', ok:true, ex:'Right. That&rsquo;s a genuine MVP: the smallest set of features that actually solves the core problem &mdash; and it&rsquo;s realistically finishable. Everything else can come after it works.'},
+      {t:'&ldquo;Tasks, plus teams, calendar sync, notifications, tags, dark mode, and an AI assistant &mdash; all in v1.&rdquo;', ok:false, ex:'That&rsquo;s not an MVP, it&rsquo;s a mountain. Packing seven features into version one is the fastest way to a project that&rsquo;s always &ldquo;almost done&rdquo; and never shipped. Cut it to the core.'},
+      {t:'&ldquo;Let&rsquo;s just start building and figure out the features as we go.&rdquo;', ok:false, ex:'Skipping scope entirely means AI happily builds in every direction at once. &ldquo;Figure it out as we go&rdquo; is how first versions balloon. A short, explicit must-have list is what keeps a build finishable.'}
+    ]
+  },
+  {
+    q:'You&rsquo;re designing a recipe-saving app. Which is the healthiest way to define its first version?',
+    opts:[
+      {t:'Match a competitor feature-for-feature so it looks professional from day one', ok:false, ex:'Copying a mature app&rsquo;s full feature list for v1 guarantees you never finish. Those features were added over years. Your first version only needs to solve the one core problem well.'},
+      {t:'Pick the single core job &mdash; save a recipe and see it later &mdash; and build only that first', ok:true, ex:'Right. Define the app by its one essential job, build that, and get it working end-to-end. A small app that reliably does one thing beats a big one that half-does ten. You expand <em>after</em> the core is solid.'},
+      {t:'Design every screen you might ever need before writing anything, so nothing changes later', ok:false, ex:'Over-designing up front assumes you can predict everything &mdash; you can&rsquo;t. A light plan for the core, then build and learn, beats a giant spec that&rsquo;s wrong in ways you only discover by building.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 &mdash; you can design before you build.</strong> You&rsquo;ve got the vocabulary (<em>entity</em> = a thing, <em>field</em> = a detail about it, <em>relationship</em> = how things connect) and the discipline (scope the first version to the one core job). That combination &mdash; a clear data model plus a ruthlessly small MVP &mdash; is exactly the plan an AI needs to build the right thing fast.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations. The data words: an <em>entity</em> is a whole thing (Player, Booking), a <em>field</em> is one detail inside it (email), a <em>relationship</em> is how two entities link (a Player has many Bookings). The scope rule: a first version does the one core job and nothing more. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderFragments();
+  renderDesigns();
+  setupBuckets();
+  renderCritique();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

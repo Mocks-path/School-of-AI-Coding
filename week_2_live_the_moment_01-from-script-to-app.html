@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1 · From Script to App — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── ACTIVITY 1: CLASSIFIER ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:78px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.05rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card:nth-child(4) .compare-icon{background:linear-gradient(135deg,#8E6BC0,#6E4BA0)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-pros{margin-top:.6rem;font-size:.75rem;line-height:1.6;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-pros .pro{color:#2E6B30;display:block}
+.compare-pros .con{color:#A03A2C;display:block}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 2: REQUEST FLOW ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.84rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-tag{font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.05em;color:#fff;padding:.14rem .45rem;border-radius:4px;flex-shrink:0;text-transform:uppercase;margin-top:.05rem}
+.chain-tag.front{background:#5B8FE0}
+.chain-tag.back{background:#8E6BC0}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 3: MYTH VS FACT ── */
+.mf-grid{display:grid;gap:.8rem;margin-top:.5rem}
+.mf-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem;transition:all .25s}
+.mf-card.right{border-color:var(--green);background:var(--green-light)}
+.mf-card.miss{border-color:var(--red);background:var(--red-light)}
+.mf-statement{font-size:.88rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.7rem}
+.mf-buttons{display:flex;gap:.5rem}
+.mf-btn{padding:.4rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--bg-card);font-size:.78rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-secondary)}
+.mf-btn:hover{border-color:var(--orange);color:var(--orange)}
+.mf-btn:disabled{cursor:not-allowed;opacity:.55}
+.mf-btn.picked-right{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.mf-btn.picked-wrong{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+.mf-explain{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;color:var(--text-secondary);border-top:1px dashed var(--border);padding-top:.6rem}
+.mf-explain.show{display:block;animation:fadeIn .3s ease}
+.mf-verdict{font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.mf-verdict.v-right{color:#256B29}
+.mf-verdict.v-miss{color:#A03A2C}
+
+/* ── ACTIVITY 4: TOOL-CHOICE + STATS ── */
+.math-scenario{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1rem 0 1.4rem}
+@media (max-width:760px){.math-scenario{grid-template-columns:1fr 1fr}}
+.math-stat{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem .9rem}
+.math-stat-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.25rem}
+.math-stat-value{font-family:var(--mono);font-size:1.05rem;font-weight:600;color:var(--navy)}
+.math-options{display:grid;gap:.6rem}
+.math-option{display:flex;align-items:flex-start;gap:.7rem;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;cursor:pointer;transition:all .2s;font-size:.86rem;line-height:1.5}
+.math-option:hover{border-color:var(--orange)}
+.math-option input{margin-top:.25rem;accent-color:var(--orange)}
+.math-option .opt-amount{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.math-option.reveal-right{border-color:var(--green);background:var(--green-light)}
+.math-option.reveal-wrong{border-color:var(--red);background:var(--red-light)}
+.breakdown{display:none;margin-top:1.2rem}
+.breakdown.show{display:block;animation:fadeIn .4s ease}
+.breakdown table{width:100%;border-collapse:collapse;font-size:.84rem}
+.breakdown th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:.45rem .6rem;border-bottom:1px solid var(--border)}
+.breakdown td{padding:.5rem .6rem;border-bottom:1px dashed var(--border);color:var(--text-secondary)}
+.breakdown td.num{font-family:var(--mono);text-align:right;color:var(--navy);font-weight:600}
+.breakdown tr.total td{border-bottom:none;font-weight:700;color:var(--navy);border-top:2px solid var(--navy)}
+.bar-row{display:flex;align-items:center;gap:.6rem;margin-top:.35rem}
+.bar-label{font-size:.72rem;color:var(--text-secondary);width:150px;flex-shrink:0}
+.bar-track{flex:1;height:14px;background:var(--bg-light);border-radius:7px;overflow:hidden;border:1px solid var(--border)}
+.bar-fill{height:100%;border-radius:7px}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 1 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 2 · AI App Development</div>
+  <h1>From Script to App — <em>the four parts every app is made of</em></h1>
+  <p class="hero-sub">Four hands-on activities. Sort real examples into the four parts of any app, trace what happens the moment a user clicks a button, decide when a job needs an app versus a simpler tool, and bust the myths about building software with AI. No coding today &mdash; just the mental model that makes everything after it click.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: FOUR APP PARTS ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">The four parts of any app</h2>
+    <p class="lesson-intro">Whether it&rsquo;s a to-do list or a banking app, every app is built from the same four kinds of parts. The <strong>interface</strong> is what the user sees and touches. The <strong>logic</strong> is the rules that decide what happens. The <strong>data</strong> is the information that gets saved. The <strong>state</strong> is what&rsquo;s true <em>right now</em> in this session. Study the four, then drag each real example into the part it belongs to. Guess freely &mdash; every card carries a hover hint with the answer.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">UI</div>
+        <h4>Interface</h4>
+        <p>What the user <strong>sees and touches</strong> &mdash; buttons, forms, lists, screens. The visible surface of the app.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Buttons, text boxes, menus, the layout</span>
+          <span class="pro">+ Everything on screen the user interacts with</span>
+          <span class="con">&minus; Not where decisions or storage happen</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">LG</div>
+        <h4>Logic</h4>
+        <p>The <strong>rules and decisions</strong>: &ldquo;if the field is empty, show a warning.&rdquo; The thinking behind the buttons.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Validation, calculations, if-this-then-that</span>
+          <span class="pro">+ Turns a click into an actual action</span>
+          <span class="con">&minus; Invisible to the user &mdash; it just runs</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">DB</div>
+        <h4>Data</h4>
+        <p>The <strong>information that gets saved</strong> and comes back later &mdash; accounts, entries, records. Survives a refresh.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Anything stored: users, posts, orders</span>
+          <span class="pro">+ Still there when you close and reopen</span>
+          <span class="con">&minus; Not the screen and not the rules</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">ST</div>
+        <h4>State</h4>
+        <p>What&rsquo;s <strong>true right now</strong> in this session &mdash; who&rsquo;s logged in, which tab is open, is it still loading.</p>
+        <div class="compare-pros">
+          <span class="pro">+ &ldquo;Logged in&rdquo;, &ldquo;loading&rdquo;, &ldquo;dark mode on&rdquo;</span>
+          <span class="pro">+ The app&rsquo;s current, temporary situation</span>
+          <span class="con">&minus; Often resets when the session ends</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip-note">&#128161; <strong>The core question for every piece of an app:</strong> &ldquo;Is this what the user sees (interface), a rule (logic), something saved (data), or just what&rsquo;s true this second (state)?&rdquo; Almost every feature you&rsquo;ll ever describe to an AI breaks down into these four. Naming the part first makes your request precise &mdash; and precise requests get better software.</div>
+
+    <div class="lesson-card" style="margin-top:1.5rem">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="scenarioList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="interface">
+            <div class="bucket-title">Interface</div>
+            <div class="bucket-sub">What the user sees &amp; touches</div>
+            <div class="bucket-drop" data-drop="interface"></div>
+          </div>
+          <div class="bucket" data-bucket="logic">
+            <div class="bucket-title">Logic</div>
+            <div class="bucket-sub">The rules &amp; decisions</div>
+            <div class="bucket-drop" data-drop="logic"></div>
+          </div>
+          <div class="bucket" data-bucket="data">
+            <div class="bucket-title">Data</div>
+            <div class="bucket-sub">Information that gets saved</div>
+            <div class="bucket-drop" data-drop="data"></div>
+          </div>
+          <div class="bucket" data-bucket="state">
+            <div class="bucket-title">State</div>
+            <div class="bucket-sub">What&rsquo;s true right now</div>
+            <div class="bucket-drop" data-drop="state"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">&#8635; Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: REQUEST FLOW / FRONT vs BACK ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Click &ldquo;Save&rdquo; &mdash; trace what actually happens</h2>
+    <p class="lesson-intro">When a user taps a button, the work splits across two places. The <strong>front-end</strong> is everything running on the user&rsquo;s screen. The <strong>back-end</strong> is the server and database the user never sees. The eight steps of a simple &ldquo;save my note&rdquo; action are shuffled below &mdash; each is tagged <strong>FRONT-END</strong> or <strong>BACK-END</strong>. Click them <strong>in the order they actually happen</strong>. A wrong click shakes red and hints at what comes next.</p>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Shuffled steps &mdash; click the next one</h4>
+          <div class="chain-pool" id="chainPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The flow, in order</h4>
+          <div class="chain-slots" id="chainSlots"></div>
+        </div>
+      </div>
+      <div class="chain-hintbox" id="chainHint"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetChain()">&#8635; Reset the flow</button>
+      </div>
+      <div class="tip-note">&#128161; <strong>Notice the hand-off:</strong> the front-end collects the click and shows the result, but it&rsquo;s the back-end that actually checks the rules and saves the data. Knowing which half a task lives in is how you describe a bug precisely (&ldquo;the button works but nothing saves&rdquo; = back-end) &mdash; and how you tell an AI exactly where to look.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: MYTH VS FACT ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Myth or Reality? — building apps with AI</h2>
+    <p class="lesson-intro">&ldquo;Just describe your idea and AI builds the whole app&rdquo; makes great headlines and broken expectations. Click <strong>Myth</strong> or <strong>Reality</strong> on each statement for instant feedback and a plain-English reality check. Answer all six to see your score.</p>
+
+    <div class="lesson-card">
+      <div class="mf-grid" id="mfGrid"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetMF()">&#8635; Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: RIGHT TOOL + STATS ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Does this even need an app?</h2>
+    <p class="lesson-intro">The most useful decision a builder makes is <em>before</em> building: not every problem needs a full app. A one-off task might just need a <strong>script</strong>. Tracking a list might be fine in a <strong>spreadsheet</strong>. Something that runs on a schedule might be an <strong>automation</strong>. An app earns its keep only when several people need a shared interface, saved data, and rules that live on. Read the scenario below, then pick the <strong>right-sized tool</strong>.</p>
+
+    <div class="lesson-card">
+      <div class="tip-note" style="margin-top:0;margin-bottom:0">&#128221; <strong>The scenario:</strong> Priya volunteers at a small community library. Twelve volunteers, working different shifts from their own phones, all need to <em>check out books to members, see who has what right now, and keep that record accurate over the long term</em>. Today they scribble it in a shared notebook and things get lost.</div>
+
+      <div class="math-scenario">
+        <div class="math-stat"><div class="math-stat-label">People who need access</div><div class="math-stat-value">12 volunteers</div></div>
+        <div class="math-stat"><div class="math-stat-label">Runs on</div><div class="math-stat-value">Their own phones</div></div>
+        <div class="math-stat"><div class="math-stat-label">Shared live record?</div><div class="math-stat-value">Yes, always</div></div>
+        <div class="math-stat"><div class="math-stat-label">Needs saved rules?</div><div class="math-stat-value">Yes (loans/returns)</div></div>
+        <div class="math-stat"><div class="math-stat-label">One-off or ongoing?</div><div class="math-stat-value">Ongoing, for years</div></div>
+        <div class="math-stat"><div class="math-stat-label">Non-technical users?</div><div class="math-stat-value">Yes, all of them</div></div>
+      </div>
+
+      <div class="math-options" id="mathOptions">
+        <label class="math-option" data-opt="a"><input type="radio" name="mathQ" value="a"><span><span class="opt-amount">A script</span> &mdash; write one small program Priya runs on her laptop whenever something changes.</span></label>
+        <label class="math-option" data-opt="b"><input type="radio" name="mathQ" value="b"><span><span class="opt-amount">A spreadsheet</span> &mdash; a shared sheet everyone types into, no interface or rules needed.</span></label>
+        <label class="math-option" data-opt="c"><input type="radio" name="mathQ" value="c"><span><span class="opt-amount">An automation</span> &mdash; a scheduled job that emails the loan list out once a night.</span></label>
+        <label class="math-option" data-opt="d"><input type="radio" name="mathQ" value="d"><span><span class="opt-amount">An app</span> &mdash; a shared interface on every phone, with saved data and loan rules built in.</span></label>
+      </div>
+
+      <div class="activity-feedback" id="feedback4"></div>
+
+      <div class="breakdown" id="mathBreakdown">
+        <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin:.4rem 0 .6rem">Time to a first working version &mdash; an honest look</h4>
+        <p style="font-size:.82rem;color:var(--text-secondary);line-height:1.6;margin-bottom:.8rem">Once you&rsquo;ve decided it&rsquo;s an app, how long until you have something that <em>runs</em>? These are realistic ranges for a simple app like Priya&rsquo;s &mdash; not a polished product, just a first working version you can click through.</p>
+        <table>
+          <tr><th>Approach</th><th style="text-align:right">Typical time to first working version</th></tr>
+          <tr><td>Learning to code it from scratch, first-timer</td><td class="num">weeks&ndash;months</td></tr>
+          <tr><td>Hand-coding it, with some experience</td><td class="num">1&ndash;3 days</td></tr>
+          <tr><td>Building it with AI, guided (this course)</td><td class="num">an afternoon</td></tr>
+          <tr class="total"><td>The honest catch &mdash; making it reliable &amp; safe</td><td class="num">still takes real work</td></tr>
+        </table>
+        <div style="margin-top:1rem">
+          <div class="bar-row"><span class="bar-label">From scratch, first-timer</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#9597A6"></div></div></div>
+          <div class="bar-row"><span class="bar-label">Hand-coded, experienced</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:#5B8FE0"></div></div></div>
+          <div class="bar-row"><span class="bar-label">AI-guided (this course)</span><div class="bar-track"><div class="bar-fill" style="width:8%;background:#4CAF50"></div></div></div>
+        </div>
+        <div class="tip-note">&#128161; <strong>The honest takeaway:</strong> AI genuinely collapses the time to a <em>first working version</em> from weeks to an afternoon &mdash; that part is real, not hype. What it does <strong>not</strong> collapse is the work of making an app reliable, safe, and pleasant to use for twelve real volunteers. A fast demo is the start of the job, not the end of it &mdash; which is exactly the myth the next section takes apart.</div>
+      </div>
+
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkMath()">Check my answer</button>
+        <button class="btn btn-ghost" onclick="resetMath()">&#8635; Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect &mdash; make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">Type a sentence each. The act of writing helps the concept settle. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Pick any app you used today. Name one piece of its interface, one rule (logic), one thing it saves (data), and one thing that&rsquo;s only true right now (state).</div>
+        <textarea placeholder="In my messaging app: the send button is interface, 'block sending an empty message' is logic, my chat history is data, and 'typing…' is state because it's only true this moment..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Priya&rsquo;s library needed a full app. Describe a task in your own life that would be better as a spreadsheet or a script &mdash; and why it doesn&rsquo;t need an app.</div>
+        <textarea placeholder="Tracking my monthly bills is just me, once a month, with no rules to enforce — so a spreadsheet is the right-sized tool, not an app..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 2 &middot; Designing the App Before You Build</h3>
+      <p>You know the four parts and when an app is the right tool. Next: sketch the app <em>before</em> you build it &mdash; the screens users move through, the story of who it&rsquo;s for, the data it holds, and which features actually make the first version.</p>
+      <a href="02-designing-your-app.html" class="btn btn-primary">Continue to Lesson 2 &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Four App Parts ─── */
+const SCENARIOS = [
+  {id:'s1', text:'The blue &ldquo;Add to cart&rdquo; button, the product photos, and the price laid out on the page.', hint:'It&rsquo;s the visible stuff the user looks at and taps.', bucket:'interface', why:'Interface: buttons, images, and layout are exactly what the user sees and touches on screen.'},
+  {id:'s2', text:'The rule that a password must be at least 8 characters, or the form refuses to submit.', hint:'It&rsquo;s a decision the app makes, not something on screen or saved.', bucket:'logic', why:'Logic: a rule that decides what happens (&ldquo;if too short, don&rsquo;t submit&rdquo;) is the app&rsquo;s thinking, not its face.'},
+  {id:'s3', text:'Your list of saved recipes that&rsquo;s still there when you close the app and open it next week.', hint:'It survives a refresh &mdash; it&rsquo;s stored somewhere.', bucket:'data', why:'Data: anything that persists and comes back later &mdash; your saved recipes are stored records.'},
+  {id:'s4', text:'The little &ldquo;Loading&hellip;&rdquo; spinner that shows only while the page is fetching results.', hint:'It&rsquo;s only true for this moment, then it&rsquo;s gone.', bucket:'state', why:'State: &ldquo;is it currently loading?&rdquo; is a right-now truth for this session, not stored data.'},
+  {id:'s5', text:'Whether you are currently signed in, so the app shows &ldquo;Log out&rdquo; instead of &ldquo;Log in&rdquo;.', hint:'It changes the moment you log in or out &mdash; it&rsquo;s a right-now fact.', bucket:'state', why:'State: &ldquo;logged in right now?&rdquo; is a live session truth. The account itself is data; being signed in this moment is state.'},
+  {id:'s6', text:'The calculation that adds up your cart items and applies a 10% discount code.', hint:'It&rsquo;s a computation the app performs, not a screen or a stored value.', bucket:'logic', why:'Logic: the math and the &ldquo;if a valid code, take 10% off&rdquo; rule is decision-making, i.e. logic.'},
+  {id:'s7', text:'The dropdown menu and the search box at the top of the screen.', hint:'The user clicks and types into it &mdash; it&rsquo;s on screen.', bucket:'interface', why:'Interface: menus and search boxes are on-screen controls the user interacts with directly.'},
+  {id:'s8', text:'Every user&rsquo;s account &mdash; their name, email, and order history &mdash; kept in the database.', hint:'It&rsquo;s stored and comes back every time they log in.', bucket:'data', why:'Data: accounts and order history are saved records that persist across sessions.'}
+];
+const BUCKET_NAMES = {interface:'Interface', logic:'Logic', data:'Data', state:'State'};
+
+let placed = {};
+function renderScenarios(){
+  const list = $('scenarioList');
+  const shuffled = [...SCENARIOS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+      <div class="scenario-hint">${s.hint}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop(id, bucket){
+  const scenario = SCENARIOS.find(s => s.id === id);
+  if (!scenario || placed[id]) return;
+  const correct = scenario.bucket === bucket;
+  placed[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + scenario.text.substring(0, 34) + (scenario.text.length > 34 ? '…' : '');
+  pill.title = correct ? scenario.why : `Correct part: ${BUCKET_NAMES[scenario.bucket]}. ${scenario.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity1Done();
+}
+function checkActivity1Done(){
+  if (Object.keys(placed).length === SCENARIOS.length) {
+    const right = Object.values(placed).filter(p => p.correct).length;
+    const fb = $('feedback1');
+    if (right === SCENARIOS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All eight correct.</strong> You can now read any app by four questions: what does the user <em>see</em> (interface), what <em>decides</em> (logic), what gets <em>saved</em> (data), and what&rsquo;s only true <em>right now</em> (state). Every feature you&rsquo;ll ever ask an AI to build maps onto these &mdash; and naming the part first is how you ask for it precisely.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 8.</strong> Hover any red pill for the right part and why. The tell: if the user looks at or taps it, it&rsquo;s <em>interface</em>; if it&rsquo;s a rule or calculation, it&rsquo;s <em>logic</em>; if it survives a refresh, it&rsquo;s <em>data</em>; if it&rsquo;s only true this second (loading, logged-in), it&rsquo;s <em>state</em>. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog1').classList.add('done');
+  }
+}
+function resetActivity1(){
+  placed = {};
+  $('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('.bucket-drop').forEach(d => d.innerHTML = '');
+  renderScenarios();
+  $('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  SCENARIOS.forEach(s => { if (!placed[s.id]) handleDrop(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 2: Save-a-Note Request Flow (front-end / back-end) ─── */
+const CHAIN = [
+  {tag:'front', text:'The user types a note and taps the &ldquo;Save&rdquo; button on their screen.', hint:'Everything starts on the user&rsquo;s screen &mdash; the front-end &mdash; where the click actually happens.'},
+  {tag:'front', text:'The front-end checks the note isn&rsquo;t empty before it bothers sending anything.', hint:'A quick front-end check catches obvious problems instantly, before any request is sent.'},
+  {tag:'front', text:'The front-end packages the note and sends a request to the server.', hint:'Once it looks OK, the front-end hands the note off &mdash; it can&rsquo;t save anything by itself.'},
+  {tag:'back', text:'The back-end receives the request and confirms the user is allowed to save.', hint:'The server (back-end) is where trust is checked &mdash; is this really a logged-in user?'},
+  {tag:'back', text:'The back-end applies the real rules &mdash; length limits, no forbidden content.', hint:'The back-end enforces the rules that matter, because the front-end&rsquo;s check can be bypassed.'},
+  {tag:'back', text:'The back-end writes the note into the database so it&rsquo;s saved for good.', hint:'This is the actual save &mdash; it happens on the back-end, in the database, not on the phone.'},
+  {tag:'back', text:'The back-end sends a &ldquo;saved successfully&rdquo; response back to the front-end.', hint:'After saving, the server reports back so the screen knows what happened.'},
+  {tag:'front', text:'The front-end shows a green &ldquo;Note saved!&rdquo; message to the user.', hint:'The very last thing is the front-end updating the screen so the user sees the result.'}
+];
+let chainNext = 0;
+function renderChain(){
+  const pool = $('chainPool');
+  const slots = $('chainSlots');
+  const order = CHAIN.map((_, i) => i).sort(()=>Math.random()-0.5);
+  pool.innerHTML = order.map(i => `<div class="chain-chip" data-step="${i}" onclick="clickChain(${i})">${CHAIN[i].text}</div>`).join('');
+  slots.innerHTML = CHAIN.map((_, i) => `
+    <div class="chain-slot" id="slot${i}">
+      <span class="chain-slot-num">${i+1}</span>
+      <span class="chain-slot-text">Waiting for step ${i+1}…</span>
+    </div>`).join('');
+}
+function clickChain(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('chainHint');
+  if (!chip || chip.classList.contains('used')) return;
+  if (i !== chainNext) {
+    chip.classList.remove('shake');
+    void chip.offsetWidth;
+    chip.classList.add('shake');
+    hintBox.className = 'chain-hintbox show';
+    hintBox.innerHTML = `<strong>Not yet.</strong> That step happens later. Think about step ${chainNext+1}: ${CHAIN[chainNext].hint}`;
+    setTimeout(() => chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('slot' + i);
+  slot.classList.add('filled');
+  const label = CHAIN[i].tag === 'front' ? 'FRONT-END' : 'BACK-END';
+  slot.querySelector('.chain-slot-text').innerHTML = `<span class="chain-tag ${CHAIN[i].tag}">${label}</span> ${CHAIN[i].text}`;
+  hintBox.className = 'chain-hintbox';
+  chainNext++;
+  if (chainNext >= CHAIN.length) {
+    const fb = $('feedback2');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Flow complete &mdash; all 8 steps in order.</strong> Look at the split: the front-end (steps 1&ndash;3, 8) collects the click and shows the result, but the back-end (steps 4&ndash;7) is where the app decides who&rsquo;s allowed, enforces the real rules, and actually saves the note. That&rsquo;s why a front-end check is never enough on its own &mdash; anything that <em>must</em> be true has to be enforced on the back-end, where the user can&rsquo;t reach it.`;
+    $('prog2').classList.add('done');
+  }
+}
+function resetChain(){
+  chainNext = 0;
+  $('feedback2').className = 'activity-feedback';
+  $('chainHint').className = 'chain-hintbox';
+  renderChain();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Myth vs Reality ─── */
+const MF = [
+  {s:'A working demo means the app is basically done and ready for real users.', a:'myth',
+   e:'A demo proves the happy path works once, for you, with clean input. Real users log in from old phones, paste emoji into name fields, lose connection mid-save, and click things in the wrong order. The demo is the <em>start</em> of the real work &mdash; handling everything that isn&rsquo;t the happy path &mdash; not the finish line.'},
+  {s:'AI can genuinely get you from idea to a first clickable version far faster than learning to code from scratch.', a:'fact',
+   e:'True &mdash; and it&rsquo;s the real reason this course exists. AI collapses the &ldquo;blank screen&rdquo; problem: a first working version that used to take a beginner weeks can take an afternoon. What it doesn&rsquo;t do is make the app reliable and safe for you &mdash; that judgment is still yours.'},
+  {s:'Because AI wrote the code, you don&rsquo;t need to understand what the app is doing.', a:'myth',
+   e:'When something breaks &mdash; and it will &mdash; someone has to understand enough to describe the problem and check the fix. You don&rsquo;t need to write every line, but you do need the mental model (interface / logic / data / state) to steer, spot a bad answer, and keep control of your own app.'},
+  {s:'AI can and will produce code that looks confident but is subtly wrong or insecure.', a:'fact',
+   e:'Correct, and this is the honest catch. AI is a fast, fluent assistant, not an infallible one. It can invent a function that doesn&rsquo;t exist, skip a security check, or misunderstand your intent &mdash; all while sounding sure. Testing and a skeptical read of what it gives you are non-negotiable skills.'},
+  {s:'Planning the app before you build &mdash; screens, data, features &mdash; is a waste of time when AI is this fast.', a:'myth',
+   e:'The opposite is true. Because building is now fast, thinking is where your leverage is. Five minutes deciding what the app <em>should</em> do saves an hour of AI happily building the wrong thing very quickly. That&rsquo;s exactly what Lesson 2 is about.'},
+  {s:'A simple app you build with AI can be genuinely useful, even if it&rsquo;s not a polished commercial product.', a:'fact',
+   e:'True. A rough app that reliably solves one real problem for a few people &mdash; a club&rsquo;s sign-up sheet, a family chore tracker &mdash; is a real win. You don&rsquo;t need to build the next big platform to get value; solving your own or a small group&rsquo;s problem is a legitimate, worthwhile goal.'}
+];
+let mfAnswered = {};
+function renderMF(){
+  const grid = $('mfGrid');
+  grid.innerHTML = MF.map((m, i) => `
+    <div class="mf-card" id="mfCard${i}">
+      <div class="mf-statement">${i+1}. ${m.s}</div>
+      <div class="mf-buttons">
+        <button class="mf-btn" id="mfM${i}" onclick="answerMF(${i},'myth')">MYTH</button>
+        <button class="mf-btn" id="mfF${i}" onclick="answerMF(${i},'fact')">REALITY</button>
+      </div>
+      <div class="mf-explain" id="mfEx${i}"></div>
+    </div>`).join('');
+}
+function answerMF(i, choice){
+  if (mfAnswered[i] !== undefined) return;
+  const m = MF[i];
+  const right = choice === m.a;
+  mfAnswered[i] = right;
+  const card = $('mfCard' + i);
+  const pickedBtn = $(choice === 'myth' ? 'mfM'+i : 'mfF'+i);
+  const otherBtn = $(choice === 'myth' ? 'mfF'+i : 'mfM'+i);
+  card.classList.add(right ? 'right' : 'miss');
+  pickedBtn.classList.add(right ? 'picked-right' : 'picked-wrong');
+  pickedBtn.disabled = true; otherBtn.disabled = true;
+  const ex = $('mfEx' + i);
+  const label = m.a === 'myth' ? 'MYTH' : 'REALITY';
+  ex.className = 'mf-explain show';
+  ex.innerHTML = `<span class="mf-verdict ${right ? 'v-right' : 'v-miss'}">${right ? '✓ Correct' : '✗ Not quite'} — this is a ${label}.</span><br>${m.e}`;
+  if (Object.keys(mfAnswered).length === MF.length) {
+    const score = Object.values(mfAnswered).filter(Boolean).length;
+    const fb = $('feedback3');
+    if (score === MF.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>6 of 6 &mdash; you see AI app-building clearly.</strong> Hold both truths at once: AI genuinely makes a first working version dramatically faster &mdash; and a demo is not a finished app, you still need to understand your own software, and you still have to plan, test, and check for what AI gets confidently wrong. That honest balance is your edge over everyone chasing &ldquo;AI builds it all for you&rdquo; hype.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You scored ${score} of 6.</strong> Re-read the red cards. Every myth makes AI sound like a magic finish button (demo = done, no need to understand, planning is wasteful), and every reality is a real advantage <em>with</em> a caveat (fast first version, but you steer, test, and plan). Realistic expectations are your first advantage. Hit <em>Try again</em> to retake it.`;
+    }
+    $('prog3').classList.add('done');
+  }
+}
+function resetMF(){
+  mfAnswered = {};
+  $('feedback3').className = 'activity-feedback';
+  renderMF();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Right-Sized Tool ─── */
+const MATH_FEEDBACK = {
+  a:`<strong>A script isn&rsquo;t enough here.</strong> A script is great for a one-off job <em>one person</em> runs. But twelve volunteers, each on their own phone, can&rsquo;t all run a script on Priya&rsquo;s laptop &mdash; and there&rsquo;d be no shared, always-current record. Scripts shine for solo, repeatable tasks, not shared live systems. Try again.`,
+  b:`<strong>A spreadsheet is close, but it breaks down.</strong> A shared sheet works for a simple list, but twelve people editing loans at once, with no rules stopping a book being checked out twice and no friendly interface for non-technical volunteers, gets messy fast &mdash; which is exactly the notebook problem, just digital. When you need enforced rules and a real interface, you&rsquo;ve outgrown a sheet. Try again.`,
+  c:`<strong>An automation solves the wrong part.</strong> A nightly email is a nice add-on, but it doesn&rsquo;t give volunteers a way to <em>check books in and out during their shift</em> or see the live status right now. Automations handle scheduled, background jobs &mdash; not the core, interactive, shared task. Try again.`,
+  d:`<strong>Correct: this genuinely needs an app.</strong> Multiple people, on their own devices, sharing one live record, with saved data and enforced loan rules, used for years by non-technical users &mdash; that&rsquo;s the exact profile where an app earns its cost. Scroll down for an honest look at how long a first working version really takes.`
+};
+function checkMath(){
+  const picked = document.querySelector('input[name="mathQ"]:checked');
+  const fb = $('feedback4');
+  if (!picked) {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Pick one of the four options first</strong> &mdash; then hit &ldquo;Check my answer&rdquo;.`;
+    return;
+  }
+  const val = picked.value;
+  document.querySelectorAll('.math-option').forEach(o => o.classList.remove('reveal-right','reveal-wrong'));
+  if (val === 'd') {
+    document.querySelector('.math-option[data-opt="d"]').classList.add('reveal-right');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = MATH_FEEDBACK.d;
+    $('mathBreakdown').className = 'breakdown show';
+    $('prog4').classList.add('done');
+  } else {
+    document.querySelector(`.math-option[data-opt="${val}"]`).classList.add('reveal-wrong');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = MATH_FEEDBACK[val];
+  }
+}
+function resetMath(){
+  document.querySelectorAll('input[name="mathQ"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.math-option').forEach(o => o.classList.remove('reveal-right','reveal-wrong'));
+  $('feedback4').className = 'activity-feedback';
+  $('mathBreakdown').className = 'breakdown';
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderScenarios();
+  setupBuckets();
+  renderChain();
+  renderMF();
+});
+</script>
+</body>
+</html>
