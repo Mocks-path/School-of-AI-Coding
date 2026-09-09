@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>From Script to Shipped · Lesson 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:42px;height:66px}
+}
+
+/* ── page-specific: maturity-ladder decision tree ─────────── */
+.tree{display:flex;flex-direction:column;gap:16px;align-items:center}
+.tlevel{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;width:100%}
+.tnode{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:20px 22px;width:min(100%,440px);text-align:center;display:none;
+}
+.tnode.shown{display:block;animation:nodeIn .45s both}
+@keyframes nodeIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.tnode .tq{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--brown-dark);line-height:1.25}
+.tnode .thint{font-size:12px;color:var(--muted);margin-top:6px}
+.tchoice{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.tchoice button{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;
+  background:var(--cream);border:1px solid var(--line);color:var(--brown);
+  padding:8px 18px;border-radius:999px;cursor:pointer;transition:all .2s;
+}
+.tchoice button:hover{border-color:var(--orange);color:var(--orange-dark)}
+.tchoice button.picked{background:var(--orange);border-color:var(--orange);color:#fff}
+.tleaf{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  width:min(100%,440px);display:none;overflow:hidden;text-align:left;
+}
+.tleaf.shown{display:block;animation:nodeIn .5s both}
+.tleaf .tband{
+  padding:12px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:0.12em;text-transform:uppercase;color:#fff;font-weight:600;
+}
+.tleaf.rec-paid .tband{background:var(--orange-dark)}
+.tleaf.rec-hybrid .tband{background:var(--tan)}
+.tleaf.rec-organic .tband{background:var(--brown)}
+.tleaf.rec-ugc .tband{background:var(--accent)}
+.tleaf .tbody{padding:16px 18px}
+.tleaf h4{font-family:'Fraunces',serif;font-size:20px;color:var(--brown-dark);margin-bottom:6px}
+.tleaf .tdesc{font-size:13px;color:var(--muted);margin-bottom:12px;max-width:none}
+.tpc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tpc h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+.tpc .tp h5{color:var(--orange-dark)} .tpc .tc h5{color:var(--muted)}
+.tpc ul{list-style:none;display:grid;gap:5px}
+.tpc li{font-size:12.5px;color:var(--ink);padding-left:16px;position:relative;line-height:1.45}
+.tpc .tp li::before{content:"+";position:absolute;left:0;color:var(--orange);font-weight:700}
+.tpc .tc li::before{content:"−";position:absolute;left:0;color:var(--muted);font-weight:700}
+.tdown{font-family:'Fraunces',serif;font-size:20px;color:var(--orange);line-height:1;display:none}
+.tdown.shown{display:block;animation:nodeIn .4s both}
+
+/* ── page-specific: version-control timeline ──────────────── */
+.tl-wrap{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px 24px 20px}
+.tl-scale{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px}
+.tl-bar{display:flex;height:66px;border-radius:10px;overflow:visible;position:relative}
+.tl-seg{
+  position:relative;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;color:#fff;
+  transition:filter .2s;border-right:2px solid var(--paper);
+}
+.tl-seg:first-child{border-radius:10px 0 0 10px}
+.tl-seg:last-child{border-radius:0 10px 10px 0;border-right:none}
+.tl-seg .sname{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;font-weight:600}
+.tl-seg .stime{font-family:'JetBrains Mono',monospace;font-size:9px;opacity:.85}
+.tl-seg:hover{filter:brightness(1.12)}
+.tl-seg.active{box-shadow:inset 0 0 0 3px var(--yellow)}
+.tl-seg.s0{flex:4;background:var(--orange-dark)}
+.tl-seg.s1{flex:5;background:var(--tan)}
+.tl-seg.s2{flex:6;background:var(--orange)}
+.tl-seg.s3{flex:5;background:var(--brown)}
+.tl-seg.s4{flex:5;background:var(--accent)}
+.tl-head{
+  position:absolute;top:-8px;bottom:-8px;width:3px;left:0;
+  background:var(--brown-dark);border-radius:2px;opacity:0;z-index:5;pointer-events:none;
+}
+.tl-head::after{content:"";position:absolute;top:-5px;left:-4.5px;width:12px;height:12px;border-radius:50%;background:var(--brown-dark)}
+.tl-head.sweep{opacity:1}
+.tl-detail{margin-top:22px}
+.tl-beat{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.1em;
+  text-transform:uppercase;font-weight:600;color:var(--orange-dark);margin-bottom:12px;
+}
+.tl-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tl-card{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;animation:nodeIn .35s both}
+.tl-card h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tl-card p{font-size:13px;color:var(--ink);margin:0;max-width:none;line-height:1.5}
+.tl-card.script p{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:12.5px;color:var(--brown-dark)}
+.tl-jump{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── page-specific: shipping-readiness meter ──────────────── */
+.calc{display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:start}
+.calc-in{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}
+.srow{margin-bottom:18px}
+.srow:last-child{margin-bottom:0}
+.slab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slab .sname{font-size:13px;font-weight:600;color:var(--brown-dark)}
+.slab .sval{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange-dark)}
+input[type=range]{width:100%;accent-color:var(--orange);cursor:pointer;height:26px}
+.cogs-row{border-top:1px dashed var(--line);margin-top:18px;padding-top:16px}
+.cogs-row .sname{font-size:13px;font-weight:600;color:var(--brown-dark)}
+.cogs-row .snote{font-size:11.5px;color:var(--muted);margin:4px 0 10px;max-width:none}
+.calc-out{display:grid;gap:12px}
+.out-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.out{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.out .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.out .v{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown-dark)}
+.roas-hero{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:space-around;gap:14px;flex-wrap:wrap}
+.roas-hero .blk{text-align:center}
+.roas-hero .k{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.roas-hero .big{font-family:'Fraunces',serif;font-size:52px;font-weight:800;line-height:1;color:var(--brown-dark)}
+.roas-hero .mid{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1.2;color:var(--tan)}
+.v.pos,.mid.pos{color:#2E7D46}
+.v.neg,.mid.neg{color:var(--orange-dark)}
+.verdict{
+  border-radius:10px;padding:14px 18px;font-family:'JetBrains Mono',monospace;
+  font-size:12px;letter-spacing:0.06em;font-weight:600;line-height:1.5;
+  border:1px solid var(--line);background:var(--paper);color:var(--muted);transition:all .3s;
+}
+.verdict.kill{background:rgba(213,82,34,0.10);border-color:var(--orange-dark);color:var(--orange-dark)}
+.verdict.iter{background:rgba(254,204,0,0.16);border-color:#C79F00;color:#7A6200}
+.verdict.scaleup{background:rgba(46,125,70,0.10);border-color:#2E7D46;color:#2E7D46}
+
+/* ── page-specific: trust-vs-verify checklist ─────────────── */
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.day{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;opacity:0;transform:translateY(12px);transition:border-color .3s;
+}
+.week.reveal .day{animation:dayIn .5s forwards}
+.week.reveal .day:nth-child(1){animation-delay:.05s}
+.week.reveal .day:nth-child(2){animation-delay:.15s}
+.week.reveal .day:nth-child(3){animation-delay:.25s}
+.week.reveal .day:nth-child(4){animation-delay:.35s}
+.week.reveal .day:nth-child(5){animation-delay:.45s}
+.week.reveal .day:nth-child(6){animation-delay:.55s}
+.week.reveal .day:nth-child(7){animation-delay:.65s}
+@keyframes dayIn{to{opacity:1;transform:translateY(0)}}
+.day.open{border-color:var(--orange)}
+.day.red.open{border-color:var(--orange-dark)}
+.day.green.open{border-color:#2E7D46}
+.day-head{padding:15px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;user-select:none}
+.day-num{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.08em;
+  background:var(--brown-dark);color:var(--paper);padding:5px 9px;border-radius:6px;white-space:nowrap;
+}
+.day.open .day-num{background:var(--orange)}
+.day.red .day-num{background:var(--orange-dark)}
+.day.green .day-num{background:#2E7D46}
+.day-head h4{font-family:'Fraunces',serif;font-size:16.5px;color:var(--brown-dark);flex:1;line-height:1.25}
+.day-caret{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:12px;transition:transform .3s}
+.day.open .day-caret{transform:rotate(90deg);color:var(--orange-dark)}
+.day-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.day.open .day-body{max-height:560px}
+.day-inner{padding:0 18px 16px}
+.day-inner ul{list-style:none;display:grid;gap:5px;margin-bottom:12px}
+.day-inner li{font-size:13px;color:var(--ink);padding-left:16px;position:relative;line-height:1.5}
+.day-inner li::before{content:"·";position:absolute;left:2px;color:var(--orange);font-weight:700}
+.day-ai{background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.day-ai .k,.day-done .k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--tan);display:block;margin-bottom:3px;font-weight:600}
+.day-ai p{font-size:12.5px;color:var(--ink);margin:0;max-width:none;line-height:1.5}
+.day-done{border-left:3px solid var(--orange);padding-left:10px}
+.day.green .day-done{border-color:#2E7D46}
+.day.red .day-done{border-color:var(--orange-dark)}
+.day-done p{font-size:12.5px;color:var(--muted);margin:0;max-width:none;font-style:italic}
+
+@media(max-width:760px){
+  .calc{grid-template-columns:1fr}
+  .out-grid{grid-template-columns:1fr 1fr}
+  .tpc{grid-template-columns:1fr}
+  .tl-seg .stime{display:none}
+  .roas-hero .big{font-size:42px}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 04 · AI Programming</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="20" fill="#412C23"/>
+      <path d="M12 30V15l6 8 4-9 4 9 6-8v15" stroke="#EF7F1A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="22" cy="10" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 1 · Lesson 04 · AI Programming</div>
+  <h1>From <em>script</em> to shipped: the last mile.</h1>
+  <p class="lede">You can make code run. Now comes the part that separates "I wrote a thing" from "I built something people can rely on": giving your work save-points so mistakes aren't fatal, proving it actually works, and knowing when to trust AI-written code versus when to check it yourself. Fair warning — the last mile is where careless builders ship bugs they can't undo.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>The maturity ladder: script → tool → product</h2>
+  <p class="lead">Not everything you build needs to become a "product." Most things start — and should stay — as a quick script. The skill is knowing which rung a piece of work belongs on, because each rung costs more effort and buys more reliability.</p>
+
+  <p>A <strong>script</strong> is a one-off: it does a job once, for you, then you move on. It doesn't need saving, testing, or polish — it needs to run correctly this one time. A <strong>tool</strong> is a script you'll reuse: now it deserves save-points, a clear name, and a note on how to run it, because future-you will forget. A <strong>product</strong> is something other people depend on: now it needs real testing, guardrails against bad input, and a way to fix it safely after it's out. Climbing a rung isn't automatic virtue — over-building a one-off wastes your time as surely as under-building a product burns your users. Walk the ladder below and answer honestly.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · The maturity-ladder guide</span>
+      <div class="controls">
+        <button onclick="treeRestart()">↺ Restart</button>
+        <button onclick="treeFull()">Show full map</button>
+      </div>
+    </div>
+    <div class="tree" id="tree">
+      <div class="tnode" id="q1">
+        <div class="tq">Will anyone other than you ever run this — or run it more than once?</div>
+        <div class="thint">Be honest. A one-time job and a thing you'll reuse are very different animals.</div>
+        <div class="tchoice">
+          <button onclick="treePick(this,'q1','q2')">Yes / reused</button>
+          <button onclick="treePick(this,'q1','q3')">No, just me, once</button>
+        </div>
+      </div>
+      <div class="tdown" id="d1">↓</div>
+      <div class="tlevel">
+        <div class="tnode" id="q2">
+          <div class="tq">Do other people depend on it working when you're not watching?</div>
+          <div class="thint">"Depend on" means a bug hurts someone — lost data, wrong output they trust.</div>
+          <div class="tchoice">
+            <button onclick="treePick(this,'q2','leafPaid')">Yes, others rely on it</button>
+            <button onclick="treePick(this,'q2','leafHybrid')">Just me, repeatedly</button>
+          </div>
+        </div>
+        <div class="tnode" id="q3">
+          <div class="tq">Does getting it slightly wrong cost anything real?</div>
+          <div class="thint">Real cost = deleted files, money moved, an email sent you can't recall.</div>
+          <div class="tchoice">
+            <button onclick="treePick(this,'q3','leafOrganic')">No, harmless if wrong</button>
+            <button onclick="treePick(this,'q3','leafUgc')">Yes, it could do damage</button>
+          </div>
+        </div>
+      </div>
+      <div class="tdown" id="d2">↓</div>
+      <div class="tlevel">
+        <div class="tleaf rec-paid" id="leafPaid">
+          <div class="tband">Rung · Product</div>
+          <div class="tbody">
+            <h4>Test it, guard it, version it</h4>
+            <p class="tdesc">People rely on this. It earns real tests, checks against bad input, and save-points so you can fix it safely after it ships.</p>
+            <div class="tpc">
+              <div class="tp"><h5>What it needs</h5><ul><li>Written tests that prove it works</li><li>Version history / save-points</li><li>Guardrails against bad or missing input</li></ul></div>
+              <div class="tc"><h5>Honest cost</h5><ul><li>Slowest to build of the three</li><li>Ongoing maintenance, not a one-off</li><li>Over-kill for anything truly one-time</li></ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="tleaf rec-hybrid" id="leafHybrid">
+          <div class="tband">Rung · Tool (recommended for reuse)</div>
+          <div class="tbody">
+            <h4>Save-point it and name it well</h4>
+            <p class="tdesc">You'll run this again. Give it version control, a clear name, and a one-line note on how to use it — future-you will thank present-you.</p>
+            <div class="tpc">
+              <div class="tp"><h5>What it needs</h5><ul><li>Version control (save-points you can return to)</li><li>A clear name and a "how to run" note</li><li>A quick manual check each time you change it</li></ul></div>
+              <div class="tc"><h5>Honest cost</h5><ul><li>A little discipline every time you touch it</li><li>More than a throwaway script deserves</li><li>Still not safe for others to fully depend on</li></ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="tleaf rec-organic" id="leafOrganic">
+          <div class="tband">Rung · Script</div>
+          <div class="tbody">
+            <h4>Just make it run, then move on</h4>
+            <p class="tdesc">One-time, harmless, only you. Don't gold-plate it. Get the right answer once and delete it without guilt.</p>
+            <div class="tpc">
+              <div class="tp"><h5>What it needs</h5><ul><li>To produce the correct result once</li><li>A quick eyeball of the output</li><li>Nothing more — really</li></ul></div>
+              <div class="tc"><h5>Honest cost</h5><ul><li>Zero safety net if you rerun it later</li><li>No record of what it did</li><li>Fine — that's the whole point</li></ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="tleaf rec-ugc" id="leafUgc">
+          <div class="tband">Rung · Careful script</div>
+          <div class="tbody">
+            <h4>One-time, but it can bite</h4>
+            <p class="tdesc">Only you, only once — but a mistake does real damage. Add a save-point first and a dry-run before you let it touch anything real.</p>
+            <div class="tpc">
+              <div class="tp"><h5>What it needs</h5><ul><li>A backup / save-point before running</li><li>A "print what I'd do" dry run first</li><li>A human read of any risky command</li></ul></div>
+              <div class="tc"><h5>Honest cost</h5><ul><li>Slower than a careless script</li><li>Easy to skip — and regret</li><li>The step beginners most often skip</li></ul></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The one mistake this ladder prevents</h3>
+  <p>Beginners do both wrong directions: they spend a weekend hardening a script they'll run once, and they ship a thing others depend on with zero tests and no save-points. Match the effort to the rung. If getting it wrong costs nothing and nobody else runs it, "make it run and move on" is the correct, mature choice — not laziness.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Version control: save-points for your code</h2>
+  <p class="lead">Version control sounds technical, but the idea is a video game: it lets you save your progress at any point and reload an earlier save if you mess up. Each save is a "commit" — a labelled snapshot of your whole project you can always return to.</p>
+
+  <p>The single most freeing fact about building software: <strong>with save-points, no mistake is permanent.</strong> Delete the wrong thing, break something that worked yesterday, chase a bad idea for an hour — you can roll back to any earlier commit and it's as if it never happened. That safety net is what turns "I'm scared to change this working code" into "let me just try it and see."</p>
+  <p>Beyond saving, version control gives you a <em>timeline</em>: a readable history of every change, when you made it, and a short note on why. And it gives you <strong>branches</strong> — a way to try a risky idea on a copy of the project, off to the side, so your working version stays untouched until you're sure. If the experiment fails, you throw the branch away; if it works, you merge it back in.</p>
+  <p>Below is a project's timeline as save-points and one experimental branch. Press <strong>▶ Play</strong> to sweep through it, or click any point to study it.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · A project timeline, commit by commit</span>
+      <div class="controls">
+        <button id="tlPlayBtn" onclick="tlPlay()">▶ Play</button>
+        <button onclick="tlReset()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="tl-wrap">
+      <div class="tl-scale"><span>start</span><span>commit 1</span><span>commit 2</span><span>branch</span><span>merge</span><span>now</span></div>
+      <div class="tl-bar" id="tlBar">
+        <div class="tl-seg s0" onclick="tlJump(0)"><span class="sname">Init</span><span class="stime">c0</span></div>
+        <div class="tl-seg s1" onclick="tlJump(1)"><span class="sname">Commit</span><span class="stime">c1</span></div>
+        <div class="tl-seg s2" onclick="tlJump(2)"><span class="sname">Commit</span><span class="stime">c2</span></div>
+        <div class="tl-seg s3" onclick="tlJump(3)"><span class="sname">Branch</span><span class="stime">try</span></div>
+        <div class="tl-seg s4" onclick="tlJump(4)"><span class="sname">Merge</span><span class="stime">c3</span></div>
+        <div class="tl-head" id="tlHead"></div>
+      </div>
+      <div class="tl-detail">
+        <div class="tl-beat" id="tlBeat">Init · first save-point</div>
+        <div class="tl-cards" id="tlCards">
+          <div class="tl-card"><h5>What happens here</h5><p id="tlJob"></p></div>
+          <div class="tl-card script"><h5>The commit note reads</h5><p id="tlScript"></p></div>
+          <div class="tl-card"><h5>Why it saves you</h5><p id="tlAi"></p></div>
+        </div>
+        <div class="tl-jump controls">
+          <button onclick="tlJump(0)">Init</button>
+          <button onclick="tlJump(1)">Commit 1</button>
+          <button onclick="tlJump(2)">Commit 2</button>
+          <button onclick="tlJump(3)">Branch</button>
+          <button onclick="tlJump(4)">Merge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>How to actually use this as a beginner</h3>
+  <p>You don't need to master every command to get the whole benefit. Adopt one habit: <strong>commit every time something works.</strong> Made the login screen appear? Save-point. Fixed a bug? Save-point, with a note like <code>fix: age crash on empty input</code>. That single discipline means you're never more than one small step from a version that ran — and AI can help you write clear commit notes and even explain what changed between two save-points.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Testing: how you actually KNOW it works</h2>
+  <p class="lead">"It ran without an error" and "it works" are different claims. A program can run perfectly and still give the wrong answer. Testing is simply the discipline of checking the output against what you already know the right answer should be.</p>
+
+  <p>Here's the trap: you run your program, no red text appears, and you declare victory. But no error just means nothing <em>crashed</em> — it says nothing about whether the result is <em>correct</em>. The only way to know is to feed it a case where you already know the answer and confirm it matches. Average of 5 and 3? You know it's 4. If the program says 4, that path works. If it says 2.67, you found a bug the error messages would never have caught.</p>
+  <p>Good testers don't just try the easy case — they hunt the <strong>edge cases</strong>: the empty input, the zero, the huge number, the unexpected type. That's where programs quietly break. And this is a place AI genuinely helps: ask it to <em>list</em> the tricky cases you should check, or to write small tests that prove each one. But you still read the results — a test that passes for the wrong reason is worse than no test.</p>
+  <p>Use the readiness meter below. Watch how each kind of check you add raises your confidence — and how skipping edge cases leaves a false sense of "done."</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Shipping-readiness meter</span>
+      <div class="controls">
+        <button onclick="calcPreset('rough')">Ran it once</button>
+        <button onclick="calcPreset('good')">Actually tested</button>
+        <button onclick="calcPreset('reset')">↺ Defaults</button>
+      </div>
+    </div>
+    <div class="calc" id="calc">
+      <div class="calc-in">
+        <div class="srow">
+          <div class="slab"><span class="sname">Happy-path checks passed</span><span class="sval" id="vSpend">3</span></div>
+          <input type="range" id="rSpend" min="0" max="10" step="1" value="3" oninput="calc()">
+        </div>
+        <div class="srow">
+          <div class="slab"><span class="sname">Edge cases covered</span><span class="sval" id="vCpc">1</span></div>
+          <input type="range" id="rCpc" min="0" max="8" step="1" value="1" oninput="calc()">
+        </div>
+        <div class="srow">
+          <div class="slab"><span class="sname">Confidence you'd bet on it</span><span class="sval" id="vConv">40%</span></div>
+          <input type="range" id="rConv" min="10" max="100" step="5" value="40" oninput="calc()">
+        </div>
+        <div class="srow">
+          <div class="slab"><span class="sname">People who depend on it</span><span class="sval" id="vAov">5</span></div>
+          <input type="range" id="rAov" min="1" max="50" step="1" value="5" oninput="calc()">
+        </div>
+        <div class="cogs-row">
+          <span class="sname">Blast radius if it's wrong</span>
+          <p class="snote">How much damage a silent bug would do. This raises the bar you must clear before shipping.</p>
+          <div class="controls">
+            <button id="cogsLean" onclick="setCogs(8,this)">Harmless</button>
+            <button id="cogsTyp" class="active" onclick="setCogs(12,this)">Moderate</button>
+            <button id="cogsHeavy" onclick="setCogs(18,this)">Severe</button>
+          </div>
+        </div>
+      </div>
+      <div class="calc-out">
+        <div class="out-grid">
+          <div class="out"><span class="k">Total checks</span><span class="v" id="oClicks">–</span></div>
+          <div class="out"><span class="k">Edge coverage</span><span class="v" id="oOrders">–</span></div>
+          <div class="out"><span class="k">Bar to clear</span><span class="v" id="oRev">–</span></div>
+        </div>
+        <div class="roas-hero">
+          <div class="blk"><span class="k">Readiness</span><span class="big" id="oRoas">–</span></div>
+          <div class="blk"><span class="k">Bar to ship</span><span class="mid" id="oBe">–</span></div>
+          <div class="blk"><span class="k">Margin</span><span class="mid" id="oProfit">–</span></div>
+        </div>
+        <div class="verdict" id="oVerdict">Move a slider to see the verdict.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Reading the verdict like a pro</h3>
+  <p>The verdict compares your readiness to the bar for <em>this</em> job, not some fixed score. A harmless one-off clears the bar with a single eyeball check — shipping it is fine. A thing many people depend on demands edge-case coverage before it goes anywhere; "it ran on my machine" is not evidence. And notice: adding one edge-case check moves the needle far more than a tenth happy-path repeat. Test where things actually break.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>The trust-vs-verify checklist for AI code</h2>
+  <p class="lead">AI writes plausible code fast — and plausible is not the same as correct. Before you run anything AI hands you, run it past this checklist. Some green flags let you trust and go; some red flags mean stop and verify, every time.</p>
+
+  <p>Set the expectation first: <strong>AI is a fast, confident junior developer who never says "I'm not sure."</strong> Most of what it writes is fine. But it will occasionally invent a library that doesn't exist, paste a secret key in plain sight, suggest a command that deletes more than you meant, or ignore the exact edge case that matters. Your job isn't to distrust everything — it's to know which specific things always deserve a second look.</p>
+  <p>Click any item to expand it. Green items are the reassuring signs; red items are the ones that should make you pause before you run a single line.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Green flags &amp; red flags for AI code</span>
+      <div class="controls">
+        <button onclick="walkWeek()">▶ Walk the list</button>
+        <button onclick="collapseWeek()">Collapse all</button>
+      </div>
+    </div>
+    <div class="week" id="week">
+      <div class="day green" id="day1">
+        <div class="day-head" onclick="toggleDay('day1')"><span class="day-num">Green</span><h4>You understand what every line does</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>You can explain the code back in your own words</li><li>Nothing in it is "magic you'll trust blindly"</li><li>If it broke, you'd know roughly where to look</li></ul>
+          <div class="day-ai"><span class="k">Why it's green</span><p>Code you understand is code you can fix, test, and defend. Ask AI to add a short comment to any line you can't explain — then read it.</p></div>
+          <div class="day-done"><span class="k">Trust level</span><p>Trust and run — but still test the output against a known answer.</p></div>
+        </div></div>
+      </div>
+      <div class="day green" id="day2">
+        <div class="day-head" onclick="toggleDay('day2')"><span class="day-num">Green</span><h4>It uses well-known, real libraries</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>The imported tools are ones you can look up and find widely used</li><li>The install command actually finds the package</li><li>The function names match the real documentation</li></ul>
+          <div class="day-ai"><span class="k">Why it's green</span><p>Popular, real libraries mean answers, examples, and safety in numbers. If you've never heard of one, that's your cue to verify it exists before trusting it.</p></div>
+          <div class="day-done"><span class="k">Trust level</span><p>Trust — after a five-second check that the library is real and current.</p></div>
+        </div></div>
+      </div>
+      <div class="day green" id="day3">
+        <div class="day-head" onclick="toggleDay('day3')"><span class="day-num">Green</span><h4>It runs, and you tested a hard case</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>No errors AND correct output on a case you know</li><li>You tried at least one edge case, not just the easy one</li><li>You have a save-point you can roll back to</li></ul>
+          <div class="day-ai"><span class="k">Why it's green</span><p>Verified behaviour plus a save-point is the strongest position you can be in. This is "trust" earned honestly, not assumed.</p></div>
+          <div class="day-done"><span class="k">Trust level</span><p>Trust fully — you've done the work to earn it.</p></div>
+        </div></div>
+      </div>
+      <div class="day red" id="day4">
+        <div class="day-head" onclick="toggleDay('day4')"><span class="day-num">Red</span><h4>Hallucinated library or function</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>An import you can't find anywhere when you search for it</li><li>A function that "sounds right" but isn't in the real docs</li><li>An install command that fails to find the package</li></ul>
+          <div class="day-ai"><span class="k">Why it's red</span><p>AI sometimes invents plausible-sounding packages and methods. If you can't find it in the real documentation, it may not exist — don't build on a ghost.</p></div>
+          <div class="day-done"><span class="k">Verify</span><p>Look it up before you trust it. If it's not real, ask AI for the actual, documented way.</p></div>
+        </div></div>
+      </div>
+      <div class="day red" id="day5">
+        <div class="day-head" onclick="toggleDay('day5')"><span class="day-num">Red</span><h4>Secrets or keys sitting in the code</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>An API key, password, or token pasted directly into a file</li><li>A "put your secret here" line you're about to save publicly</li><li>Any credential that would leak if you shared the code</li></ul>
+          <div class="day-ai"><span class="k">Why it's red</span><p>A secret committed to a save-point or shared online can be scraped and abused within minutes. AI often inlines them for a "working" demo — never ship that.</p></div>
+          <div class="day-done"><span class="k">Verify</span><p>Move every secret out of the code before committing. Ask AI how to load it safely from outside the file.</p></div>
+        </div></div>
+      </div>
+      <div class="day red" id="day6">
+        <div class="day-head" onclick="toggleDay('day6')"><span class="day-num">Red</span><h4>Dangerous or irreversible commands</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>Anything that deletes, overwrites, or force-removes files</li><li>Commands that move money, send messages, or change live data</li><li>A "just run this to fix it" line you don't fully understand</li></ul>
+          <div class="day-ai"><span class="k">Why it's red</span><p>Some actions can't be undone — and AI can suggest a broad delete when you asked for a narrow one. A save-point protects code, not the outside world.</p></div>
+          <div class="day-done"><span class="k">Verify</span><p>Read every destructive command line by line. Do a dry run first. Never paste-and-run something you can't explain.</p></div>
+        </div></div>
+      </div>
+      <div class="day red" id="day7">
+        <div class="day-head" onclick="toggleDay('day7')"><span class="day-num">Red</span><h4>Edge cases quietly ignored</h4><span class="day-caret">▸</span></div>
+        <div class="day-body"><div class="day-inner">
+          <ul><li>No handling for empty input, zero, or a missing value</li><li>Works on the neat example but not the messy real one</li><li>Assumes input is always well-formed — it won't be</li></ul>
+          <div class="day-ai"><span class="k">Why it's red</span><p>AI optimises for the happy path you described. The blank field, the huge number, the wrong type — those are where real programs break in front of real people.</p></div>
+          <div class="day-done"><span class="k">Verify</span><p>Ask AI to list the edge cases it didn't handle, then test each one yourself before you trust the result.</p></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>What "shipping responsibly" really looks like</h3>
+  <p>A genuinely good ship: you understood every line, confirmed the libraries were real, pulled the one secret out of the code, read the delete command twice, tested the empty-input case, and committed a save-point before flipping it on. That's maybe ten extra minutes. It's the difference between "the AI wrote it, so I hope it's fine" and "I verified it, so I know it is." Trust is fine — verify first.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>Running code is the start of the last mile, not the end. Match your effort to the rung — script, tool, or product. Commit a save-point every time something works, so no mistake is permanent. Prove it works by testing against known answers and hunting edge cases. And treat AI code as a fast junior: trust the green flags, verify the red ones, every time.</p>
+  <ul>
+    <li>Script → tool → product: build to the rung, don't over- or under-build</li>
+    <li>Version control = save-points; commit every time something works</li>
+    <li>"It ran" ≠ "it works" — test output against answers you already know</li>
+    <li>Hunt edge cases: empty input, zero, huge numbers, wrong types</li>
+    <li>AI red flags: fake libraries, secrets in code, dangerous commands, skipped edges</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 04 of 04 · Week 1 complete — Week 2: Building Bigger &amp; Automating →</footer>
+<script>
+
+/* ══ Figure 1 · maturity-ladder tree ══ */
+const TREE_KIDS={
+  q1:['q2','q3','leafPaid','leafHybrid','leafOrganic','leafUgc'],
+  q2:['leafPaid','leafHybrid'],
+  q3:['leafOrganic','leafUgc']
+};
+const TREE_ALL=['q1','q2','q3','leafPaid','leafHybrid','leafOrganic','leafUgc'];
+function tShow(id){
+  const el=document.getElementById(id);
+  el.classList.remove('shown');void el.offsetWidth;el.classList.add('shown');
+}
+function tHide(id){
+  const el=document.getElementById(id);
+  el.classList.remove('shown');
+  el.querySelectorAll('.tchoice button').forEach(b=>b.classList.remove('picked'));
+}
+function treeArrows(){
+  const anyL2=['q2','q3'].some(id=>document.getElementById(id).classList.contains('shown'));
+  const anyL3=['leafPaid','leafHybrid','leafOrganic','leafUgc'].some(id=>document.getElementById(id).classList.contains('shown'));
+  document.getElementById('d1').classList.toggle('shown',anyL2);
+  document.getElementById('d2').classList.toggle('shown',anyL3);
+}
+function treePick(btn,nodeId,showId){
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('picked'));
+  btn.classList.add('picked');
+  TREE_KIDS[nodeId].forEach(id=>{if(id!==showId)tHide(id)});
+  tShow(showId);
+  treeArrows();
+}
+function treeRestart(){
+  TREE_ALL.forEach(id=>{if(id!=='q1')tHide(id)});
+  document.querySelectorAll('#q1 .tchoice button').forEach(b=>b.classList.remove('picked'));
+  tShow('q1');
+  treeArrows();
+}
+function treeFull(){
+  TREE_ALL.forEach(id=>tShow(id));
+  document.querySelectorAll('#tree .tchoice button').forEach(b=>b.classList.remove('picked'));
+  treeArrows();
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{
+  if(e.isIntersecting){tShow('q1');o.unobserve(e.target)}
+}),{threshold:0.3}).observe(document.getElementById('tree'));
+
+/* ══ Figure 2 · version-control timeline ══ */
+const TL_DATA=[
+  {beat:"Init · first save-point",
+   job:"You create the very first commit — a snapshot of the project as it exists right now, before you've changed anything. This is the ground you can always return to.",
+   script:"init: starting point — empty greeter script",
+   ai:"If everything after this goes wrong, you can roll all the way back to a clean, working starting point. There is no such thing as \"ruined beyond repair.\""},
+  {beat:"Commit 1 · a working feature",
+   job:"You wrote the greeting, ran it, and it worked. So you save a commit — a labelled snapshot of exactly this working state, with a note on what you did.",
+   script:"feat: greet the user by name",
+   ai:"You now have a named point that definitely works. Break something later? Roll back to \"greet the user by name\" and you're safe in seconds."},
+  {beat:"Commit 2 · a bug fix",
+   job:"You hit the age crash from Lesson 3, fixed it, confirmed it prints correctly, and committed. Each fix that works becomes its own save-point.",
+   script:"fix: age crash on empty input",
+   ai:"Your timeline now reads like a story: what changed, when, and why. Six months from now, that note tells you exactly what this change was for."},
+  {beat:"Branch · a risky experiment",
+   job:"You want to try a bigger, riskier change without endangering your working code. So you branch: a side copy where you can experiment freely while the main version stays untouched.",
+   script:"branch: try-colour-output (experimental)",
+   ai:"If the experiment fails, you throw the branch away and your working version never knew it happened. This is how you stay bold without being reckless."},
+  {beat:"Merge · fold the win back in",
+   job:"The experiment worked. You merge the branch back into the main line, so your working version now includes the new feature — and the timeline records that it came from the experiment.",
+   script:"merge: try-colour-output → main",
+   ai:"Branch, try, and merge only the wins. Your main version only ever moves forward through changes you actually confirmed — never a half-finished idea."}
+];
+const TL_BOUNDS=[0,2,8,14,19];
+const TL_MS_PER_S=300;
+let tlTimers=[];
+function tlSet(i){
+  document.querySelectorAll('#tlBar .tl-seg').forEach((s,k)=>s.classList.toggle('active',k===i));
+  const d=TL_DATA[i];
+  document.getElementById('tlBeat').textContent=d.beat;
+  document.getElementById('tlJob').textContent=d.job;
+  document.getElementById('tlScript').textContent=d.script;
+  document.getElementById('tlAi').textContent=d.ai;
+  const cards=document.getElementById('tlCards');
+  cards.querySelectorAll('.tl-card').forEach(c=>{
+    c.style.animation='none';void c.offsetWidth;c.style.animation='';
+  });
+}
+function tlJump(i){tlStop();tlSet(i)}
+function tlStop(){
+  tlTimers.forEach(t=>clearTimeout(t));tlTimers=[];
+  const head=document.getElementById('tlHead');
+  head.style.transition='none';head.classList.remove('sweep');head.style.left='0%';
+  document.getElementById('tlPlayBtn').classList.remove('active');
+}
+function tlPlay(){
+  tlStop();
+  const head=document.getElementById('tlHead');
+  document.getElementById('tlPlayBtn').classList.add('active');
+  head.classList.add('sweep');
+  void head.offsetWidth;
+  head.style.transition='left '+(24*TL_MS_PER_S)+'ms linear';
+  head.style.left='calc(100% - 3px)';
+  TL_BOUNDS.forEach((sec,i)=>{
+    tlTimers.push(setTimeout(()=>tlSet(i),sec*TL_MS_PER_S));
+  });
+  tlTimers.push(setTimeout(()=>{
+    head.classList.remove('sweep');
+    document.getElementById('tlPlayBtn').classList.remove('active');
+  },24*TL_MS_PER_S+200));
+}
+function tlReset(){tlStop();tlSet(0)}
+tlSet(0);
+new IntersectionObserver((es,o)=>es.forEach(e=>{
+  if(e.isIntersecting){tlPlay();o.unobserve(e.target)}
+}),{threshold:0.4}).observe(document.getElementById('tlBar'));
+
+/* ══ Figure 3 · shipping-readiness meter ══ */
+let COGS=12;
+const FEE_RATE=0.04;
+function pctf(n){return Math.round(n)+'%'}
+function setCogs(v,btn){
+  COGS=v;
+  ['cogsLean','cogsTyp','cogsHeavy'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  btn.classList.add('active');
+  calc();
+}
+function calc(){
+  const happy=parseFloat(document.getElementById('rSpend').value);
+  const edge=parseFloat(document.getElementById('rCpc').value);
+  const conf=parseFloat(document.getElementById('rConv').value);
+  const users=parseFloat(document.getElementById('rAov').value);
+  document.getElementById('vSpend').textContent=happy;
+  document.getElementById('vCpc').textContent=edge;
+  document.getElementById('vConv').textContent=conf.toFixed(0)+'%';
+  document.getElementById('vAov').textContent=users;
+
+  const totalChecks=happy+edge;
+  const edgeCov=totalChecks>0?Math.round(edge/totalChecks*100):0;
+  /* readiness: edge cases count double; confidence contributes; capped at 100 */
+  let readiness=Math.min(100,Math.round(happy*5 + edge*11 + conf*0.25));
+  /* bar to ship rises with blast radius and number of dependents */
+  const blastMap={8:35,12:55,18:78};
+  let bar=Math.min(95,blastMap[COGS] + Math.round(Math.log2(users+1)*4));
+  const margin=readiness-bar;
+
+  document.getElementById('oClicks').textContent=totalChecks;
+  document.getElementById('oOrders').textContent=edgeCov+'%';
+  document.getElementById('oRev').textContent=bar+'%';
+  document.getElementById('oRoas').textContent=readiness+'%';
+  document.getElementById('oBe').textContent=bar+'%';
+
+  const p=document.getElementById('oProfit');
+  p.textContent=(margin>=0?'+':'')+margin+' pts';
+  p.classList.remove('pos','neg');
+  p.classList.add(margin>=0?'pos':'neg');
+
+  const v=document.getElementById('oVerdict');
+  v.classList.remove('kill','iter','scaleup');
+  const ratio=bar>0?readiness/bar:2;
+  if(ratio<0.8){
+    v.classList.add('kill');
+    v.textContent='NOT READY — readiness ('+readiness+'%) is below the bar this job demands ('+bar+'%). Add edge-case tests before anyone touches it.';
+  }else if(ratio<1.05){
+    v.classList.add('iter');
+    v.textContent='ALMOST — you\'re right at the bar ('+bar+'%). One or two more edge cases, and a save-point, and you can ship with a clear conscience.';
+  }else{
+    v.classList.add('scaleup');
+    v.textContent='READY — verified above the bar ('+bar+'%). Commit a save-point and ship. You tested it; you don\'t just hope it works.';
+  }
+}
+function calcPreset(which){
+  const s=document.getElementById('rSpend'),c=document.getElementById('rCpc'),
+        n=document.getElementById('rConv'),a=document.getElementById('rAov');
+  if(which==='rough'){s.value=2;c.value=0;n.value=30;a.value=8}
+  else if(which==='good'){s.value=5;c.value=5;n.value=85;a.value=8}
+  else{s.value=3;c.value=1;n.value=40;a.value=5}
+  calc();
+}
+calc();
+new IntersectionObserver((es,o)=>es.forEach(e=>{
+  if(e.isIntersecting){calc();o.unobserve(e.target)}
+}),{threshold:0.3}).observe(document.getElementById('calc'));
+
+/* ══ Figure 4 · trust-vs-verify checklist ══ */
+const DAY_IDS=['day1','day2','day3','day4','day5','day6','day7'];
+let walkTimers=[];
+function toggleDay(id){
+  clearWalk();
+  document.getElementById(id).classList.toggle('open');
+}
+function openOnly(id){
+  DAY_IDS.forEach(d=>document.getElementById(d).classList.toggle('open',d===id));
+}
+function clearWalk(){walkTimers.forEach(t=>clearTimeout(t));walkTimers=[]}
+function walkWeek(){
+  clearWalk();
+  DAY_IDS.forEach(d=>document.getElementById(d).classList.remove('open'));
+  DAY_IDS.forEach((d,i)=>{
+    walkTimers.push(setTimeout(()=>openOnly(d),400+i*1100));
+  });
+}
+function collapseWeek(){
+  clearWalk();
+  DAY_IDS.forEach(d=>document.getElementById(d).classList.remove('open'));
+}
+const weekEl=document.getElementById('week');
+new IntersectionObserver((es,o)=>es.forEach(e=>{
+  if(e.isIntersecting){
+    weekEl.classList.remove('reveal');void weekEl.offsetWidth;weekEl.classList.add('reveal');
+    o.unobserve(e.target);
+  }
+}),{threshold:0.15}).observe(weekEl);
+
+</script>
+</body>
+</html>

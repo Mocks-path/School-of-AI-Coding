@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thinking Like a Programmer · Lesson 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:42px;height:66px}
+}
+
+/* ===== page-specific: step cards (section 01) ===== */
+.crit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:22px 0}
+.crit{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px}
+.crit .k{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;color:#fff;background:var(--tan);display:inline-block;padding:3px 8px;border-radius:4px;margin-bottom:8px}
+.crit h4{font-family:'Fraunces',serif;font-size:17px;color:var(--brown-dark);margin-bottom:5px}
+.crit p{font-size:13px;color:var(--muted);margin:0;max-width:none}
+
+/* ===== radar (figure 1) ===== */
+.rad-flex{display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:center}
+.rad-svg{width:100%;height:auto;display:block}
+.rad-grid{fill:none;stroke:var(--line);stroke-width:1}
+.rad-spoke{stroke:var(--line);stroke-width:1}
+.rad-lab{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--muted);letter-spacing:0.05em;text-transform:uppercase}
+.rad-vv{fill:var(--orange-dark);font-weight:600}
+#radPoly{fill:rgba(239,127,26,0.22);stroke:var(--orange);stroke-width:2.5;stroke-linejoin:round}
+.rad-dot{fill:var(--orange-dark);stroke:var(--paper);stroke-width:2}
+.rad-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}
+.rad-name{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.rad-score-row{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.rad-score{font-family:'Fraunces',serif;font-weight:800;font-size:52px;line-height:1;color:var(--brown-dark)}
+.rad-outof{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+.rad-verdict{font-size:14px;color:var(--brown);border-left:3px solid var(--orange);padding-left:12px;margin-bottom:18px;min-height:44px}
+.rad-w{display:grid;gap:12px;border-top:1px dashed var(--line);padding-top:16px}
+.rw label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.rw strong{color:var(--orange-dark)}
+.rw input[type=range]{width:100%;accent-color:var(--orange);cursor:pointer}
+.rad-note{font-size:12px;color:var(--muted);margin:10px 0 0;max-width:none}
+
+/* ===== specificity spectrum (figure 2) ===== */
+.life-svg{width:100%;height:auto;display:block;touch-action:none}
+#lifeCurve{fill:none;stroke:var(--orange-dark);stroke-width:3;stroke-linecap:round}
+.life-axis{stroke:var(--brown);stroke-width:1.5}
+.pband{fill:var(--paper);opacity:0;transition:opacity .3s}
+.pband.on{opacity:1;fill:rgba(239,127,26,0.10)}
+.ptick{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--muted);text-anchor:middle;letter-spacing:0.08em;text-transform:uppercase}
+.pline{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
+#lifeMk{cursor:grab}
+#lifeMk:active{cursor:grabbing}
+.mk-ring{fill:none;stroke:var(--orange);stroke-width:2;opacity:.6;animation:mkPulse 1.8s infinite}
+@keyframes mkPulse{0%{r:9;opacity:.6}100%{r:22;opacity:0}}
+.mk-dot{fill:var(--orange);stroke:var(--paper);stroke-width:2.5}
+.mk-pill{fill:var(--brown-dark)}
+.mk-txt{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#FBE7CB;text-anchor:middle;letter-spacing:0.12em;font-weight:600}
+.life-panel{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;align-items:baseline;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-top:18px}
+.life-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:#fff;padding:4px 10px;border-radius:4px;white-space:nowrap}
+.life-tag.good{background:var(--orange)}
+.life-tag.warn{background:var(--tan)}
+.life-tag.bad{background:var(--brown-dark)}
+.life-panel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark)}
+.life-panel p{grid-column:1/-1;font-size:14px;color:var(--muted);margin:0;max-width:none}
+.drag-hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange-dark);letter-spacing:0.08em;margin-top:10px}
+
+/* ===== decomposition funnel (figure 3) ===== */
+.fwrap{display:grid;gap:0}
+.fstage{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 22px}
+.fmeta .fnum{font-family:'Fraunces',serif;font-weight:800;font-size:34px;line-height:1;color:var(--brown-dark);display:block}
+.fmeta .flab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.fdots{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:34px}
+.fdot{width:11px;height:11px;border-radius:3px;background:var(--brown);opacity:0;transform:scale(.2)}
+#fs2 .fdot{width:17px;height:17px;border-radius:4px;background:var(--tan)}
+#fs3 .fdot{width:24px;height:24px;border-radius:6px;background:var(--orange-dark)}
+#fs4 .fdot{width:36px;height:36px;border-radius:9px;background:var(--orange)}
+.fwrap.p1 #fs1 .fdot{animation:fpop .45s forwards}
+.fwrap.p2 #fs2 .fdot{animation:fpop .45s forwards}
+.fwrap.p3 #fs3 .fdot{animation:fpop .45s forwards}
+.fwrap.p4 #fs4 .fdot{animation:fpop .5s forwards,fwin 1.8s .6s infinite}
+.fwrap.p1b #fs1 .fdot:not(.keep){animation-name:fdim;animation-duration:.55s}
+.fwrap.p1b #fs1 .fdot.keep{background:var(--orange);box-shadow:0 0 0 2px rgba(239,127,26,.25)}
+@keyframes fpop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes fdim{from{opacity:1;transform:scale(1)}to{opacity:.12;transform:scale(.7)}}
+@keyframes fwin{0%{box-shadow:0 0 0 0 rgba(239,127,26,.55)}70%{box-shadow:0 0 0 18px rgba(239,127,26,0)}100%{box-shadow:0 0 0 0 rgba(239,127,26,0)}}
+.flt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);opacity:.45;padding:10px 22px;display:flex;align-items:center;gap:10px;transition:all .4s}
+.flt .arr{color:var(--orange);font-size:14px}
+.fwrap.p1b #ff1,.fwrap.q2 #ff2,.fwrap.q3 #ff3{opacity:1;color:var(--orange-dark);font-weight:600}
+
+/* ===== concept cards (section 03) ===== */
+.sig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:22px 0}
+.sig{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:18px}
+.sig .k{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;color:#fff;background:var(--orange-dark);display:inline-block;padding:3px 8px;border-radius:4px;margin-bottom:8px}
+.sig h4{font-family:'Fraunces',serif;font-size:17px;color:var(--brown-dark);margin-bottom:5px}
+.sig p{font-size:13px;color:var(--muted);margin:0 0 10px;max-width:none}
+.sig pre{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--brown-dark);color:#F3E7D5;border-radius:8px;padding:11px 12px;margin:0;overflow-x:auto;line-height:1.5;white-space:pre-wrap}
+.sig pre .cm{color:#B79A82}
+.sig pre .kw{color:var(--yellow)}
+
+/* ===== spec checklist (figure 4) ===== */
+.vwrap{display:grid;grid-template-columns:1.15fr 1fr;gap:26px;align-items:start}
+.vprod{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.vprod strong{color:var(--orange-dark)}
+#vlist{display:grid;gap:8px}
+.vitem{display:flex;gap:12px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:14px;color:var(--brown);transition:border-color .2s;opacity:0;transform:translateX(-14px)}
+.vitem:hover{border-color:var(--orange)}
+.vitem input{width:18px;height:18px;margin-top:2px;accent-color:var(--orange);cursor:pointer;flex-shrink:0}
+#vlist.go .vitem{animation:vIn .45s forwards}
+#vlist.go .vitem:nth-child(1){animation-delay:.05s}
+#vlist.go .vitem:nth-child(2){animation-delay:.13s}
+#vlist.go .vitem:nth-child(3){animation-delay:.21s}
+#vlist.go .vitem:nth-child(4){animation-delay:.29s}
+#vlist.go .vitem:nth-child(5){animation-delay:.37s}
+#vlist.go .vitem:nth-child(6){animation-delay:.45s}
+#vlist.go .vitem:nth-child(7){animation-delay:.53s}
+#vlist.go .vitem:nth-child(8){animation-delay:.61s}
+@keyframes vIn{to{opacity:1;transform:translateX(0)}}
+.vside{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;position:sticky;top:90px}
+.vbar{height:16px;background:var(--cream);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:8px 0 10px}
+#vfill{height:100%;width:0%;background:linear-gradient(90deg,var(--orange),var(--orange-dark));transition:width .5s ease;border-radius:8px}
+.vscore-row{display:flex;justify-content:space-between;align-items:baseline;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+.vscore-row strong{font-family:'Fraunces',serif;font-size:34px;color:var(--brown-dark)}
+.vpanel{margin-top:16px;border-left:3px solid var(--line);padding-left:14px;transition:border-color .3s}
+.vpanel.v-bad{border-color:var(--brown-dark)}
+.vpanel.v-warn{border-color:var(--tan)}
+.vpanel.v-good{border-color:var(--orange)}
+.vpanel.v-great{border-color:var(--yellow)}
+.vtag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;color:var(--brown-dark)}
+.vpanel p{font-size:14px;color:var(--muted);margin:6px 0 0;max-width:none}
+
+/* ===== vague vs specific compare ===== */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+.vs-col{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--paper)}
+.vs-col.bad{border-color:var(--tan)}
+.vs-col.good{border-color:var(--orange)}
+.vs-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;padding:4px 9px;border-radius:5px;display:inline-block;margin-bottom:12px}
+.vs-col.bad .vs-tag{background:#F0E2D2;color:var(--tan)}
+.vs-col.good .vs-tag{background:#FDEBD7;color:var(--orange-dark)}
+.vs-prompt{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brown-dark);background:var(--cream);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:12px}
+.vs-result{font-size:13.5px;color:var(--muted);line-height:1.5}
+.vs-result strong{color:var(--brown-dark)}
+@media(max-width:700px){.vs{grid-template-columns:1fr}}
+
+@media(max-width:700px){
+  .rad-flex,.vwrap{grid-template-columns:1fr}
+  .fstage{grid-template-columns:1fr;gap:10px;padding:14px 16px}
+  .vside{position:static}
+  .life-panel{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 02 · AI Programming</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="20" fill="#412C23"/>
+      <path d="M12 31V15l10 10 10-10v16" stroke="#EF7F1A" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="22" cy="10.5" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 1 · Lesson 02 · AI Programming</div>
+  <h1>Think in <em>steps</em>, not in code.</h1>
+  <p class="lede">The hard part of building with AI was never the code — the AI writes that. The hard part is thinking clearly enough to describe what you want. This lesson teaches the mindset: break a goal into literal steps, ask for it specifically instead of vaguely, recognise a handful of core ideas in plain English, and read the code that comes back. Master this and the AI becomes genuinely useful. Skip it and it just guesses.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Decompose the goal into literal steps</h2>
+  <p class="lead">Beginners describe a goal. Programmers describe a sequence. The difference sounds small — it's the whole game, because a computer can only follow literal steps, and AI writes better code when you hand it those steps.</p>
+
+  <p>A computer has no common sense. Tell a friend "make me a cup of tea" and they fill in a hundred unspoken steps. Tell a computer the same thing and it has no idea what a cup, tea, or "make" mean unless you spell each move out in order. Thinking like a programmer means slowing down and asking: <em>what are the exact, ordered, unambiguous steps?</em> Here's "greet each new signup by name" broken into literal steps a machine could actually follow:</p>
+
+  <div class="crit-grid">
+    <div class="crit"><span class="k">Step 1</span><h4>Get the list</h4><p>Take the list of people who signed up today. If the list is empty, stop — there's nobody to greet.</p></div>
+    <div class="crit"><span class="k">Step 2</span><h4>Take one person</h4><p>Look at the first person on the list. Remember their name and email.</p></div>
+    <div class="crit"><span class="k">Step 3</span><h4>Build the message</h4><p>Write "Hi &lt;name&gt;, welcome aboard!" — putting their actual name where &lt;name&gt; is.</p></div>
+    <div class="crit"><span class="k">Step 4</span><h4>Send it</h4><p>Send that message to their email address. If sending fails, note it for later.</p></div>
+    <div class="crit"><span class="k">Step 5</span><h4>Next person</h4><p>Move to the next person on the list and repeat from Step 2.</p></div>
+    <div class="crit"><span class="k">Step 6</span><h4>Finish</h4><p>When there's no one left, stop and report how many greetings were sent.</p></div>
+  </div>
+
+  <h3>Score your decomposition, don't guess at it</h3>
+  <p>A good breakdown isn't just "a list of steps." It's balanced across six qualities. Put those qualities on a radar and every plan becomes a shape: a strong decomposition is a <em>big, balanced</em> hexagon; a weak one is spiky — great on some axes, collapsed on the "handle the empty case" or "handle errors" leg. Try the three sample plans below, then drag the weight sliders to say which qualities matter most for your task.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Decomposition-quality radar</span>
+      <div class="controls">
+        <button id="rb0" onclick="radSet(0)">"Make me a website" (vague)</button>
+        <button id="rb1" onclick="radSet(1)">Greet-signups plan</button>
+        <button id="rb2" onclick="radSet(2)">One-line ask</button>
+      </div>
+    </div>
+    <div class="rad-flex">
+      <svg class="rad-svg" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg" aria-label="Decomposition quality radar chart">
+        <g id="radGrid"></g>
+        <polygon id="radPoly" points="250,195 250,195 250,195 250,195 250,195 250,195"></polygon>
+        <circle class="rad-dot" id="rd0" r="4.5" cx="250" cy="195"/>
+        <circle class="rad-dot" id="rd1" r="4.5" cx="250" cy="195"/>
+        <circle class="rad-dot" id="rd2" r="4.5" cx="250" cy="195"/>
+        <circle class="rad-dot" id="rd3" r="4.5" cx="250" cy="195"/>
+        <circle class="rad-dot" id="rd4" r="4.5" cx="250" cy="195"/>
+        <circle class="rad-dot" id="rd5" r="4.5" cx="250" cy="195"/>
+        <text class="rad-lab" x="250" y="34" text-anchor="middle">Ordered steps <tspan class="rad-vv" id="rv0">0</tspan></text>
+        <text class="rad-lab" x="382" y="118" text-anchor="start">Specific <tspan class="rad-vv" id="rv1">0</tspan></text>
+        <text class="rad-lab" x="382" y="282" text-anchor="start">Inputs named <tspan class="rad-vv" id="rv2">0</tspan></text>
+        <text class="rad-lab" x="250" y="364" text-anchor="middle">Handles empty <tspan class="rad-vv" id="rv3">0</tspan></text>
+        <text class="rad-lab" x="118" y="282" text-anchor="end">Handles errors <tspan class="rad-vv" id="rv4">0</tspan></text>
+        <text class="rad-lab" x="118" y="118" text-anchor="end">Clear "done" <tspan class="rad-vv" id="rv5">0</tspan></text>
+      </svg>
+      <div class="rad-panel">
+        <div class="rad-name" id="radName">Pick a plan →</div>
+        <div class="rad-score-row"><span class="rad-score" id="radScore">0.0</span><span class="rad-outof">/ 10 weighted</span></div>
+        <div class="rad-verdict" id="radVerdict">Waiting for a plan to score.</div>
+        <div class="rad-w">
+          <div class="rw">
+            <label>Ordered-steps weight <strong id="wd0">1.0×</strong></label>
+            <input type="range" id="ws0" min="0" max="2" step="0.25" value="1" oninput="radW()">
+          </div>
+          <div class="rw">
+            <label>Specific weight <strong id="wd1">1.0×</strong></label>
+            <input type="range" id="ws1" min="0" max="2" step="0.25" value="1" oninput="radW()">
+          </div>
+          <div class="rw">
+            <label>Handles-empty weight <strong id="wd3">1.0×</strong></label>
+            <input type="range" id="ws3" min="0" max="2" step="0.25" value="1" oninput="radW()">
+          </div>
+        </div>
+        <p class="rad-note">Every axis is scored 0–10. A high total with one collapsed leg is a trap: the AI will happily build the 90% you described and silently ignore the 10% you left out.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>Notice what the radar does to "Make me a website": it scores fine on ambition and nothing else — no ordered steps, no named inputs, no idea what "done" means. That's the classic beginner request, and the AI's guess will be equally shapeless. The greet-signups plan, by contrast, is big and balanced. The shape tells you the truth your enthusiasm won't.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Vague in, vague out — enter with a spec</h2>
+  <p class="lead">The single biggest lever a beginner has over AI code quality is specificity. The same tool, given the same task, produces junk or gold depending only on how precisely you asked. Where you sit on the vague-to-specific spectrum matters more than which tool you use.</p>
+
+  <p>Here's the uncomfortable truth about a <strong>vague</strong> prompt: the AI still answers confidently. It doesn't say "I need more detail" — it fills the gaps with guesses, and its guesses are average, generic, and often not what you meant. "Make a login page" gets you <em>a</em> login page, just not <em>your</em> login page: wrong fields, no error messages, no idea where the data should go.</p>
+  <p>A <strong>specific</strong> spec is the opposite. Name the inputs, the rules, the edge cases, and what "done" looks like, and the AI has nothing left to guess — so its draft lands close on the first try and needs fewer loops to fix. Drag the marker below and watch the same request slide from useless to usable as it gets more specific.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The specificity spectrum</span>
+      <div class="controls">
+        <button id="lb0" onclick="lifeSnap(0)">One word</button>
+        <button id="lb1" onclick="lifeSnap(1)">Vague</button>
+        <button id="lb2" onclick="lifeSnap(2)">Getting there</button>
+        <button id="lb3" onclick="lifeSnap(3)">Specific</button>
+        <button id="lb4" onclick="lifeSnap(4)">Over-specified</button>
+      </div>
+    </div>
+    <svg class="life-svg" id="lifeSvg" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" aria-label="Specificity vs result-quality curve with draggable marker">
+      <g id="lifeBands"></g>
+      <line class="life-axis" x1="40" y1="280" x2="660" y2="280"/>
+      <text class="ptick" x="52" y="150" transform="rotate(-90 52 150)">result quality →</text>
+      <path id="lifeCurve" d=""/>
+      <g id="lifeTicks"></g>
+      <g id="lifeMk" transform="translate(95,240)">
+        <circle class="mk-ring" r="9"/>
+        <circle class="mk-dot" r="8"/>
+        <rect class="mk-pill" x="-58" y="-44" width="116" height="22" rx="11"/>
+        <text class="mk-txt" y="-29">YOUR PROMPT</text>
+      </g>
+    </svg>
+    <div class="drag-hint">↔ Drag the marker along the curve, or tap a specificity level</div>
+    <div class="life-panel">
+      <span class="life-tag warn" id="lifeTag">TOO VAGUE</span>
+      <h4 id="lifePhase">One word</h4>
+      <p id="lifeMsg">"Login." The AI has almost nothing to work with and will guess everything.</p>
+    </div>
+  </div>
+
+  <h3>See it side by side</h3>
+  <p>The abstract point lands harder with a real example. Same goal — "let users log in" — asked two ways. Read what each prompt actually produces:</p>
+
+  <div class="vs">
+    <div class="vs-col bad">
+      <span class="vs-tag">Vague prompt</span>
+      <div class="vs-prompt">"Make a login page."</div>
+      <div class="vs-result"><strong>What you get:</strong> a generic form with an email and password box, styled however the AI felt like. No rules on what a valid password is, no error messages, nowhere for the data to go, no "forgot password." It looks done and isn't. You now spend five loops discovering everything it guessed wrong.</div>
+    </div>
+    <div class="vs-col good">
+      <span class="vs-tag">Specific spec</span>
+      <div class="vs-prompt">"Make a login form with email + password. Email must contain '@'. Password min 8 chars. Show a red error under the field if either is invalid. On success, print 'Welcome back'. Don't submit if either field is empty."</div>
+      <div class="vs-result"><strong>What you get:</strong> a form that matches your rules on the first draft. The edge cases you named — empty fields, short passwords — are already handled. Fewer loops, and the ones left are your choices, not the AI's guesses.</div>
+    </div>
+  </div>
+
+  <h3>How do you know your spec is specific enough?</h3>
+  <p>You read it back and ask: <strong>could a stranger build the wrong thing from this and still technically be right?</strong> If yes, a gap remains — name it. <strong>Specific</strong> means inputs, rules, and edge cases are all stated. <strong>Over-specified</strong> is a real (milder) failure too: burying the AI in so much detail it loses the thread, or dictating <em>how</em> when you only care about <em>what</em>. Aim for the top of the curve, not the far edge. The checklist in Section 04 turns "specific enough" into something you can actually count.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Five ideas that unlock all code</h2>
+  <p class="lead">You don't need to memorise a language to read what AI writes. Almost every program — in any language — is built from just five plain-English ideas. Learn to spot these and unfamiliar code stops looking like noise.</p>
+
+  <p>The code AI hands you will be full of punctuation you don't recognise. Ignore the punctuation at first and look for these five patterns instead. They're the vocabulary of thinking like a programmer — the same concepts whether the code is one line or one thousand. The snippets below are illustrative pseudo-code, kept deliberately readable.</p>
+
+  <div class="sig-grid">
+    <div class="sig"><span class="k">Concept 1</span><h4>Variables</h4><p>A named box that holds a value so you can reuse it. "Remember this, call it <em>name</em>."</p><pre><span class="cm"># a box called name</span>
+name = "Aisha"
+greeting = "Hi " + name</pre></div>
+    <div class="sig"><span class="k">Concept 2</span><h4>Conditionals</h4><p>A fork in the road: do one thing <em>if</em> something is true, otherwise do another.</p><pre><span class="kw">if</span> age >= 18:
+  allow_entry()
+<span class="kw">else</span>:
+  show_sorry()</pre></div>
+    <div class="sig"><span class="k">Concept 3</span><h4>Loops</h4><p>Repeat the same steps for each item, so you write them once, not a thousand times.</p><pre><span class="kw">for</span> person <span class="kw">in</span> signups:
+  send_welcome(person)</pre></div>
+    <div class="sig"><span class="k">Concept 4</span><h4>Functions</h4><p>A named mini-recipe you can reuse. Define the steps once, call the name whenever.</p><pre><span class="kw">def</span> send_welcome(p):
+  msg = "Hi " + p.name
+  email(p.address, msg)</pre></div>
+    <div class="sig"><span class="k">Concept 5</span><h4>Collections</h4><p>A list or table holding many values together — like a spreadsheet column of names.</p><pre>signups = ["Aisha",
+  "Ben", "Chen"]
+count = length(signups)</pre></div>
+    <div class="sig"><span class="k">Putting it together</span><h4>Read the shape</h4><p>Most programs are just these five, nested. Spot the loop, find the condition inside it, and the logic reveals itself — no syntax memorised.</p><pre><span class="kw">for</span> p <span class="kw">in</span> signups:
+  <span class="kw">if</span> p.new:
+    send_welcome(p)</pre></div>
+  </div>
+
+  <h3>Reading code the AI writes: 50 lines → the 5 that matter</h3>
+  <p>When the AI hands you a wall of code, don't read it top to bottom like a novel. Funnel it: skim the whole thing for the <strong>overall shape</strong> (what are the big blocks?), narrow to the <strong>functions</strong> (what are the named recipes?), then the <strong>loops and conditions</strong> (where are the decisions?), and finally focus on <strong>the one line</strong> that does the thing you actually care about. Reading is a filter, not a slog.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Reading code, funneled</span>
+      <div class="controls">
+        <button onclick="fPlay()">▶ Play</button>
+        <button onclick="fReset()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="fwrap" id="fwrap">
+      <div class="fstage">
+        <div class="fmeta"><span class="fnum">50</span><span class="flab">lines total</span></div>
+        <div class="fdots" id="fs1"></div>
+      </div>
+      <div class="flt" id="ff1"><span class="arr">↓</span> Skim for shape — imports, setup, the big blocks. Ignore the punctuation for now.</div>
+      <div class="fstage">
+        <div class="fmeta"><span class="fnum">10</span><span class="flab">real logic</span></div>
+        <div class="fdots" id="fs2"></div>
+      </div>
+      <div class="flt" id="ff2"><span class="arr">↓</span> Find the functions — the named recipes that do the actual work</div>
+      <div class="fstage">
+        <div class="fmeta"><span class="fnum">3</span><span class="flab">key decisions</span></div>
+        <div class="fdots" id="fs3"></div>
+      </div>
+      <div class="flt" id="ff3"><span class="arr">↓</span> Trace the loops & conditions — where does it decide and repeat?</div>
+      <div class="fstage">
+        <div class="fmeta"><span class="fnum">1</span><span class="flab">the line that matters</span></div>
+        <div class="fdots" id="fs4"></div>
+      </div>
+    </div>
+  </div>
+
+  <p>Be honest about the goal here: you're not trying to understand every character. You're trying to answer one question — <em>does this do what I asked, and is there anything dangerous in it?</em> If you can find the line that matters and follow the decisions around it, you can catch a confidently-wrong answer. That's the whole point of reading. Understanding grows loop by loop; you don't need all of it on day one.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Turn "specific enough" into a checklist</h2>
+  <p class="lead">Specificity is a checklist, not a feeling. Before you send a prompt to the AI, run it through the same eight questions and let the count — not your optimism — tell you whether it's ready.</p>
+
+  <p>Each item below is binary on purpose. "Kind of mentions the inputs" is a no. "The AI can probably figure out the empty case" is a no. The discipline of answering honestly is exactly what separates a spec from a wish. Score the sample prompt yourself, or hit <em>Check a strong spec</em> to see what a well-formed request looks like — note that even strong specs rarely go 8 for 8, and that's fine.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Prompt-specificity checklist</span>
+      <div class="controls">
+        <button onclick="vPreset()">Check a strong spec</button>
+        <button onclick="vClear()">↺ Clear</button>
+      </div>
+    </div>
+    <div class="vwrap">
+      <div>
+        <div class="vprod">Scoring the prompt: <strong>"Build a tip calculator"</strong></div>
+        <div id="vlist">
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>States the goal in one plain sentence ("split a bill and add a tip")</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Names the inputs (bill amount, tip %, number of people)</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>States the rules (tip = bill × percent; round to 2 decimals)</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Names the output and its format ("show total per person as $X.XX")</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Covers the empty / zero case (what if people = 0?)</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Covers bad input (what if someone types letters, not numbers?)</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Says what "done" looks like — a concrete example you can test against</span></label>
+          <label class="vitem"><input type="checkbox" onchange="vUpdate()"><span>Leaves the "how" open where you don't care (language, styling) unless it matters</span></label>
+        </div>
+      </div>
+      <div class="vside">
+        <div class="vscore-row"><span>Spec score</span><strong id="vnum">0 / 8</strong></div>
+        <div class="vbar"><div id="vfill"></div></div>
+        <div class="vpanel" id="vpanel">
+          <span class="vtag" id="vtag">Verdict</span>
+          <p id="vmsg">Tick what your prompt actually states — not what you're hoping the AI will infer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>What the thresholds mean</h3>
+  <p><strong>0–3:</strong> too vague — send this and you'll spend the whole session fixing guesses. Add inputs and rules first. <strong>4–5:</strong> workable but leaky; the AI will still guess the edge cases you skipped, so expect surprises. <strong>6–7:</strong> a solid spec — send it, and the loops you run will be your refinements, not its mistakes. <strong>8:</strong> excellent; just make sure you haven't crossed into over-specifying the "how." Whatever the score, the real judge is the running program — the checklist just decides whether your first draft starts close or starts lost.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>Thinking like a programmer is a describing discipline, not a coding one. Break the goal into literal ordered steps, ask specifically instead of vaguely, recognise the five ideas that build all code, and read what comes back as a filter, not a slog. The AI writes the syntax — you supply the clarity. That clarity is the skill that survives every tool change.</p>
+  <ul>
+    <li>Decompose first · a computer follows literal, ordered, unambiguous steps</li>
+    <li>Vague in, vague out · name the inputs, rules, edge cases, and "done"</li>
+    <li>Five ideas unlock all code · variables · conditionals · loops · functions · collections</li>
+    <li>Read as a funnel · shape → functions → decisions → the one line that matters</li>
+    <li>Run your prompt through the spec checklist before the AI ever sees it</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 02 of 04 · Next up: Your First Build with AI →</footer>
+<script>
+
+/* ============ Figure 1 · Radar ============ */
+const NS='http://www.w3.org/2000/svg';
+const RCX=250,RCY=195,RR=140;
+const radAng=[0,1,2,3,4,5].map(i=>-Math.PI/2+i*Math.PI/3);
+function radPt(i,v){const r=RR*v/10;return [RCX+r*Math.cos(radAng[i]),RCY+r*Math.sin(radAng[i])]}
+(function buildGrid(){
+  const g=document.getElementById('radGrid');
+  [2.5,5,7.5,10].forEach(l=>{
+    const p=document.createElementNS(NS,'polygon');
+    p.setAttribute('class','rad-grid');
+    p.setAttribute('points',radAng.map((_,i)=>radPt(i,l).map(n=>n.toFixed(1)).join(',')).join(' '));
+    g.appendChild(p);
+  });
+  radAng.forEach((_,i)=>{
+    const ln=document.createElementNS(NS,'line');
+    const [x,y]=radPt(i,10);
+    ln.setAttribute('class','rad-spoke');
+    ln.setAttribute('x1',RCX);ln.setAttribute('y1',RCY);
+    ln.setAttribute('x2',x.toFixed(1));ln.setAttribute('y2',y.toFixed(1));
+    g.appendChild(ln);
+  });
+})();
+const radPresets=[
+  {name:'"Make me a website" (vague)',vals:[2,2,1,1,1,2]},
+  {name:'Greet-signups plan',vals:[9,8,8,8,7,9]},
+  {name:'One-line ask',vals:[5,4,3,2,2,4]}
+];
+let radCur=[0,0,0,0,0,0],radRAF=null,W=[1,1,1,1,1,1];
+const radPoly=document.getElementById('radPoly');
+function radRender(){
+  radPoly.setAttribute('points',radCur.map((v,i)=>radPt(i,v).map(n=>n.toFixed(1)).join(',')).join(' '));
+  radCur.forEach((v,i)=>{
+    const [x,y]=radPt(i,v);
+    const d=document.getElementById('rd'+i);
+    d.setAttribute('cx',x.toFixed(1));d.setAttribute('cy',y.toFixed(1));
+    document.getElementById('rv'+i).textContent=v.toFixed(1);
+  });
+  radScoreUpd();
+}
+function radScoreUpd(){
+  const sw=W.reduce((a,b)=>a+b,0);
+  const s=radCur.reduce((a,v,i)=>a+v*W[i],0)/sw;
+  document.getElementById('radScore').textContent=s.toFixed(1);
+  const mn=Math.min.apply(null,radCur);
+  let v;
+  if(s>=7&&mn>3.2)v='Strong, balanced breakdown. The AI has little left to guess — hand it over.';
+  else if(s>=7)v='High score, but one leg has collapsed. Fix the weak axis — a spiky plan means the AI silently skips whatever you left out.';
+  else if(s>=5.5)v='Half-formed. Workable only after you name the missing inputs, cases, and what "done" means.';
+  else v='Too vague to build from. The AI will guess everything and you will spend the session correcting it.';
+  document.getElementById('radVerdict').textContent=v;
+}
+function radAnimate(target){
+  if(radRAF)cancelAnimationFrame(radRAF);
+  const start=radCur.slice(),t0=performance.now(),dur=700;
+  function step(now){
+    const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+    radCur=start.map((s,i)=>s+(target[i]-s)*e);
+    radRender();
+    if(k<1)radRAF=requestAnimationFrame(step);
+  }
+  radRAF=requestAnimationFrame(step);
+}
+function radSet(i){
+  document.getElementById('radName').textContent=radPresets[i].name;
+  [0,1,2].forEach(j=>document.getElementById('rb'+j).classList.toggle('active',j===i));
+  radAnimate(radPresets[i].vals);
+}
+function radW(){
+  [0,1,3].forEach(i=>{
+    W[i]=parseFloat(document.getElementById('ws'+i).value);
+    document.getElementById('wd'+i).textContent=W[i].toFixed(2).replace(/0$/,'')+'×';
+  });
+  radScoreUpd();
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){radSet(1);o.unobserve(e.target)}}),{threshold:0.35}).observe(radPoly.closest('.illus'));
+
+/* ============ Figure 2 · Specificity spectrum ============ */
+const lifeSvg=document.getElementById('lifeSvg'),lifeMk=document.getElementById('lifeMk');
+const LIFE_PH=[
+  {t0:0,t1:0.18,name:'One word',tag:'TOO VAGUE',cls:'bad',msg:'"Login." The AI has almost nothing to work with. It will invent the fields, the rules, and the look — and almost none of it will match what you pictured.'},
+  {t0:0.18,t1:0.40,name:'Vague',tag:'STILL GUESSING',cls:'warn',msg:'"Make a login page." Better, but every rule is still a guess: valid password? error messages? where does the data go? You will spend loops discovering what it assumed.'},
+  {t0:0.40,t1:0.62,name:'Getting there',tag:'WARMER',cls:'warn',msg:'"Login with email and password, show an error if wrong." Now the inputs are named. Edge cases are still open, but the draft will land far closer.'},
+  {t0:0.62,t1:0.82,name:'Specific',tag:'JUST RIGHT',cls:'good',msg:'Inputs, rules, edge cases, and a concrete "done" all stated. The AI has nothing left to guess — best first draft, fewest loops to fix. Aim here.'},
+  {t0:0.82,t1:1,name:'Over-specified',tag:'TOO MUCH',cls:'warn',msg:'So much detail — and dictating HOW, not just WHAT — that the AI loses the thread or you waste effort. A milder failure than vagueness, but a real one. Ease back.'}
+];
+function lifeY(x){const t=(x-40)/620;return 265-205*Math.exp(-Math.pow(t-0.72,2)/(2*0.22*0.22))}
+(function buildLife(){
+  let d='M40 '+lifeY(40).toFixed(1);
+  for(let x=48;x<=660;x+=8)d+=' L'+x+' '+lifeY(x).toFixed(1);
+  document.getElementById('lifeCurve').setAttribute('d',d);
+  const bands=document.getElementById('lifeBands'),ticks=document.getElementById('lifeTicks');
+  LIFE_PH.forEach((p,i)=>{
+    const r=document.createElementNS(NS,'rect');
+    r.setAttribute('x',(40+p.t0*620).toFixed(1));r.setAttribute('y',30);
+    r.setAttribute('width',((p.t1-p.t0)*620).toFixed(1));r.setAttribute('height',250);
+    r.setAttribute('class','pband');r.setAttribute('id','pb'+i);
+    bands.appendChild(r);
+    if(i>0){
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('class','pline');
+      const bx=(40+p.t0*620).toFixed(1);
+      ln.setAttribute('x1',bx);ln.setAttribute('y1',30);ln.setAttribute('x2',bx);ln.setAttribute('y2',280);
+      bands.appendChild(ln);
+    }
+    const tx=document.createElementNS(NS,'text');
+    tx.setAttribute('class','ptick');
+    tx.setAttribute('x',(40+(p.t0+p.t1)/2*620).toFixed(1));tx.setAttribute('y',302);
+    tx.textContent=p.name;
+    ticks.appendChild(tx);
+  });
+})();
+let lifeX=95,lifeRAF=null,lifeDrag=false;
+function lifePhaseIdx(x){const t=(x-40)/620;for(let i=0;i<LIFE_PH.length;i++){if(t<=LIFE_PH[i].t1)return i}return 4}
+function lifeMove(x){
+  x=Math.max(40,Math.min(660,x));lifeX=x;
+  lifeMk.setAttribute('transform','translate('+x.toFixed(1)+','+lifeY(x).toFixed(1)+')');
+  const i=lifePhaseIdx(x),p=LIFE_PH[i];
+  document.getElementById('lifePhase').textContent=p.name;
+  document.getElementById('lifeMsg').textContent=p.msg;
+  const tag=document.getElementById('lifeTag');
+  tag.textContent=p.tag;tag.className='life-tag '+p.cls;
+  for(let j=0;j<5;j++){
+    document.getElementById('pb'+j).classList.toggle('on',j===i);
+    document.getElementById('lb'+j).classList.toggle('active',j===i);
+  }
+}
+function lifeSnap(i){
+  if(lifeRAF)cancelAnimationFrame(lifeRAF);
+  const p=LIFE_PH[i],target=40+(p.t0+p.t1)/2*620,start=lifeX,t0=performance.now(),dur=500;
+  function step(now){
+    const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+    lifeMove(start+(target-start)*e);
+    if(k<1)lifeRAF=requestAnimationFrame(step);
+  }
+  lifeRAF=requestAnimationFrame(step);
+}
+function lifeEvX(e){
+  const pt=e.touches?e.touches[0]:e;
+  const r=lifeSvg.getBoundingClientRect();
+  return (pt.clientX-r.left)*700/r.width;
+}
+lifeMk.addEventListener('mousedown',e=>{lifeDrag=true;e.preventDefault()});
+lifeMk.addEventListener('touchstart',e=>{lifeDrag=true;e.preventDefault()},{passive:false});
+window.addEventListener('mousemove',e=>{if(lifeDrag)lifeMove(lifeEvX(e))});
+window.addEventListener('touchmove',e=>{if(lifeDrag){lifeMove(lifeEvX(e));e.preventDefault()}},{passive:false});
+window.addEventListener('mouseup',()=>lifeDrag=false);
+window.addEventListener('touchend',()=>lifeDrag=false);
+lifeSvg.addEventListener('click',e=>{if(e.target.closest('#lifeMk'))return;lifeMove(lifeEvX(e))});
+lifeMove(95);
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){lifeSnap(3);o.unobserve(e.target)}}),{threshold:0.4}).observe(lifeSvg);
+
+/* ============ Figure 3 · Reading funnel ============ */
+const fwrap=document.getElementById('fwrap'),fT=[];
+(function buildFunnel(){
+  const counts=[50,10,3,1],ids=['fs1','fs2','fs3','fs4'],gaps=[0.025,0.09,0.14,0];
+  ids.forEach((id,s)=>{
+    const el=document.getElementById(id);
+    for(let i=0;i<counts[s];i++){
+      const d=document.createElement('span');
+      d.className='fdot'+(s===0&&i%5===2?' keep':'');
+      d.style.animationDelay=(i*gaps[s]).toFixed(3)+'s';
+      el.appendChild(d);
+    }
+  });
+})();
+function fReset(){
+  while(fT.length)clearTimeout(fT.pop());
+  fwrap.classList.remove('p1','p1b','p2','q2','p3','q3','p4');
+}
+function fPlay(){
+  fReset();
+  void fwrap.offsetWidth;
+  fwrap.classList.add('p1');
+  fT.push(setTimeout(()=>fwrap.classList.add('p1b'),1900));
+  fT.push(setTimeout(()=>fwrap.classList.add('p2'),2800));
+  fT.push(setTimeout(()=>fwrap.classList.add('q2'),3800));
+  fT.push(setTimeout(()=>fwrap.classList.add('p3'),4500));
+  fT.push(setTimeout(()=>fwrap.classList.add('q3'),5400));
+  fT.push(setTimeout(()=>fwrap.classList.add('p4'),6100));
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){fPlay();o.unobserve(e.target)}}),{threshold:0.3}).observe(fwrap);
+
+/* ============ Figure 4 · Spec checklist ============ */
+const vboxes=Array.prototype.slice.call(document.querySelectorAll('#vlist input'));
+function vUpdate(){
+  const n=vboxes.filter(b=>b.checked).length;
+  document.getElementById('vfill').style.width=(n/8*100)+'%';
+  document.getElementById('vnum').textContent=n+' / 8';
+  const panel=document.getElementById('vpanel'),tag=document.getElementById('vtag'),msg=document.getElementById('vmsg');
+  panel.className='vpanel';
+  if(n===0){tag.textContent='Verdict';msg.textContent='Tick what your prompt actually states — not what you’re hoping the AI will infer.';return}
+  if(n<=3){panel.classList.add('v-bad');tag.textContent='Too vague — rewrite it';msg.textContent='The AI will guess most of this and guess generically. Add the inputs and rules before you send it, or plan to spend the session correcting.'}
+  else if(n<=5){panel.classList.add('v-warn');tag.textContent='Leaky — patch the gaps';msg.textContent='Some structure, real holes. The unchecked items are exactly where the AI will surprise you. Name them before you hit send.'}
+  else if(n<=7){panel.classList.add('v-good');tag.textContent='Solid spec — send it';msg.textContent='This gives the AI a close first draft. The loops you run now will be your refinements, not its mistakes.'}
+  else{panel.classList.add('v-great');tag.textContent='Excellent — just don’t over-dictate';msg.textContent='8 for 8 is rare. Make sure you haven’t over-specified the "how" — leave the AI room where you genuinely don’t care.'}
+}
+function vPreset(){
+  const win=[1,1,1,1,1,0,1,1];
+  vboxes.forEach((b,i)=>b.checked=!!win[i]);
+  vUpdate();
+}
+function vClear(){vboxes.forEach(b=>b.checked=false);vUpdate()}
+const vlist=document.getElementById('vlist');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){vlist.classList.remove('go');void vlist.offsetWidth;vlist.classList.add('go');o.unobserve(e.target)}}),{threshold:0.25}).observe(vlist);
+
+</script>
+</body>
+</html>

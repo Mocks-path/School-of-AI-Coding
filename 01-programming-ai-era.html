@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Programming in the AI Era · Lesson 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 2 · the loop ============ */
+.flow{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:30px 22px 22px;position:relative}
+.flow-row{display:flex;align-items:stretch;gap:0}
+.fnode{
+  flex:0 0 auto;width:150px;text-align:center;padding:16px 10px 13px;
+  background:var(--cream);border:2px solid var(--line);border-radius:12px;
+  transition:border-color .3s,background .3s,transform .3s,box-shadow .3s;
+}
+.fnode h5{font-family:'Fraunces',serif;font-size:16px;color:var(--brown-dark);line-height:1.15;margin-bottom:4px}
+.fnode .fsub{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);line-height:1.4;display:block}
+.fnode .fmark{width:34px;height:34px;border-radius:50%;background:var(--brown-dark);color:var(--paper);font-family:'Fraunces',serif;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:background .3s}
+.fnode.on{border-color:var(--orange);background:#FDEBD7;transform:translateY(-4px);box-shadow:0 8px 18px rgba(239,127,26,0.22)}
+.fnode.on .fmark{background:var(--orange)}
+.fconn{flex:1;min-width:26px;align-self:center;height:3px;background:var(--line);position:relative;border-radius:2px}
+.fdot{
+  position:absolute;top:50%;left:0;width:15px;height:15px;border-radius:50%;
+  transform:translate(-50%,-50%);opacity:0;z-index:2;
+}
+.fdot.money{background:var(--yellow);border:2px solid var(--tan);box-shadow:0 0 0 4px rgba(254,204,0,0.25)}
+.fdot.pkg{background:var(--brown);border:2px solid var(--brown-dark);box-shadow:0 0 0 4px rgba(65,44,35,0.15)}
+.fconn.go .fdot,.frail.go .fdot{animation:dotR 1.35s ease-in-out forwards}
+.fconn.go.rev .fdot,.frail.go.rev .fdot{animation:dotL 1.35s ease-in-out forwards}
+@keyframes dotR{0%{left:0%;opacity:0}14%{opacity:1}86%{opacity:1}100%{left:100%;opacity:0}}
+@keyframes dotL{0%{left:100%;opacity:0}14%{opacity:1}86%{opacity:1}100%{left:0%;opacity:0}}
+.frail{margin:30px 10px 6px;height:3px;background:var(--line);position:relative;border-radius:2px}
+.frail-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:8px}
+.flow.drop #fnRead,.flow.drop #fc3{display:none}
+.fcap-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:20px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-height:74px}
+.fstep{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.08em;color:#fff;background:var(--orange);border-radius:6px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.fcap{font-size:14.5px;color:var(--brown-dark);line-height:1.5}
+.fkey{display:flex;gap:22px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.fkey span{display:inline-flex;align-items:center;gap:7px}
+.fkey i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.fkey .km{background:var(--yellow);border:2px solid var(--tan)}
+.fkey .kp{background:var(--brown);border:2px solid var(--brown-dark)}
+@media(max-width:700px){
+  .flow{padding:18px 10px 14px}
+  .fnode{width:96px;padding:10px 5px 9px}
+  .fnode h5{font-size:12.5px}
+  .fnode .fsub{font-size:8px}
+  .fnode .fmark{width:26px;height:26px;font-size:13px}
+}
+
+/* ============ Figure 3 · effort split ============ */
+.mcalc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+.mrows{display:grid;gap:18px;margin-bottom:24px}
+.mrow{display:grid;grid-template-columns:180px 1fr 84px;gap:16px;align-items:center}
+.mrow label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);font-weight:600}
+.mrow .mval{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--orange-dark);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--cream);border:1px solid var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+.mbar{display:flex;height:52px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:repeating-linear-gradient(45deg,#F4E9D8 0 8px,var(--cream) 8px 16px)}
+.mseg{height:100%;transition:width .45s ease;min-width:0}
+.mseg.sp{background:var(--brown)} .mseg.ss{background:var(--tan)}
+.mseg.sa{background:var(--orange-dark)} .mseg.sf{background:#8B7A6C}
+.mseg.spr{background:var(--yellow)}
+.mlegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
+.mlegend span{display:inline-flex;align-items:center;gap:6px}
+.mlegend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.mresult{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px dashed var(--line)}
+.mprofit{font-family:'Fraunces',serif;font-weight:800;font-size:46px;line-height:1;color:var(--brown-dark);transition:color .3s}
+.mprofit.neg{color:var(--orange-dark)}
+.mprofit-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.mverdict{font-size:14.5px;color:var(--brown);font-weight:500;max-width:340px;line-height:1.45}
+.mprice{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:16px}
+.mprice strong{color:var(--brown-dark);font-size:16px}
+@media(max-width:700px){
+  .mrow{grid-template-columns:1fr 70px;gap:10px}
+  .mrow label{grid-column:1/-1}
+  .mprofit{font-size:36px}
+}
+
+/* ============ Figure 5 · tool categories ============ */
+.aimap-chain{display:flex;align-items:center;gap:0;margin-bottom:20px}
+.ainode{
+  flex:1;text-align:center;padding:16px 8px;background:var(--paper);
+  border:2px solid var(--line);border-radius:12px;cursor:pointer;
+  transition:all .25s;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);font-weight:600;
+}
+.ainode .aidx{display:block;font-family:'Fraunces',serif;font-size:24px;font-weight:800;color:var(--line);margin-bottom:4px;transition:color .25s;text-transform:none;letter-spacing:0}
+.ainode:hover{border-color:var(--orange);transform:translateY(-2px)}
+.ainode.active{background:var(--brown-dark);border-color:var(--brown-dark);color:var(--paper)}
+.ainode.active .aidx{color:var(--orange)}
+.ailink{width:26px;height:3px;background:var(--line);flex-shrink:0;position:relative}
+.ailink::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border-left:7px solid var(--line);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.aipanel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px;min-height:250px}
+.aipanel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.aipanel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark);margin-bottom:4px}
+.aipanel .aitag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:14px}
+.aipanel ul{list-style:none;display:grid;gap:9px;margin-bottom:18px}
+.aipanel li{font-size:14.5px;color:var(--ink);padding-left:24px;position:relative;line-height:1.5}
+.aipanel li::before{content:"✦";position:absolute;left:0;color:var(--orange);font-size:13px}
+.ai-human{
+  background:var(--cream);border-left:3px solid var(--brown);border-radius:0 10px 10px 0;
+  padding:13px 16px;font-size:13.5px;color:var(--brown);line-height:1.5;
+}
+.ai-human strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:700px){
+  .aimap-chain{flex-wrap:wrap;gap:8px}
+  .ainode{flex:1 1 42%}
+  .ailink{display:none}
+}
+
+/* ============ Figure 4 · myth cards ============ */
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hcard{height:215px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.hgrid.show .hcard{animation:hIn .5s forwards}
+.hgrid.show .hcard:nth-child(1){animation-delay:.05s}
+.hgrid.show .hcard:nth-child(2){animation-delay:.2s}
+.hgrid.show .hcard:nth-child(3){animation-delay:.35s}
+.hgrid.show .hcard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.hinner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.hcard.flipped .hinner{transform:rotateY(180deg)}
+.hface{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center;
+}
+.hfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.hfront .hclaim{font-family:'Fraunces',serif;font-weight:800;font-size:27px;line-height:1.1;margin-bottom:8px}
+.hfront .hsub{font-size:13px;opacity:.92;max-width:260px}
+.hfront .hhint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.hback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.hback .hlab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.hback p{font-size:13.5px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){
+  .hgrid{grid-template-columns:1fr}
+  .hcard{height:200px}
+  .hfront .hclaim{font-size:23px}
+}
+
+/* ============ Figure 1 · idea-to-program strip ============ */
+.i2p{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.i2p .step{flex:1;min-width:150px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 16px;text-align:center}
+.i2p .step .ic{font-family:'Fraunces',serif;font-weight:800;font-size:26px;color:var(--orange);margin-bottom:6px}
+.i2p .step h5{font-family:'Fraunces',serif;font-size:18px;color:var(--brown-dark);margin-bottom:5px}
+.i2p .step p{font-size:12.5px;color:var(--muted);margin:0;max-width:none}
+.i2p .arrow{display:flex;align-items:center;justify-content:center;color:var(--orange);font-size:22px;padding:0 6px;flex:0 0 auto}
+@media(max-width:700px){.i2p .arrow{display:none}.i2p .step{flex:1 1 100%;margin-bottom:8px}}
+
+/* ============ Figure 4 · timeline ============ */
+.tl{position:relative;padding-left:8px}
+.tl-item{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:start;padding:14px 0;border-bottom:1px dashed var(--line)}
+.tl-item:last-child{border-bottom:none}
+.tl-era{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.tl-body h4{font-family:'Fraunces',serif;font-size:18px;color:var(--brown-dark);margin-bottom:3px}
+.tl-body p{font-size:13.5px;color:var(--muted);margin:0;max-width:none}
+@media(max-width:700px){.tl-item{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 01 · AI Programming</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="13" width="36" height="27" rx="6" fill="#412C23"/>
+      <path d="M14 13 C14 4.5 30 4.5 30 13" stroke="#EF7F1A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M12 32 L12 22 L17 28 L22 21 L27 28 L32 22 L32 32" stroke="#FECC00" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="9" r="4.5" fill="#EF7F1A"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 1 · Lesson 01 · AI Programming</div>
+  <h1>Programming in the <em>AI era</em>.</h1>
+  <p class="lede">Programming has always been one thing: turning a clear idea into instructions a computer will follow. That hasn't changed. What changed is who types the first draft. Today you can describe what you want in plain English and let an AI assistant write the code — while you stay the one who decides, tests, and fixes. This lesson gives you the honest map of that new working relationship before you write a single prompt.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>What programming really is</h2>
+  <p class="lead">Strip away the jargon and a program is just a recipe: a list of exact steps a computer runs, in order, without guessing what you meant. Programming is the act of writing that recipe clearly enough that a machine can follow it.</p>
+
+  <p>A computer is fast, tireless, and completely literal. It does exactly what the instructions say — not what you hoped they'd say. That's the whole difficulty and the whole power. Get the steps right and the machine repeats them perfectly a million times. Get one step wrong and it repeats the mistake a million times, just as cheerfully.</p>
+  <p>So every program is born the same way: an <strong>idea</strong> in a human head, translated into <strong>code</strong> (the exact written steps), which the machine turns into a <strong>running program</strong> that does something useful. Historically, a human wrote every line of that code by hand. "Coding with AI" changes only the middle step: you still own the idea and judge the result, but the AI drafts the code for you.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Idea → Code → Running program</span>
+    </div>
+    <div class="i2p">
+      <div class="step"><div class="ic">1</div><h5>Idea</h5><p>What you want to happen, in plain human terms — "sort these names alphabetically."</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="ic">2</div><h5>Code</h5><p>The exact, ordered steps written in a language the computer can read.</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="ic">3</div><h5>Running program</h5><p>The machine executes the steps and produces the result you asked for.</p></div>
+    </div>
+  </div>
+
+  <h3>What "coding with AI" actually means</h3>
+  <p>It does <em>not</em> mean the AI decides what to build or whether the result is correct. It means you write the idea in plain English, the AI drafts the code, and then you run it, read it, and steer it. <strong>You direct; the AI drafts.</strong> The skill you're really learning in this course isn't typing syntax from memory — it's describing problems precisely, reading what comes back, and knowing when it's wrong. Those skills outlast any single tool.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>The loop that runs everything</h2>
+  <p class="lead">Nobody — human or AI — writes a working program in one clean shot. Real coding is a loop you go around again and again until the result is right. Learn the loop and you can build almost anything with AI at your side.</p>
+
+  <p>The loop has six moves: <strong>Describe</strong> what you want, let the AI <strong>Generate</strong> a draft, <strong>Run</strong> it to see what actually happens, <strong>Read</strong> the code and the result to understand it, <strong>Fix</strong> what's wrong (usually by describing the problem again), and <strong>Repeat</strong> until it does the job. The first draft is almost never the final answer — and that's normal, not failure.</p>
+  <p>The move beginners skip is <strong>Read</strong>. It's tempting to paste code, see it run, and move on. But if you never read what the AI wrote, you can't tell a correct answer from a confident wrong one — and AI is very good at being confidently wrong. Press ▶ to watch one trip around the loop, step by step.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The core loop, in motion</span>
+      <div class="controls">
+        <button id="btnDrop" class="active" onclick="runFlow('drop')">▶ One good loop</button>
+        <button id="btnTrad" onclick="runFlow('trad')">▶ Skipping "Read"</button>
+        <button onclick="resetFlow(true)">↺ Reset</button>
+      </div>
+    </div>
+    <div class="flow drop" id="flow">
+      <div class="flow-row">
+        <div class="fnode" id="fnCust">
+          <div class="fmark">D</div>
+          <h5>Describe</h5>
+          <span class="fsub">You · plain English</span>
+        </div>
+        <div class="fconn" id="fc1"><div class="fdot money"></div></div>
+        <div class="fnode" id="fnStore">
+          <div class="fmark">G</div>
+          <h5>Generate</h5>
+          <span class="fsub">AI · drafts code</span>
+        </div>
+        <div class="fconn" id="fc2"><div class="fdot money"></div></div>
+        <div class="fnode" id="fnRead">
+          <div class="fmark">R</div>
+          <h5>Read</h5>
+          <span class="fsub">You · understand it</span>
+        </div>
+        <div class="fconn" id="fc3"><div class="fdot pkg"></div></div>
+        <div class="fnode" id="fnSup">
+          <div class="fmark">F</div>
+          <h5>Run &amp; Fix</h5>
+          <span class="fsub">Test · repeat</span>
+        </div>
+      </div>
+      <div class="frail" id="frail"><div class="fdot pkg"></div></div>
+      <div class="frail-label" id="frailLabel">↩ if it isn't right yet, describe the fix and loop again</div>
+      <div class="fcap-wrap">
+        <div class="fstep" id="fstep">— / —</div>
+        <div class="fcap" id="fcap">Press ▶ One good loop or ▶ Skipping "Read" to run the sequence.</div>
+      </div>
+      <div class="fkey">
+        <span><i class="km"></i> your move</span>
+        <span><i class="kp"></i> code / result</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Who owns which move</h3>
+  <p>Look at who acts at each stage. <strong>Describe</strong>, <strong>Read</strong>, and the decision to <strong>Fix or ship</strong> are all yours. <strong>Generate</strong> is the AI's — it drafts fast and cheap. <strong>Run</strong> belongs to the computer, which tells you the honest truth about whether the code works. AI generates; you decide. That division of labour is the heart of building software in the AI era: the machine does the typing, you do the judging.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>How much do you actually type?</h2>
+  <p class="lead">A fair question for a nervous beginner: if the AI writes the code, what's left for me? The honest answer is that the work shifts — away from typing syntax, toward describing, reading, and deciding. Drag the sliders and watch where the effort really goes.</p>
+
+  <p>Think of a small task — say, a script that renames a folder of photos by date. In the old world, most of your effort was <strong>recalling exact syntax</strong>: which punctuation, which function name, in which order. AI collapses that cost to near zero. But the other kinds of effort don't vanish — they grow in importance. You still have to <strong>describe</strong> the task clearly, <strong>read and verify</strong> what came back, and <strong>decide</strong> whether it's correct and safe to run.</p>
+  <p>The sliders below let you set how much effort each part takes for a given task. Notice the pattern: as "syntax recall" drops (which is what AI does for you), the share of your time spent on <em>judgment</em> — describing and verifying — goes up. That's the real shift AI makes. It doesn't remove the thinking; it moves the thinking to the front and the back.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Where your effort goes</span>
+      <div class="controls" id="priceBtns">
+        <button onclick="setPrice(1,this)">Tiny script</button>
+        <button class="active" onclick="setPrice(2,this)">Small feature</button>
+        <button onclick="setPrice(3,this)">Whole app</button>
+      </div>
+    </div>
+    <div class="mcalc">
+      <div class="mprice">Task size: <strong id="mPriceLbl">Small feature</strong> &nbsp;·&nbsp; bars show the share of your time each activity takes</div>
+      <div class="mrows">
+        <div class="mrow">
+          <label for="slProd">Describe the goal</label>
+          <input type="range" id="slProd" min="0" max="10" step="1" value="6" oninput="calcMargin()">
+          <div class="mval" id="vProd">6</div>
+        </div>
+        <div class="mrow">
+          <label for="slShip">Read &amp; verify</label>
+          <input type="range" id="slShip" min="0" max="10" step="1" value="7" oninput="calcMargin()">
+          <div class="mval" id="vShip">7</div>
+        </div>
+        <div class="mrow">
+          <label for="slAds">Recall exact syntax</label>
+          <input type="range" id="slAds" min="0" max="10" step="1" value="1" oninput="calcMargin()">
+          <div class="mval" id="vAds">1</div>
+        </div>
+      </div>
+      <div class="mbar" id="mbar">
+        <div class="mseg sp" id="segP"></div>
+        <div class="mseg ss" id="segS"></div>
+        <div class="mseg sa" id="segA"></div>
+        <div class="mseg spr" id="segPr"></div>
+      </div>
+      <div class="mlegend">
+        <span><i style="background:var(--brown)"></i> describe</span>
+        <span><i style="background:var(--tan)"></i> read &amp; verify</span>
+        <span><i style="background:var(--orange-dark)"></i> syntax recall</span>
+        <span><i style="background:var(--yellow)"></i> AI drafts (free)</span>
+      </div>
+      <div class="mresult">
+        <div>
+          <span class="mprofit-label">Your judgment share</span>
+          <div class="mprofit" id="profitNum">0%</div>
+        </div>
+        <div class="mverdict" id="verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The part AI can't take</h3>
+  <p><strong>Describing precisely is a skill.</strong> A vague request gets a vague program; the next lesson is entirely about this.<br>
+  <strong>Reading is your safety net.</strong> AI is confidently wrong often enough that unread code is a liability, not a shortcut.<br>
+  <strong>Deciding stays human.</strong> Whether the result is correct, safe, and actually solves your problem is a call only you can make — because only you know what "done" means.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>A short history, and today's toolbox</h2>
+  <p class="lead">The story of programming is one long march toward describing intent more like a human and less like a machine. AI assistants are the latest step, not a break from the past. First the history — then the categories of tools you'll actually meet.</p>
+
+  <p>Every generation of programming tools made the human's job more about <em>ideas</em> and less about <em>machine detail</em>. We went from flipping physical switches, to punch cards, to typed languages closer to English, to editors that autocomplete and catch mistakes — and now to assistants that draft whole chunks from a plain-English request. Each step didn't replace the programmer; it raised the level they work at.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · From punch cards to AI assistants</span>
+    </div>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-era">1940s–50s</div><div class="tl-body"><h4>Switches &amp; punch cards</h4><p>Instructions fed as holes in cardboard or physical wiring. One mistake meant re-punching a whole deck. The human worked at the machine's level.</p></div></div>
+      <div class="tl-item"><div class="tl-era">1950s–70s</div><div class="tl-body"><h4>High-level languages</h4><p>Languages like FORTRAN, and later C and Python, let people write steps in something closer to English and math. A translator turned it into machine code.</p></div></div>
+      <div class="tl-item"><div class="tl-era">1990s–2010s</div><div class="tl-body"><h4>IDEs &amp; smart editors</h4><p>Editors autocompleted names, highlighted errors as you typed, and ran code with one click — catching mistakes before the machine ever saw them.</p></div></div>
+      <div class="tl-item"><div class="tl-era">2020s–now</div><div class="tl-body"><h4>AI assistants</h4><p>You describe intent in plain English and the assistant drafts working code. The human's job moves further toward directing, reading, and deciding.</p></div></div>
+    </div>
+  </div>
+
+  <h3>The tool landscape, as categories</h3>
+  <p class="lead">Specific products come and go, so learn the <em>categories</em>, not the logos. Almost every AI coding tool you'll meet is one of four kinds. Click each to see what it's for — and remember the same loop from Section 02 runs inside all of them.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 5 · Four kinds of AI coding tool</span>
+      <div class="controls">
+        <button onclick="stageStep(-1)">◀ Prev kind</button>
+        <button onclick="stageStep(1)">Next kind ▶</button>
+      </div>
+    </div>
+    <div class="aimap-chain" id="aiChain">
+      <div class="ainode" data-k="research" onclick="pickStage('research')"><span class="aidx">1</span>Chat assistant</div>
+      <div class="ailink"></div>
+      <div class="ainode" data-k="store" onclick="pickStage('store')"><span class="aidx">2</span>IDE copilot</div>
+      <div class="ailink"></div>
+      <div class="ainode" data-k="mkt" onclick="pickStage('mkt')"><span class="aidx">3</span>Cloud sandbox</div>
+      <div class="ailink"></div>
+      <div class="ainode" data-k="support" onclick="pickStage('support')"><span class="aidx">4</span>Notebook</div>
+    </div>
+    <div class="aipanel" id="aiPanel"></div>
+  </div>
+
+  <h3>Same loop, different rooms</h3>
+  <p>Whichever category you pick, you're still running Describe → Generate → Run → Read → Fix → Repeat. The tools differ only in <em>where</em> the loop happens and how much they set up for you. A beginner can start with a chat assistant and a cloud sandbox — nothing to install — and graduate to an IDE copilot later. The skill transfers; the buttons don't matter.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>You now know what programming actually is and how the AI era changes it. A program is a literal recipe the machine follows; "coding with AI" means you describe the idea in plain English and the AI drafts the code, while you run, read, and decide. Every real build runs the same six-step loop, and AI's job is to generate — yours is to judge. Tools are just different rooms for the same loop. Next lesson: how to think like a programmer so your descriptions actually work.</p>
+  <ul>
+    <li>Idea → Code → Running program — AI drafts the middle, you own the ends</li>
+    <li>The loop: Describe → Generate → Run → Read → Fix → Repeat</li>
+    <li>AI generates; you decide — never ship code you haven't read</li>
+    <li>History trend: humans keep working closer to intent, further from machine detail</li>
+    <li>Learn the four tool categories, not the logos: chat · IDE copilot · sandbox · notebook</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 01 of 04 · Next up: Thinking Like a Programmer →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 2 · the loop ===== */
+const flowEl=el('flow'),fcap=el('fcap'),fstep=el('fstep');
+let flowTimers=[];
+const FLOWS={
+  drop:[
+    {n:['fnCust','fnStore'],c:[['fc1','money',false]],cap:'DESCRIBE: You state the goal in plain English — "rename every photo in this folder using the date it was taken." Clear intent goes IN first.'},
+    {n:['fnStore'],c:[],cap:'GENERATE: The AI drafts code from your description in seconds. This is fast and cheap — but it is a draft, not a verified answer.'},
+    {n:['fnStore','fnRead'],c:[['fc2','money',false]],cap:'READ: You read what came back. Does it actually do what you asked? Reading is how you catch a confidently-wrong answer before it runs.'},
+    {n:['fnRead','fnSup'],c:[['fc3','pkg',false]],cap:'RUN & FIX: You run the code and see the real result. Something is off — one file was skipped — so you describe the fix and loop back.'},
+    {n:['fnCust','fnStore'],c:[['frail','pkg',true]],cap:'REPEAT: Around the loop again with the fix described. A couple of quick laps and the program does exactly the job. That is normal — not failure.'}
+  ],
+  trad:[
+    {n:['fnCust','fnStore'],c:[['fc1','money',false]],cap:'DESCRIBE: You give a quick, vague request and let the AI generate. So far it looks the same as the good loop...'},
+    {n:['fnStore'],c:[],cap:'GENERATE: The AI produces code that LOOKS right and runs without an error. Tempting to stop here and move on.'},
+    {n:['fnStore','fnSup'],c:[['fc2','money',false]],cap:'SKIP READ: You paste it in and ship without reading it. No error appears — so you assume it worked. This is the trap.'},
+    {n:['fnSup'],c:[],cap:'HIDDEN BUG: Weeks later you discover it quietly renamed files by the WRONG date the whole time. It ran perfectly — it just did the wrong thing.'},
+    {n:['fnRead'],c:[],cap:'The lesson: "no error" is not "correct." Unread AI code is a liability. Reading is the cheap step that would have caught this on day one.'}
+  ]
+};
+function clearFlowState(){
+  ['fnCust','fnStore','fnRead','fnSup'].forEach(id=>el(id).classList.remove('on'));
+  ['fc1','fc2','fc3','frail'].forEach(id=>el(id).classList.remove('go','rev'));
+}
+function applyFlowStep(s,i,total){
+  clearFlowState();
+  s.n.forEach(id=>el(id).classList.add('on'));
+  s.c.forEach(pair=>{
+    const c=el(pair[0]),d=c.querySelector('.fdot');
+    d.className='fdot '+pair[1];
+    void c.offsetWidth;
+    if(pair[2])c.classList.add('rev');
+    c.classList.add('go');
+  });
+  fstep.textContent=(i+1)+' / '+total;
+  fcap.textContent=s.cap;
+}
+function runFlow(mode){
+  resetFlow(false);
+  el('btnDrop').classList.toggle('active',mode==='drop');
+  el('btnTrad').classList.toggle('active',mode==='trad');
+  flowEl.classList.remove('drop','trad');
+  flowEl.classList.add(mode);
+  el('frailLabel').textContent = mode==='drop'
+    ? '↩ if it isn’t right yet, describe the fix and loop again'
+    : '↩ the skipped-Read path ends in a hidden bug, not a loop';
+  const steps=FLOWS[mode];
+  steps.forEach((s,i)=>{
+    flowTimers.push(setTimeout(()=>applyFlowStep(s,i,steps.length), 300+i*2100));
+  });
+}
+function resetFlow(full){
+  flowTimers.forEach(t=>clearTimeout(t));
+  flowTimers=[];
+  clearFlowState();
+  if(full){
+    fstep.textContent='— / —';
+    fcap.textContent='Press ▶ One good loop or ▶ Skipping "Read" to run the sequence.';
+  }
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runFlow('drop');o.unobserve(e.target)}}),{threshold:0.35}).observe(flowEl);
+
+/* ===== Figure 3 · effort split ===== */
+let taskName='Small feature';
+const TASK_NAMES={1:'Tiny script',2:'Small feature',3:'Whole app'};
+function setPrice(p,btn){
+  taskName=TASK_NAMES[p];
+  document.querySelectorAll('#priceBtns button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  el('mPriceLbl').textContent=taskName;
+  const presets={1:[4,5,1],2:[6,7,1],3:[8,9,2]};
+  el('slProd').value=presets[p][0];
+  el('slShip').value=presets[p][1];
+  el('slAds').value=presets[p][2];
+  calcMargin();
+}
+function calcMargin(){
+  const desc=parseFloat(el('slProd').value);
+  const read=parseFloat(el('slShip').value);
+  const syn=parseFloat(el('slAds').value);
+  const used=desc+read+syn;
+  const aiFree=Math.max(0,24-used);
+  const total=used+aiFree;
+  el('vProd').textContent=desc;
+  el('vShip').textContent=read;
+  el('vAds').textContent=syn;
+  const w=v=>Math.max(0,(v/total)*100);
+  el('segP').style.width=w(desc)+'%';
+  el('segS').style.width=w(read)+'%';
+  el('segA').style.width=w(syn)+'%';
+  el('segPr').style.width=w(aiFree)+'%';
+  const humanTotal=Math.max(1,used);
+  const judgment=Math.round(((desc+read)/humanTotal)*100);
+  const pn=el('profitNum');
+  pn.textContent=judgment+'%';
+  pn.classList.remove('neg');
+  let v;
+  if(judgment>=80)      v='Almost all of your effort is thinking — describing and verifying. This is what coding with AI feels like: the machine types, you judge.';
+  else if(judgment>=60) v='Most of your effort is judgment, with a little syntax still on your plate. Push the syntax slider down and watch AI absorb it.';
+  else if(judgment>=40) v='A balanced split. As tools improve, the syntax share keeps shrinking and the judgment share keeps growing.';
+  else                  v='Heavy on syntax recall — the old-world way. AI is built to collapse exactly this bar toward zero.';
+  el('verdict').textContent=v;
+}
+setPrice(2,document.querySelectorAll('#priceBtns button')[1]);
+
+/* ===== Figure 5 · tool categories ===== */
+const AIMAP={
+  research:{t:'Chat assistant — describe, get a draft',tag:'Category 1 · nothing to install',tasks:[
+    'You type a plain-English request in a chat box and paste back the code it drafts',
+    'Great for learning: ask "what does this line do?" and get an explanation, not just code',
+    'Best when you want to understand a concept or draft a small self-contained snippet',
+    'Examples of this category: general chat AIs used for coding help'
+  ],h:'The loop lives in the conversation. You describe and read; you copy the code into wherever it needs to run. Judgment stays entirely with you.'},
+  store:{t:'IDE copilot — help inside your editor',tag:'Category 2 · lives where you write code',tasks:[
+    'Suggests the next lines as you type, right inside a code editor',
+    'Can generate or rewrite a whole file from a comment describing what you want',
+    'Sees your existing project, so its drafts fit the code already there',
+    'Examples of this category: autocomplete-style and chat-in-editor coding assistants'
+  ],h:'Fastest for people already working in a project. The convenience makes it easy to accept suggestions unread — so the discipline to Read matters most here.'},
+  mkt:{t:'Cloud sandbox — build & run in the browser',tag:'Category 3 · zero setup, runs online',tasks:[
+    'A full coding environment in a browser tab — no installing anything on your computer',
+    'Describe an app and it can draft, run, and even host it for you to click and test',
+    'Ideal for beginners: you see your program actually run within minutes',
+    'Examples of this category: browser-based build-and-run platforms'
+  ],h:'Removes the scariest beginner hurdle — setup. You still own Describe, Read, and Decide; the sandbox just handles Run for you in the cloud.'},
+  support:{t:'Notebook — code and results side by side',tag:'Category 4 · great for data & experiments',tasks:[
+    'Runs code in small blocks, showing the result of each right beneath it',
+    'You can mix notes, code, tables, and charts in one document',
+    'Perfect for exploring data step by step, or learning what each line does',
+    'Examples of this category: interactive data/analysis notebooks'
+  ],h:'The step-by-step layout makes Read almost automatic — you see each block’s output immediately. Still your call whether the numbers mean what you think.'}
+};
+const AIORDER=['research','store','mkt','support'];
+let aiCurrent='research';
+function pickStage(k){
+  aiCurrent=k;
+  document.querySelectorAll('#aiChain .ainode').forEach(n=>{
+    n.classList.toggle('active',n.dataset.k===k);
+  });
+  const d=AIMAP[k],panel=el('aiPanel');
+  let html='<span class="aitag">'+d.tag+'</span><h4>'+d.t+'</h4><ul>';
+  d.tasks.forEach(t=>{html+='<li>'+t+'</li>'});
+  html+='</ul><div class="ai-human"><strong>Same loop inside</strong>'+d.h+'</div>';
+  panel.innerHTML=html;
+  panel.classList.remove('swap');
+  void panel.offsetWidth;
+  panel.classList.add('swap');
+}
+function stageStep(dir){
+  let i=AIORDER.indexOf(aiCurrent)+dir;
+  if(i<0)i=AIORDER.length-1;
+  if(i>=AIORDER.length)i=0;
+  pickStage(AIORDER[i]);
+}
+pickStage('research');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickStage('research');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('aiChain'));
+
+</script>
+</body>
+</html>

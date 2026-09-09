@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your First Real Program · Lesson 03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · Error-message anatomy ============ */
+.anatomy{display:grid;grid-template-columns:400px 1fr;gap:26px;align-items:start}
+.mock{
+  width:100%;max-width:392px;background:#1E1712;border:1px solid var(--line);
+  border-radius:16px;padding:18px;position:relative;
+  box-shadow:0 14px 34px rgba(65,44,35,0.10);
+}
+.mock [data-spot]{position:relative;border-radius:8px;transition:outline-color .3s}
+.mock [data-spot].hl{outline:2px solid var(--orange);outline-offset:3px;animation:hlPulse 1.3s ease-in-out infinite}
+@keyframes hlPulse{
+  0%,100%{outline-color:var(--orange)}
+  50%{outline-color:rgba(239,127,26,0.25)}
+}
+.spot{
+  position:absolute;top:-10px;right:-10px;width:24px;height:24px;border-radius:50%;
+  background:var(--orange);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:2px solid #1E1712;z-index:6;transition:transform .25s,background .25s;
+  box-shadow:0 3px 8px rgba(47,29,25,0.5);
+}
+.spot:hover{transform:scale(1.2)}
+[data-spot].hl .spot{background:var(--yellow);color:var(--brown-dark);transform:scale(1.25)}
+/* terminal chrome */
+.term-bar{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.term-bar .d{width:11px;height:11px;border-radius:50%}
+.term-bar .d1{background:#FF5F56}.term-bar .d2{background:#FFBD2E}.term-bar .d3{background:#27C93F}
+.term-bar .ttl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8A7A6C;margin-left:6px}
+.tline{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.55;color:#D9C9B6;padding:3px 5px;margin:2px 0;cursor:pointer;word-break:break-word}
+.tline .tprompt{color:#6FB86F}
+.t-trace{color:#B89A82}
+.t-file{color:#8FC7E8}
+.t-etype{color:#FF8A66;font-weight:600}
+.t-emsg{color:#FFD27A}
+.t-caret{color:#FF8A66}
+.spot-panel{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:24px;min-height:230px;position:sticky;top:90px;
+}
+.spot-panel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sp-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.sp-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown-dark);margin:6px 0 10px}
+.sp-why{font-size:14px;color:var(--ink);margin-bottom:12px;max-width:none}
+.sp-ai{
+  font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--orange);
+  padding:10px 14px;border-radius:0 8px 8px 0;max-width:none;margin:0;
+}
+.sp-ai strong{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark)}
+
+/* ============ Figure 2 · Environment flip cards ============ */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;perspective:1400px}
+.fcard{position:relative;height:410px;cursor:pointer;opacity:0;transform:translateY(16px)}
+.cards3.in .fcard{animation:cardUp .6s forwards}
+.cards3.in .fcard:nth-child(1){animation-delay:.1s}
+.cards3.in .fcard:nth-child(2){animation-delay:.3s}
+.cards3.in .fcard:nth-child(3){animation-delay:.5s}
+@keyframes cardUp{to{opacity:1;transform:translateY(0)}}
+.f-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.35,.15,.25,1)}
+.fcard.flipped .f-inner{transform:rotateY(180deg)}
+.f-face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:16px;border:1px solid var(--line);padding:22px;display:flex;flex-direction:column;
+  transition:box-shadow .4s;
+}
+.f-front{background:var(--paper);align-items:center;justify-content:center;text-align:center;gap:8px}
+.f-front .f-icon{width:74px;height:74px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.f-front .f-icon svg{width:42px;height:42px}
+.fcard:nth-child(1) .f-icon{background:rgba(239,127,26,0.14)}
+.fcard:nth-child(2) .f-icon{background:rgba(163,78,28,0.12)}
+.fcard:nth-child(3) .f-icon{background:rgba(254,204,0,0.18)}
+.f-front h4{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:var(--brown-dark)}
+.f-front .tagline{font-size:13.5px;color:var(--muted);max-width:210px}
+.f-front .hint{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);margin-top:14px}
+.f-back{background:var(--brown-dark);color:#EFDFC9;transform:rotateY(180deg);font-size:12.5px;overflow:auto}
+.f-back h5{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange-light);margin:10px 0 5px}
+.f-back h5:first-child{margin-top:0}
+.f-back ul{list-style:none}
+.f-back li{padding-left:16px;position:relative;margin-bottom:3px;line-height:1.45}
+.f-back li.pro::before{content:"+";position:absolute;left:0;color:var(--yellow);font-weight:700}
+.f-back li.con::before{content:"−";position:absolute;left:0;color:var(--orange-light);font-weight:700}
+.f-back .bestfor{margin-top:auto;padding-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.06em;color:var(--yellow);border-top:1px solid rgba(251,246,238,0.15)}
+.fcard.rec .f-face{box-shadow:0 0 0 3px var(--yellow),0 14px 36px rgba(254,204,0,0.35)}
+.persona{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.persona button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);
+  border:1px solid var(--line);color:var(--brown);padding:9px 15px;border-radius:999px;
+  cursor:pointer;letter-spacing:0.04em;transition:all .2s;
+}
+.persona button:hover{border-color:var(--orange);color:var(--orange-dark)}
+.persona button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.rec-note{
+  margin-top:14px;font-size:14px;color:var(--brown-dark);background:var(--paper);
+  border:1px solid var(--line);border-left:3px solid var(--yellow);
+  padding:12px 16px;border-radius:0 10px 10px 0;min-height:24px;max-width:none;
+}
+.rec-note.pop{animation:panelIn .4s ease}
+
+/* ============ Figure 3 · Debug-with-AI stepper ============ */
+.gen-grid{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start}
+.opt-group{margin-bottom:20px}
+.opt-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.opt{display:grid;gap:7px}
+.opt button{
+  font-family:'Inter',sans-serif;font-size:13px;text-align:left;background:var(--paper);
+  border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:9px;
+  cursor:pointer;transition:all .2s;
+}
+.opt button:hover{border-color:var(--orange)}
+.opt button.on{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.gen-out{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:28px;min-height:230px;position:relative;
+  box-shadow:0 8px 22px rgba(65,44,35,0.06);
+}
+.gen-out::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.gen-ph{font-size:14px;color:var(--muted);font-style:italic}
+.gen-out.live .gen-ph{display:none}
+#genText{font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.65;color:var(--brown-dark);white-space:pre-wrap}
+.cursor{display:none;color:var(--orange);font-weight:700;animation:blink 0.9s steps(1) infinite}
+.gen-out.live .cursor{display:inline}
+@keyframes blink{50%{opacity:0}}
+.gen-tagrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.gen-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;background:var(--cream);border:1px solid var(--line);color:var(--tan);padding:3px 9px;border-radius:4px}
+.gen-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-top:14px;max-width:none}
+.gen-note strong{color:var(--orange-dark)}
+
+/* ============ Figure 4 · Build-loop stepper ============ */
+.trust-wrap{display:grid;grid-template-columns:1fr 250px;gap:30px;align-items:start}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.03em;
+  border:1px solid var(--line);background:var(--paper);color:var(--brown);
+  padding:9px 15px;border-radius:999px;cursor:pointer;transition:all .25s;user-select:none;
+}
+.chip::before{content:"○ ";color:var(--orange-dark);font-weight:600}
+.chip:hover{border-color:var(--orange)}
+.chip.on{background:var(--brown-dark);color:#FBE7CB;border-color:var(--brown-dark)}
+.chip.on::before{content:"● ";color:var(--yellow)}
+.tower-zone{text-align:center}
+.tower{
+  height:316px;width:130px;margin:0 auto;border:1px dashed var(--line);border-radius:14px;
+  background:var(--paper);display:flex;flex-direction:column-reverse;
+  padding:5px;gap:3px;overflow:hidden;
+}
+.layer{
+  width:100%;height:0;border-radius:7px;opacity:0;flex-shrink:0;
+  transition:height .55s cubic-bezier(.3,.8,.3,1),opacity .4s;
+}
+.ly-domain{background:var(--orange)} .ly-photos{background:var(--tan)}
+.ly-reviews{background:var(--orange-dark)} .ly-ship{background:var(--yellow)}
+.ly-refund{background:var(--brown)} .ly-contact{background:var(--orange-light)}
+.ly-badges{background:var(--accent)} .ly-about{background:#C9A227}
+.t-pct{font-family:'Fraunces',serif;font-size:46px;font-weight:800;color:var(--orange-dark);line-height:1;margin-top:16px}
+.t-pct span{font-size:22px}
+.t-cap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.t-verdict{
+  margin-top:18px;font-size:14px;color:var(--brown-dark);background:var(--paper);
+  border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-height:48px;max-width:none;
+}
+.t-verdict.pop{animation:panelIn .35s ease}
+.trust-hintrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:16px;letter-spacing:0.04em;max-width:none}
+
+@media(max-width:880px){
+  .anatomy,.gen-grid,.trust-wrap{grid-template-columns:1fr}
+  .spot-panel{position:static}
+  .cards3{grid-template-columns:1fr;perspective:none}
+  .fcard{height:390px;max-width:420px;width:100%;margin:0 auto}
+  .tower-zone{margin-top:10px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 03 · AI Programming</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M10 31V14.5l6 8.5 6-8.5 6 8.5 6-8.5V31" stroke="#EF7F1A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="10.5" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 1 · Lesson 03 · AI Programming</div>
+  <h1>Your first program will <em>break</em>. That's the point.</h1>
+  <p class="lede">The gap between "I typed some code" and "I built something that runs" is one skill: reading what the computer tells you when it complains. In this lesson we pick a low-friction place to write code, run the build loop until it works, decode an error message word by word, debug alongside AI, and ship one small working thing.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Start where there's nothing to install</h2>
+  <p class="lead">Beginners quit in the first hour — not because coding is hard, but because <em>setup</em> is. Wrong version, missing path, a cryptic install error before you've written a single line. The fix is to start somewhere the environment already exists and just works.</p>
+
+  <p>You do not need to configure a machine to write your first program. Three categories of low-friction environment let you skip setup entirely. A <strong>browser sandbox</strong> runs code on a webpage — nothing to download, just type and press run. A <strong>notebook</strong> lets you write code in small cells and see the result of each one right below it, which is perfect for learning because you get feedback in tiny steps. A <strong>cloud IDE</strong> gives you a full code editor in your browser, pre-loaded with everything, so your project lives online and opens the same on any device.</p>
+  <p>All three share one virtue: <strong>you write code and see it run in the same window, in seconds.</strong> That tight loop — type, run, look — is the entire job for now. Later you may install tools on your own machine, but nothing about learning to program requires it today. Explore the annotated error below to see what "run it" actually gives you back when something goes wrong.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Anatomy of an error message</span>
+      <div class="controls">
+        <button id="tourBtn" onclick="tourSpots()">▶ Tour all</button>
+        <button onclick="resetSpots()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="anatomy">
+      <div class="mock" id="mock">
+        <div class="term-bar"><span class="d d1"></span><span class="d d2"></span><span class="d d3"></span><span class="ttl">Console output</span></div>
+        <div class="tline"><span class="tprompt">$</span> python greet.py</div>
+        <div class="tline t-trace" data-spot="trace" onclick="selectSpot('trace')">
+          <span class="spot">1</span>Traceback (most recent call last):
+        </div>
+        <div class="tline" data-spot="loc" onclick="selectSpot('loc')">
+          <span class="spot">2</span>&nbsp;&nbsp;File <span class="t-file">"greet.py", line 4</span>, in &lt;module&gt;
+        </div>
+        <div class="tline" data-spot="line" onclick="selectSpot('line')">
+          <span class="spot">3</span>&nbsp;&nbsp;&nbsp;&nbsp;print("Hi " + name + ", age " + age)
+        </div>
+        <div class="tline" data-spot="caret" onclick="selectSpot('caret')">
+          <span class="spot">4</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-caret">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^^^^^^^^^^^^</span>
+        </div>
+        <div class="tline" data-spot="etype" onclick="selectSpot('etype')">
+          <span class="spot">5</span><span class="t-etype">TypeError</span>: <span class="t-emsg">can only concatenate str (not "int") to str</span>
+        </div>
+      </div>
+      <div class="spot-panel" id="spotPanel">
+        <div class="sp-tag" id="spTag">Interactive anatomy</div>
+        <div class="sp-title" id="spTitle">Click any numbered dot</div>
+        <p class="sp-why" id="spWhy">An error message looks like a wall of scary red text, but it's actually a labelled report telling you exactly what broke and where. Click a dot on the console — or press "Tour all" — to translate each part into plain English.</p>
+        <p class="sp-ai" id="spAi"><strong>Tip —</strong> read errors bottom-up. The last line names <em>what</em> went wrong; the lines above tell you <em>where</em>. Together they usually point straight at the fix.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The error is on your side</h3>
+  <p>New coders read an error message as "the computer is angry at me." Flip that. An error is the most helpful thing the computer can do — instead of guessing what you meant and doing something wrong silently, it stops and hands you a precise note about what confused it. A program that <em>fails loudly</em> is far easier to fix than one that quietly does the wrong thing. Learn to read these notes and you've learned to program.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Pick your first environment</h2>
+  <p class="lead">There are three low-friction ways to write your first program, and they trade convenience against power. Choosing one doesn't lock you in — but it decides how fast you get from "blank screen" to "it ran."</p>
+
+  <p>A <strong>browser sandbox</strong> is a scratchpad: type code, hit run, see output, all on one webpage with zero setup. A <strong>notebook</strong> is a lab bench: code in cells, results inline, notes alongside — ideal for learning one concept at a time. A <strong>cloud IDE</strong> is a full workshop: a real editor and project in your browser, closer to how working software is actually built. Each is a legitimate starting point; each has an honest cost. Flip the cards to compare, then tell the chooser where you are.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The environment chooser</span>
+      <div class="controls">
+        <button onclick="flipAll()">▶ Flip all</button>
+        <button onclick="resetCards()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="cards3" id="cards3">
+      <div class="fcard" id="c-one" onclick="this.classList.toggle('flipped')">
+        <div class="f-inner">
+          <div class="f-face f-front">
+            <div class="f-icon"><svg viewBox="0 0 42 42" fill="none"><rect x="4" y="8" width="34" height="26" rx="4" stroke="#EF7F1A" stroke-width="2.5"/><path d="M4 14h34" stroke="#EF7F1A" stroke-width="2.5"/><path d="M12 22l4 4-4 4M20 30h8" stroke="#D55222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h4>Browser sandbox</h4>
+            <p class="tagline">Type, run, see output — all on one page. Nothing to install, ever.</p>
+            <div class="hint">Tap to flip</div>
+          </div>
+          <div class="f-face f-back">
+            <h5>Pros</h5>
+            <ul>
+              <li class="pro">Zero setup — open a tab and you're coding</li>
+              <li class="pro">Instant run/output on the same screen</li>
+              <li class="pro">Nothing to break on your machine</li>
+            </ul>
+            <h5>Cons</h5>
+            <ul>
+              <li class="con">Can't build large multi-file projects</li>
+              <li class="con">Work often vanishes when you close the tab</li>
+              <li class="con">Not how real software eventually gets built</li>
+            </ul>
+            <div class="bestfor">Best for: your very first "hello, it ran" moment</div>
+          </div>
+        </div>
+      </div>
+      <div class="fcard" id="c-niche" onclick="this.classList.toggle('flipped')">
+        <div class="f-inner">
+          <div class="f-face f-front">
+            <div class="f-icon"><svg viewBox="0 0 42 42" fill="none"><rect x="5" y="6" width="32" height="9" rx="2" stroke="#A34E1C" stroke-width="2.4"/><rect x="5" y="18" width="32" height="9" rx="2" stroke="#A34E1C" stroke-width="2.4"/><rect x="5" y="30" width="20" height="6" rx="2" fill="#EF7F1A"/></svg></div>
+            <h4>Notebook</h4>
+            <p class="tagline">Code in small cells, results right below each one. Learn in tiny steps.</p>
+            <div class="hint">Tap to flip</div>
+          </div>
+          <div class="f-face f-back">
+            <h5>Pros</h5>
+            <ul>
+              <li class="pro">See the result of every line as you go</li>
+              <li class="pro">Mix code, output, and written notes</li>
+              <li class="pro">Perfect for learning one concept at a time</li>
+            </ul>
+            <h5>Cons</h5>
+            <ul>
+              <li class="con">Easy to run cells out of order and confuse yourself</li>
+              <li class="con">Not built for shipping a finished app</li>
+              <li class="con">Hides some of the "real" run mechanics</li>
+            </ul>
+            <div class="bestfor">Best for: beginners learning by experimenting</div>
+          </div>
+        </div>
+      </div>
+      <div class="fcard" id="c-gen" onclick="this.classList.toggle('flipped')">
+        <div class="f-inner">
+          <div class="f-face f-front">
+            <div class="f-icon"><svg viewBox="0 0 42 42" fill="none"><rect x="4" y="6" width="34" height="30" rx="4" stroke="#A34E1C" stroke-width="2.4"/><path d="M4 13h34" stroke="#A34E1C" stroke-width="2.4"/><rect x="8" y="17" width="9" height="15" rx="2" fill="#FECC00"/><path d="M21 20h11M21 25h11M21 30h7" stroke="#A34E1C" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <h4>Cloud IDE</h4>
+            <p class="tagline">A full editor and project in your browser. Closest to the real thing.</p>
+            <div class="hint">Tap to flip</div>
+          </div>
+          <div class="f-face f-back">
+            <h5>Pros</h5>
+            <ul>
+              <li class="pro">Real editor, real files, real projects</li>
+              <li class="pro">Project lives online — opens the same anywhere</li>
+              <li class="pro">Teaches the workflow you'll actually use</li>
+            </ul>
+            <h5>Cons</h5>
+            <ul>
+              <li class="con">More moving parts to understand up front</li>
+              <li class="con">Can overwhelm on day one</li>
+              <li class="con">Usually needs an account and sign-in</li>
+            </ul>
+            <div class="bestfor">Best for: your first real multi-file build</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="persona">
+      <button onclick="persona('one',this)">I just want it to run today</button>
+      <button onclick="persona('niche',this)">I'm learning concepts step by step</button>
+      <button onclick="persona('gen',this)">I'm ready to build a small project</button>
+    </div>
+    <p class="rec-note" id="recNote">Pick the line that sounds like you — we'll highlight the environment that fits.</p>
+  </div>
+
+  <h3>Our honest recommendation</h3>
+  <p>For most beginners: start in a <strong>browser sandbox</strong> to get the very first "it ran" feeling with zero friction, then move to a <strong>notebook</strong> the moment you're learning concepts and want to see each step's result. Reach for a <strong>cloud IDE</strong> only when you're building something with more than one file. Don't let anyone shame you into installing a full toolchain on day one — setup is a skill for later, not a prerequisite for your first program.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Debug with AI — but you steer</h2>
+  <p class="lead">Debugging used to mean staring at code and re-reading it until the mistake jumped out. AI collapses that: paste the error, the code, and what you expected versus what you got, and it isolates the likely cause in seconds. Your job shifts from hunting to directing.</p>
+
+  <p>Here is what AI genuinely does well when your program breaks: <strong>translating error messages</strong> into plain English, <strong>isolating</strong> which line probably caused the failure, <strong>proposing a specific fix</strong> with an explanation of why, and <strong>spotting the class of bug</strong> ("this is an off-by-one" / "this variable is the wrong type"). But it only works if you feed it the right three things: the <em>full error</em>, the <em>relevant code</em>, and <em>expected vs. actual behaviour</em>. "It's broken, fix it" gets you a guess; a good report gets you a fix.</p>
+  <p>And here is the part hype skips: <strong>AI is confidently wrong sometimes.</strong> It may "fix" the error by deleting the check that caused it, or invent a function that doesn't exist. You stay the pilot: read the explanation, run the change, and confirm the program now does what you actually wanted — not just that the red text disappeared. Walk the debugging conversation below, one turn at a time.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Debugging with AI, step by step</span>
+      <div class="controls">
+        <button onclick="genCopy()">▶ Play turn</button>
+        <button onclick="clearCopy()">↺ Clear</button>
+      </div>
+    </div>
+    <div class="gen-grid">
+      <div>
+        <div class="opt-group">
+          <div class="opt-label">1 · Pick the bug</div>
+          <div class="opt" id="prodOpt">
+            <button class="on" onclick="pickProd('type',this)">Type mismatch error</button>
+            <button onclick="pickProd('name',this)">Name / typo error</button>
+            <button onclick="pickProd('logic',this)">Wrong answer (no error)</button>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">2 · Pick the step</div>
+          <div class="opt" id="toneOpt">
+            <button class="on" onclick="pickTone('report',this)">You report it</button>
+            <button onclick="pickTone('isolate',this)">AI isolates it</button>
+            <button onclick="pickTone('fix',this)">AI proposes fix</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="gen-tagrow"><span class="gen-tag" id="tagProd">Type mismatch error</span><span class="gen-tag" id="tagTone">You report it</span></div>
+        <div class="gen-out" id="genOut">
+          <div class="gen-ph">Pick a bug and a step, then press ▶ Play turn to watch that part of the debugging conversation appear.</div>
+          <span id="genText"></span><span class="cursor" id="genCur">▍</span>
+        </div>
+        <p class="gen-note"><strong>AI drafts the fix in seconds — you still run it and verify.</strong> The red text disappearing is not the same as the program doing what you meant. Confirm the behaviour, not just the silence.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The report that gets a real fix</h3>
+  <p>Treat AI like a sharp colleague who can't see your screen. Give it the three things it can't guess: the <strong>full error text</strong> (copy all of it, not a summary), the <strong>code around the failing line</strong>, and <strong>expected vs. got</strong> ("I expected it to print the total; it crashed instead"). Ten seconds of good reporting turns a vague back-and-forth into one clean answer — and, quietly, teaches you to read your own bugs.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>The build loop, and one small program</h2>
+  <p class="lead">Working software isn't written in one heroic pass — it's grown in tiny cycles. Write a little, run it, read what happened, adjust. Each pass through this loop adds one working piece, and the program takes shape under your hands.</p>
+
+  <p>Every builder runs the same loop, whether it's their first program or their thousandth: <strong>write</strong> a small change, <strong>run</strong> it, <strong>read</strong> the output or error, <strong>fix</strong> what's off, and <strong>repeat</strong> until it does the job. The trick is keeping each pass small — change one thing, then run — so when something breaks, you know exactly what caused it. Below is a worked build of a tiny program: a script that greets a user by name and states their age. Toggle each step of the loop and watch the progress meter fill as the program comes together.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · The build loop, stepped</span>
+      <div class="controls">
+        <button onclick="fullStack()">▶ Run full loop</button>
+        <button onclick="bareMin()">↺ Blank start</button>
+      </div>
+    </div>
+    <div class="trust-wrap" id="trustWrap">
+      <div>
+        <div class="chips">
+          <span class="chip" id="ch-domain" onclick="chipToggle('domain')">Write: ask for a name</span>
+          <span class="chip" id="ch-photos" onclick="chipToggle('photos')">Run: see it print</span>
+          <span class="chip" id="ch-reviews" onclick="chipToggle('reviews')">Add: include the age</span>
+          <span class="chip" id="ch-ship" onclick="chipToggle('ship')">Run: hit a TypeError</span>
+          <span class="chip" id="ch-refund" onclick="chipToggle('refund')">Read: decode the error</span>
+          <span class="chip" id="ch-contact" onclick="chipToggle('contact')">Fix: convert the number</span>
+          <span class="chip" id="ch-badges" onclick="chipToggle('badges')">Run: it works</span>
+          <span class="chip" id="ch-about" onclick="chipToggle('about')">Verify: try a hard case</span>
+        </div>
+        <div class="t-verdict" id="tVerdict">Toggle the steps on and off to watch the program grow from blank to working.</div>
+        <p class="trust-hintrow">Notice the loop repeats: each "Run" is followed by a "Read." You never write two changes without running in between.</p>
+      </div>
+      <div class="tower-zone">
+        <div class="tower">
+          <div class="layer ly-domain" id="ly-domain"></div>
+          <div class="layer ly-photos" id="ly-photos"></div>
+          <div class="layer ly-reviews" id="ly-reviews"></div>
+          <div class="layer ly-ship" id="ly-ship"></div>
+          <div class="layer ly-refund" id="ly-refund"></div>
+          <div class="layer ly-contact" id="ly-contact"></div>
+          <div class="layer ly-badges" id="ly-badges"></div>
+          <div class="layer ly-about" id="ly-about"></div>
+        </div>
+        <div class="t-pct"><span id="tNum">0</span><span>%</span></div>
+        <div class="t-cap">Program done</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The loop, in the order to run it</h3>
+  <p>Start by <strong>writing the smallest thing that could run</strong> — even one line that prints something. <strong>Run it</strong> immediately; never write three changes before running. When you <strong>add</strong> the next piece and it breaks, <strong>read</strong> the error carefully before touching anything. <strong>Fix</strong> exactly what the message pointed at, then <strong>run again</strong> to confirm. Finally, <strong>verify</strong> against a case you didn't build for — an empty name, a weird age — because "it ran once" and "it works" are different claims. None of these steps is glamorous. Together they are how every program you'll ever build gets made.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>You now know what your first program is <em>for</em>. It is not a test you pass or fail — it is a loop you run. You start where there's nothing to install, you write and run in tiny steps, errors are labelled reports on your side, AI helps you decode and fix them while you steer, and "it works" is something you verify, not assume.</p>
+  <ul>
+    <li>Start setup-free — a sandbox, notebook, or cloud IDE beats a broken install</li>
+    <li>Errors are helpful reports: read bottom-up for what broke, then where</li>
+    <li>Debug with AI by feeding it the full error, the code, and expected vs. got</li>
+    <li>AI drafts fixes; you run them and confirm the behaviour, not just the silence</li>
+    <li>Run the build loop small: write, run, read, fix, repeat — then verify a hard case</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 03 of 04 · Next up: From Script to Shipped →</footer>
+<script>
+
+/* ============ Figure 1 · Error-message anatomy ============ */
+const SPOTS={
+  trace:{n:1,t:"The traceback header",
+    why:"\"Traceback (most recent call last)\" is just a heading that means: here is the trail of what the program was doing when it broke. Everything below it is the story, ending with the line where it actually failed. It's not part of the error itself — it's the label on the report.",
+    ai:"AI reads the whole traceback at once and tells you which line in YOUR code (not the language's internals) is the one you need to look at first."},
+  loc:{n:2,t:"The file and line number",
+    why:"\"File greet.py, line 4\" is the address of the problem. It tells you the exact file and the exact line to open. Before you change anything, go to that line — nine times out of ten the fix lives right there or one line above it.",
+    ai:"Paste the code around that line number and AI can point at the specific character that's wrong, instead of you re-reading the whole file."},
+  line:{n:3,t:"The offending line of code",
+    why:"The message shows you the actual line it choked on: it's trying to glue text and a number together. Seeing the real line — not a summary — is what lets you connect the error to something you wrote and recognise your own mistake.",
+    ai:"AI can rewrite just this line correctly and explain the one-word change, so you learn the rule instead of copy-pasting blindly."},
+  caret:{n:4,t:"The carets (^^^) pointer",
+    why:"Those little arrows point at the exact part of the line the computer objected to. It's the equivalent of a teacher underlining the word you got wrong. Follow the arrows and you're looking straight at the problem, not hunting for it.",
+    ai:"When you tell AI \"the carets are under `age`\", it knows precisely which value has the wrong type and skips straight to the fix."},
+  etype:{n:5,t:"The error type and message",
+    why:"The last line is the punchline: a TypeError meaning \"you can only join text to text, not a number.\" This one sentence names the whole problem. Read errors bottom-up — this line tells you WHAT went wrong; the lines above tell you WHERE.",
+    ai:"Search this exact phrase or paste it to AI and you'll get the standard cause and fix in seconds — these messages are the same for everyone, so answers are everywhere."}
+};
+const spotOrder=["trace","loc","line","caret","etype"];
+let tourTimer=null,tourIdx=0;
+function selectSpot(k){
+  document.querySelectorAll('#mock [data-spot]').forEach(el=>el.classList.remove('hl'));
+  const region=document.querySelector('#mock [data-spot="'+k+'"]');
+  if(region)region.classList.add('hl');
+  const d=SPOTS[k],panel=document.getElementById('spotPanel');
+  document.getElementById('spTag').textContent='Part '+d.n+' of 5';
+  document.getElementById('spTitle').textContent=d.t;
+  document.getElementById('spWhy').textContent=d.why;
+  document.getElementById('spAi').innerHTML='<strong>AI assist —</strong> '+d.ai;
+  panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function tourSpots(){
+  stopTour();
+  const btn=document.getElementById('tourBtn');btn.classList.add('active');
+  tourIdx=0;selectSpot(spotOrder[0]);
+  tourTimer=setInterval(()=>{
+    tourIdx++;
+    if(tourIdx>=spotOrder.length){stopTour();return}
+    selectSpot(spotOrder[tourIdx]);
+  },3200);
+}
+function stopTour(){
+  if(tourTimer){clearInterval(tourTimer);tourTimer=null}
+  document.getElementById('tourBtn').classList.remove('active');
+}
+function resetSpots(){
+  stopTour();
+  document.querySelectorAll('#mock [data-spot]').forEach(el=>el.classList.remove('hl'));
+  document.getElementById('spTag').textContent='Interactive anatomy';
+  document.getElementById('spTitle').textContent='Click any numbered dot';
+  document.getElementById('spWhy').textContent='An error message looks like a wall of scary red text, but it’s actually a labelled report telling you exactly what broke and where. Click a dot on the console — or press “Tour all” — to translate each part into plain English.';
+  document.getElementById('spAi').innerHTML='<strong>Tip —</strong> read errors bottom-up. The last line names <em>what</em> went wrong; the lines above tell you <em>where</em>. Together they usually point straight at the fix.';
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){tourSpots();o.unobserve(e.target)}}),{threshold:0.4}).observe(document.getElementById('mock'));
+
+/* ============ Figure 2 · Environment flip cards ============ */
+const cardsEl=document.getElementById('cards3');
+function flipAll(){document.querySelectorAll('.fcard').forEach(c=>c.classList.add('flipped'))}
+function resetCards(){
+  document.querySelectorAll('.fcard').forEach(c=>c.classList.remove('flipped','rec'));
+  document.querySelectorAll('.persona button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('recNote').textContent='Pick the line that sounds like you — we’ll highlight the environment that fits.';
+}
+const RECS={
+  one:{card:'c-one',msg:'Go browser sandbox. You want the fastest possible path from blank screen to “it ran” — no accounts, no installs, no files. Get the win first; everything else can wait.'},
+  niche:{card:'c-niche',msg:'Go notebook. Learning one concept at a time is exactly what cells are for — you see the result of every line right below it, which turns abstract ideas into things you can watch happen.'},
+  gen:{card:'c-gen',msg:'Go cloud IDE. A real project with real files, editable from anywhere, is the environment that teaches the workflow you’ll actually use — worth the small extra setup once you’re building.'}
+};
+function persona(key,btn){
+  document.querySelectorAll('.persona button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.fcard').forEach(c=>c.classList.remove('rec'));
+  const r=RECS[key];
+  document.getElementById(r.card).classList.add('rec');
+  const note=document.getElementById('recNote');
+  note.textContent=r.msg;
+  note.classList.remove('pop');void note.offsetWidth;note.classList.add('pop');
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){cardsEl.classList.add('in');o.unobserve(e.target)}}),{threshold:0.25}).observe(cardsEl);
+
+/* ============ Figure 3 · Debug-with-AI stepper (pre-baked) ============ */
+const COPY={
+  type:{
+    report:"YOU:\nMy program crashes when I add the age. Here's what I've got.\n\nError:\n  TypeError: can only concatenate str (not \"int\") to str\n\nCode (line 4):\n  print(\"Hi \" + name + \", age \" + age)\n\nExpected: it prints \"Hi Sam, age 30\"\nGot: it crashes with the error above.",
+    isolate:"AI:\nThe crash is on line 4. `name` is text, but `age` is a number.\nPython won't glue a number onto a string with `+` — that's what\n\"can only concatenate str (not int) to str\" means.\n\nThe carets under `age` in your traceback are pointing at\nexactly the value that has the wrong type. Everything else\non that line is fine.",
+    fix:"AI:\nConvert the number to text before joining it. Change line 4 to:\n\n  print(\"Hi \" + name + \", age \" + str(age))\n\n`str(age)` turns 30 into the text \"30\", so now every piece is\ntext and the `+` works. Run it — you should see:\n  Hi Sam, age 30\n\nVerify: try an age like 0 or a very large number to be sure."
+  },
+  name:{
+    report:"YOU:\nIt says something is not defined but I'm sure I spelled it right.\n\nError:\n  NameError: name 'naem' is not defined\n\nCode (line 4):\n  print(\"Hi \" + naem)\n\nExpected: prints the person's name.\nGot: crashes before printing anything.",
+    isolate:"AI:\nA NameError means you used a word the program has never seen.\nYou defined `name` earlier, but on line 4 you wrote `naem` —\nthe letters are swapped. The computer treats `naem` as a\nbrand-new, empty thing and gives up.\n\nThis is the most common beginner bug: a one-character typo.",
+    fix:"AI:\nFix the spelling on line 4 so it matches where you defined it:\n\n  print(\"Hi \" + name)\n\nThat's the whole fix. Run it again and the greeting prints.\n\nVerify: scan for any other place you typed `naem` — typos\noften come in pairs."
+  },
+  logic:{
+    report:"YOU:\nNo error this time — but the answer is wrong.\n\nCode:\n  total = 5 + 3\n  average = total / 3\n\nExpected: the average of 5 and 3, which is 4.\nGot: 2.67. No crash, just the wrong number.",
+    isolate:"AI:\nThis is a logic bug — the code runs happily but does the wrong\nmath. You divided by 3, but you're averaging 2 numbers, so you\nshould divide by 2. The computer did exactly what you typed;\nwhat you typed just didn't match what you meant.\n\nThese are the trickiest bugs: no red text points you at them.",
+    fix:"AI:\nDivide by how many numbers you're averaging — 2, not 3:\n\n  average = total / 2\n\nNow it returns 4. Because there's no error message to disappear,\nthe ONLY way to know this is fixed is to check the output against\na case where you already know the right answer."
+  }
+};
+const PRODNAMES={type:"Type mismatch error",name:"Name / typo error",logic:"Wrong answer (no error)"};
+const TONENAMES={report:"You report it",isolate:"AI isolates it",fix:"AI proposes fix"};
+let curProd='type',curTone='report',typer=null;
+function pickProd(p,btn){
+  curProd=p;
+  document.querySelectorAll('#prodOpt button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('tagProd').textContent=PRODNAMES[p];
+}
+function pickTone(t,btn){
+  curTone=t;
+  document.querySelectorAll('#toneOpt button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('tagTone').textContent=TONENAMES[t];
+}
+function genCopy(){
+  if(typer){clearInterval(typer);typer=null}
+  const txt=COPY[curProd][curTone];
+  const out=document.getElementById('genOut'),el=document.getElementById('genText');
+  out.classList.add('live');
+  el.textContent='';
+  let i=0;
+  typer=setInterval(()=>{
+    i++;
+    el.textContent=txt.slice(0,i);
+    if(i>=txt.length){clearInterval(typer);typer=null}
+  },9);
+}
+function clearCopy(){
+  if(typer){clearInterval(typer);typer=null}
+  document.getElementById('genText').textContent='';
+  document.getElementById('genOut').classList.remove('live');
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){genCopy();o.unobserve(e.target)}}),{threshold:0.4}).observe(document.getElementById('genOut'));
+
+/* ============ Figure 4 · Build-loop stepper ============ */
+const CHIPW={domain:12,photos:12,reviews:12,ship:13,refund:13,contact:13,badges:13,about:12};
+const trustOn={domain:false,photos:false,reviews:false,ship:false,refund:false,contact:false,badges:false,about:false};
+function chipToggle(id){trustOn[id]=!trustOn[id];updateStack()}
+function fullStack(){for(const k in trustOn)trustOn[k]=true;updateStack()}
+function bareMin(){for(const k in trustOn)trustOn[k]=false;updateStack()}
+function updateStack(){
+  let pct=0;
+  for(const k in trustOn){
+    const chip=document.getElementById('ch-'+k),layer=document.getElementById('ly-'+k);
+    if(trustOn[k]){
+      pct+=CHIPW[k];
+      chip.classList.add('on');
+      layer.style.height=(CHIPW[k]*3)+'px';
+      layer.style.opacity='1';
+    }else{
+      chip.classList.remove('on');
+      layer.style.height='0px';
+      layer.style.opacity='0';
+    }
+  }
+  if(pct>100)pct=100;
+  document.getElementById('tNum').textContent=pct;
+  let v;
+  if(pct===0)v='Blank file — nothing runs yet. Every program starts here.';
+  else if(pct<30)v='First lines written and running. You have proof the loop works — now grow it.';
+  else if(pct<55)v='It broke on the new piece. Good — a loud failure is a labelled clue, not a setback.';
+  else if(pct<80)v='Error read and fixed. The program runs clean now — but "runs once" isn\'t "works."';
+  else if(pct<100)v='Almost there — one honest verification step separates "it ran" from "it works."';
+  else v='Loop complete: written, run, read, fixed, and verified against a hard case. That\'s a real program.';
+  const vd=document.getElementById('tVerdict');
+  vd.textContent=v;
+  vd.classList.remove('pop');void vd.offsetWidth;vd.classList.add('pop');
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){fullStack();o.unobserve(e.target)}}),{threshold:0.35}).observe(document.getElementById('trustWrap'));
+
+</script>
+</body>
+</html>
