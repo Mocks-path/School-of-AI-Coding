@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Designing an Agent's Job · Lesson 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · Brief anatomy hotspots ============ */
+.anatomy{display:grid;grid-template-columns:400px 1fr;gap:26px;align-items:start}
+.mock{
+  width:100%;max-width:392px;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:18px;position:relative;
+  box-shadow:0 14px 34px rgba(65,44,35,0.10);
+}
+.mock [data-spot]{position:relative;border-radius:10px;transition:outline-color .3s}
+.mock [data-spot].hl{outline:2px solid var(--orange);outline-offset:3px;animation:hlPulse 1.3s ease-in-out infinite}
+@keyframes hlPulse{0%,100%{outline-color:var(--orange)}50%{outline-color:rgba(239,127,26,0.25)}}
+.spot{
+  position:absolute;top:-10px;right:-10px;width:24px;height:24px;border-radius:50%;
+  background:var(--brown-dark);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:2px solid var(--paper);z-index:6;transition:transform .25s,background .25s;
+  box-shadow:0 3px 8px rgba(47,29,25,0.3);
+}
+.spot:hover{transform:scale(1.2)}
+[data-spot].hl .spot{background:var(--orange);transform:scale(1.25)}
+.m-img{
+  height:96px;background:linear-gradient(135deg,#F5E7D0,#E9D2AC);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  color:var(--tan);font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;border-radius:10px;
+}
+.m-img svg{width:40px;height:32px}
+.m-thumbs{display:flex;gap:6px;margin:8px 2px 10px;cursor:pointer}
+.m-thumbs .th{width:38px;height:32px;border-radius:6px;background:linear-gradient(135deg,#EBD6B4,#DCC191);border:1px solid var(--line)}
+.m-thumbs .th.sel{outline:2px solid var(--orange)}
+.m-head{font-family:'Fraunces',serif;font-weight:700;font-size:17px;line-height:1.2;color:var(--brown-dark);padding:2px;margin:2px 0 8px;cursor:pointer}
+.m-price{display:flex;align-items:baseline;gap:9px;padding:3px;margin-bottom:10px;cursor:pointer}
+.m-price .now{font-family:'Fraunces',serif;font-size:18px;font-weight:800;color:var(--orange-dark)}
+.m-price .was{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.m-desc{font-size:12px;color:var(--ink);line-height:1.5;padding:3px;margin-bottom:10px;cursor:pointer;border-radius:8px}
+.m-cta{
+  background:var(--orange);color:#fff;text-align:center;font-weight:700;font-size:14px;
+  padding:12px;border-radius:10px;cursor:pointer;margin-bottom:12px;
+  box-shadow:0 5px 14px rgba(239,127,26,0.35);
+}
+.m-recs{cursor:pointer;padding:2px;border-radius:8px}
+.m-recs .rlbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tan);margin-bottom:6px;display:block}
+.m-recs .rrow{display:flex;gap:8px}
+.m-recs .rcard{flex:1;background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center}
+.m-recs .rcard .rimg{height:26px;border-radius:5px;background:linear-gradient(135deg,#EBD6B4,#DCC191);margin-bottom:4px;display:flex;align-items:center;justify-content:center}
+.m-recs .rcard .rimg svg{width:16px;height:16px}
+.m-recs .rcard .rp{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--brown-dark);font-weight:600}
+.spot-panel{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:24px;min-height:250px;position:sticky;top:90px;
+}
+.spot-panel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sp-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.sp-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown-dark);margin:6px 0 10px}
+.sp-why{font-size:14px;color:var(--ink);margin-bottom:12px;max-width:none}
+.sp-ai{font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;max-width:none;margin:0}
+.sp-ai strong{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark)}
+@media(max-width:880px){
+  .anatomy{grid-template-columns:1fr}
+  .spot-panel{position:static}
+}
+
+/* ============ Figure 2 · Vague / sharp brief ============ */
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.ba-col{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative;display:flex;flex-direction:column}
+.ba-before{border-style:dashed}
+.ba-after{border:2px solid var(--orange);box-shadow:0 10px 26px rgba(239,127,26,0.12)}
+.ba-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:5px;align-self:flex-start;margin-bottom:14px}
+.ba-before .ba-lbl{background:var(--cream);color:var(--muted)}
+.ba-after .ba-lbl{background:var(--orange);color:#fff}
+.ba-txt{font-family:'Fraunces',serif;font-size:15px;line-height:1.55;color:var(--brown-dark)}
+.ba-before .ba-txt{color:var(--muted)}
+.ba-cursor{color:var(--orange);font-weight:700;animation:blink .9s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.ba-metrics{display:flex;gap:14px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);flex-wrap:wrap}
+.ba-metric{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)}
+.ba-metric b{display:block;font-family:'Fraunces',serif;font-size:20px;color:var(--orange-dark);text-transform:none;letter-spacing:0}
+.ba-before .ba-metric b{color:var(--muted)}
+.ba-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:16px;max-width:none}
+.ba-note strong{color:var(--orange-dark)}
+@media(max-width:700px){
+  .ba-grid{grid-template-columns:1fr}
+}
+
+/* ============ Figure 3 · Tool picker ============ */
+.img-demo{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
+.img-stage{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+.img-canvas{
+  height:230px;border-radius:12px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;transition:all .6s;
+  background:repeating-linear-gradient(45deg,#F0E4D0 0 12px,#F7EEDD 12px 24px);
+}
+.img-canvas .prod{
+  min-width:150px;padding:0 16px;height:96px;border-radius:16px;position:relative;z-index:3;transition:all .6s;
+  background:linear-gradient(135deg,var(--tan),var(--orange-dark));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:#fff;text-align:center;
+  box-shadow:0 8px 24px rgba(65,44,35,0.25);
+}
+.img-canvas.scene-studio{background:radial-gradient(circle at 50% 40%,#fff 0%,#EDE3D2 100%)}
+.img-canvas.scene-life{background:linear-gradient(160deg,#D9E8F0 0%,#EDE0CB 60%,#C9A876 100%)}
+.img-canvas.scene-life::after{content:"";position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(0deg,rgba(65,44,35,0.15),transparent)}
+.img-canvas.scene-holiday{background:linear-gradient(160deg,#2F1D19 0%,#6E3A28 100%)}
+.img-canvas.scene-holiday::before{content:"✦ ✦ ✦";position:absolute;top:16px;left:0;right:0;text-align:center;color:var(--yellow);letter-spacing:22px;font-size:13px;opacity:.85}
+.img-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.img-controls{display:grid;gap:10px}
+.img-controls .icl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.iopt{display:grid;gap:7px}
+.iopt button{
+  font-family:'Inter',sans-serif;font-size:13px;text-align:left;background:var(--paper);
+  border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:9px;cursor:pointer;transition:all .2s;
+}
+.iopt button:hover{border-color:var(--orange)}
+.iopt button.on{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.img-caption{margin-top:16px;font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;max-width:none;min-height:44px}
+@media(max-width:880px){
+  .img-demo{grid-template-columns:1fr}
+}
+
+/* ============ Figure 4 · Autonomy decision split ============ */
+.pers-wrap{display:grid;gap:18px}
+.pers-picker{display:flex;gap:10px;flex-wrap:wrap}
+.pers-picker button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);
+  border:1px solid var(--line);color:var(--brown);padding:9px 15px;border-radius:999px;
+  cursor:pointer;letter-spacing:0.03em;transition:all .2s;display:flex;align-items:center;gap:8px;
+}
+.pers-picker button:hover{border-color:var(--orange)}
+.pers-picker button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.pers-picker .dot{width:9px;height:9px;border-radius:50%}
+.pers-screen{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;position:relative;overflow:hidden}
+.pers-screen::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.pers-hero{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown-dark);line-height:1.2;margin-bottom:6px;transition:opacity .3s}
+.pers-sub{font-size:14px;color:var(--muted);margin-bottom:16px;max-width:none;transition:opacity .3s}
+.pers-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pers-card{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;transition:all .3s;opacity:0;transform:translateY(8px)}
+.pers-screen.show .pers-card{animation:pcIn .4s forwards}
+.pers-screen.show .pers-card:nth-child(1){animation-delay:.05s}
+.pers-screen.show .pers-card:nth-child(2){animation-delay:.13s}
+.pers-screen.show .pers-card:nth-child(3){animation-delay:.21s}
+@keyframes pcIn{to{opacity:1;transform:translateY(0)}}
+.pers-card .pcimg{height:44px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center}
+.pers-card .pcimg svg{width:22px;height:22px}
+.pers-card .pcname{font-family:'Fraunces',serif;font-size:13px;font-weight:600;color:var(--brown-dark);line-height:1.2}
+.pers-card .pcprice{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;margin-top:3px}
+.pers-explain{font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--brown);padding:11px 15px;border-radius:0 8px 8px 0;max-width:none}
+.pers-explain strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:700px){
+  .pers-row{grid-template-columns:1fr;gap:8px}
+}
+
+/* ============ Figure 5 · Trap flip cards ============ */
+.trap-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.trap-card{height:210px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.trap-grid.show .trap-card{animation:trapIn .5s forwards}
+.trap-grid.show .trap-card:nth-child(1){animation-delay:.05s}
+.trap-grid.show .trap-card:nth-child(2){animation-delay:.2s}
+.trap-grid.show .trap-card:nth-child(3){animation-delay:.35s}
+.trap-grid.show .trap-card:nth-child(4){animation-delay:.5s}
+@keyframes trapIn{to{opacity:1;transform:translateY(0)}}
+.trap-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.trap-card.flipped .trap-inner{transform:rotateY(180deg)}
+.trap-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center}
+.trap-front{background:linear-gradient(135deg,var(--orange-dark) 0%,var(--tan) 100%);color:#fff;text-align:center;align-items:center}
+.trap-front .trap-claim{font-family:'Fraunces',serif;font-weight:800;font-size:26px;line-height:1.1;margin-bottom:8px}
+.trap-front .trap-sub{font-size:13px;opacity:.94;max-width:260px}
+.trap-front .trap-hint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.8}
+.trap-back{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.trap-back .trap-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.trap-back p{font-size:13.5px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){
+  .trap-grid{grid-template-columns:1fr}
+  .trap-card{height:200px}
+  .trap-front .trap-claim{font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 02 · AI Agents</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M10 31V14.5l6 8.5 6-8.5 6 8.5 6-8.5V31" stroke="#EF7F1A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="10.5" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 3 · Lesson 02 · AI Agents</div>
+  <h1>Designing an <em>agent's job</em>.</h1>
+  <p class="lede">An agent is only as good as the job you hand it. In the last lesson we took an agent apart; now we do the harder, more useful thing — write its brief. That means stating the goal, choosing the tools it may reach for, giving it a role, and above all building the guardrails that decide how much it can do on its own and where a human must step in. Get the brief right and an agent is a quiet, reliable helper. Get it vague and it will confidently do the wrong thing at full speed.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>A good brief has a small number of parts</h2>
+  <p class="lead">Handing an agent a job is like briefing a brand-new assistant on their first day: you say what you want done, who they should be, what they're allowed to touch, and when they must stop and check with you. Miss any one and the day goes sideways.</p>
+
+  <p>Newcomers tend to write agent briefs the way they'd type a quick chat message — one vague line and a hope. But an agent will actually go and <em>do</em> things, so the brief carries more weight than a chat prompt ever did. A complete brief names the goal, gives the agent its inputs, sets a role, states the few instructions that matter, lists the exact tools, and — most importantly — builds the guardrails. Click each numbered part of the brief below to see the job it does and the honest tip for getting it right.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Anatomy of an agent brief</span>
+      <div class="controls">
+        <button id="tourBtn" onclick="tourSpots()">▶ Tour all</button>
+        <button onclick="resetSpots()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="anatomy">
+      <div class="mock" id="mock">
+        <div class="m-img" data-spot="goal" onclick="selectSpot('goal')">
+          <span class="spot">1</span>
+          <svg viewBox="0 0 40 32" fill="none"><circle cx="20" cy="16" r="11" stroke="#A34E1C" stroke-width="2"/><circle cx="20" cy="16" r="5.5" stroke="#A34E1C" stroke-width="2"/><circle cx="20" cy="16" r="1.5" fill="#A34E1C"/></svg>
+          Goal · triage my inbox
+        </div>
+        <div class="m-thumbs" data-spot="context" onclick="selectSpot('context')">
+          <span class="spot">2</span>
+          <div class="th sel"></div><div class="th"></div><div class="th"></div><div class="th"></div>
+        </div>
+        <div class="m-head" data-spot="role" onclick="selectSpot('role')"><span class="spot">3</span>Role: a careful assistant that never sends without asking</div>
+        <div class="m-price" data-spot="autonomy" onclick="selectSpot('autonomy')">
+          <span class="spot">4</span>
+          <span class="now">Autonomy: ask-first</span><span class="was">read &amp; draft only</span>
+        </div>
+        <div class="m-desc" data-spot="instructions" onclick="selectSpot('instructions')">
+          <span class="spot">5</span>
+          Instructions: read each unread email, draft a reply and save it as a draft. Always cite what you based the reply on. Never guess a fact or a date.
+        </div>
+        <div class="m-cta" data-spot="guardrails" onclick="selectSpot('guardrails')"><span class="spot">6</span>Guardrail: stop &amp; ask before send / delete / pay</div>
+        <div class="m-recs" data-spot="tools" onclick="selectSpot('tools')">
+          <span class="spot">7</span>
+          <span class="rlbl">Toolbox — the only actions it may take</span>
+          <div class="rrow">
+            <div class="rcard"><div class="rimg"><svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="#A34E1C" stroke-width="1.6"/><path d="M11 11l3 3" stroke="#A34E1C" stroke-width="1.6"/></svg></div><div class="rp">read</div></div>
+            <div class="rcard"><div class="rimg"><svg viewBox="0 0 16 16" fill="none"><path d="M3 3h7l3 3v7H3z" stroke="#A34E1C" stroke-width="1.6" fill="none"/><path d="M6 8h4M6 11h4" stroke="#A34E1C" stroke-width="1.6"/></svg></div><div class="rp">draft</div></div>
+            <div class="rcard"><div class="rimg"><svg viewBox="0 0 16 16" fill="none"><rect x="2.5" y="4" width="11" height="8" rx="1.5" stroke="#A34E1C" stroke-width="1.6"/><path d="M3 5l5 4 5-4" stroke="#A34E1C" stroke-width="1.6" fill="none"/></svg></div><div class="rp">calendar</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spot-panel" id="spotPanel">
+        <div class="sp-tag" id="spTag">Interactive brief</div>
+        <div class="sp-title" id="spTitle">Click any numbered part</div>
+        <p class="sp-why" id="spWhy">Each numbered part of the brief does one job — together they turn "do something useful" into a job an agent can actually run safely. Click a dot, or press "Tour all," to walk through them.</p>
+        <p class="sp-ai" id="spAi"><strong>Tip —</strong> the goal, the tools and the guardrails do the heavy lifting. If you only had time to nail three parts, nail those three.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>The brief is where safety is actually decided</h3>
+  <p>Here's the part beginners find surprising: almost everything that makes an agent safe or dangerous is decided in the brief, before it takes a single step. A tool you don't list is an action it can never take. A confirmation gate you add is a mistake it can never make alone. A clear goal is a wrong turn it never takes. You don't supervise an agent mainly by watching it run — you supervise it by writing a careful brief up front. The rest of this lesson zooms into the three parts that matter most: the goal, the tools, and the guardrails.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>From a vague wish to a real goal</h2>
+  <p class="lead">The most common way an agent goes wrong isn't a bug — it's a fuzzy goal. "Sort out my inbox" means five different things to five people, and the agent has to pick one. A sharp goal removes the guessing. Watch a weak brief become a strong one.</p>
+
+  <p>The "before" below is how most people first write a brief: a wish, not an instruction. It sounds clear in your head and means nothing to a machine that has to act on it. The "after" is the same request rewritten as a real goal — an outcome with a finish line, plus the one or two things the agent must never do. The difference is the gap between an agent that quietly saves you an hour and one that sends a half-finished reply to your whole address book. Press Sharpen and watch the brief tighten up.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · Vague wish → real brief</span>
+      <div class="controls">
+        <button id="baBtn" onclick="runRewrite()">▶ Sharpen the brief</button>
+        <button onclick="resetRewrite()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="ba-grid">
+      <div class="ba-col ba-before">
+        <span class="ba-lbl">Before · a vague wish</span>
+        <div class="ba-txt">"Help me with my emails. Sort out the inbox and deal with anything important. Use your judgement and just handle it for me."</div>
+        <div class="ba-metrics">
+          <div class="ba-metric">Reads like<b>A wish</b></div>
+          <div class="ba-metric">Finish line<b>None</b></div>
+        </div>
+      </div>
+      <div class="ba-col ba-after">
+        <span class="ba-lbl">After · a real brief</span>
+        <div class="ba-txt"><span id="baText"></span><span class="ba-cursor" id="baCur" style="display:none">▍</span></div>
+        <div class="ba-metrics" id="baMetrics" style="opacity:0">
+          <div class="ba-metric">Reads like<b>A spec</b></div>
+          <div class="ba-metric">Finish line<b>Clear</b></div>
+        </div>
+      </div>
+    </div>
+    <p class="ba-note"><strong>A goal is an outcome with a fence around it.</strong> Notice the sharp brief doesn't just say what to do — it says what to never do ("never send") and when to stop ("after the unread emails"). The "never" list is as important as the "do" list.</p>
+  </div>
+
+  <h3>The four questions every brief must answer</h3>
+  <p>You don't need a template to write a good brief — you need to answer four questions honestly. <strong>What's the goal</strong>, stated as a checkable outcome? <strong>Who is the agent</strong> being asked to be, and how careful? <strong>What tools</strong> does it get — and, just as important, which does it not? And <strong>what are the limits</strong>: how many steps, what budget, and which actions must stop for your approval? Answer those four and you've written a brief an agent can run without surprising you. Skip any one and you've left a door open.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>The toolbox: what the agent can reach for</h2>
+  <p class="lead">An agent's tools are the exact actions it's allowed to take — and the model's clever trick is that it reads the task, then <em>picks</em> the right tool from the box and fills in the details itself. This is called function-calling, and it's easier to watch than to explain. Pick a task below and see which tool the agent reaches for.</p>
+
+  <p>Think of the toolbox as a labelled drawer of functions you hand the agent: <code>read_calendar</code>, <code>send_email</code>, <code>query_data</code>, <code>read_file</code>. You don't tell it which to use — you describe the goal, and the model matches the task to a tool and works out the inputs on its own. That matching is the heart of an agent's usefulness, and also exactly why the <em>contents</em> of the box are such a big decision: the agent can only ever do what's in the drawer. Try a few tasks and watch the pick.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Function-calling: the agent picks a tool</span>
+      <div class="controls">
+        <button onclick="setScene('calendar')">Calendar task</button>
+        <button onclick="setScene('email')">Email task</button>
+        <button onclick="setScene('data')">Data task</button>
+      </div>
+    </div>
+    <div class="img-demo">
+      <div class="img-stage">
+        <div class="img-canvas scene-plain" id="imgCanvas">
+          <div class="prod" id="imgProd">the toolbox</div>
+        </div>
+        <div class="img-label" id="imgLabel">The agent's toolbox · 4 tools available</div>
+      </div>
+      <div>
+        <div class="img-controls">
+          <div class="icl">Give it a task</div>
+          <div class="iopt" id="sceneOpt">
+            <button class="on" onclick="setScene('plain')">Show the toolbox</button>
+            <button onclick="setScene('calendar')">"What's on my calendar today?"</button>
+            <button onclick="setScene('email')">"Email Sam the meeting notes"</button>
+            <button onclick="setScene('data')">"How many signups last week?"</button>
+          </div>
+        </div>
+        <div class="img-caption" id="imgCaption">This agent was given four tools. On its own it does nothing — it waits for a task, then picks. Give it a task and watch which tool it reaches for.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Fewer tools, fewer surprises</h3>
+  <p>The instinct is to hand the agent every tool you can "just in case." Resist it. Every tool in the box is one more thing a confused agent can do by mistake, and one more thing you have to trust it with. The durable rule is: give the fewest tools that let it finish the job, and nothing more. An agent that can only read and draft cannot accidentally send, delete, or spend — not because it chose well, but because you never gave it the option. The safest action is the one that was never in the drawer.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Guardrails: how much rope, and where a human stands</h2>
+  <p class="lead">The last and most important design decision is autonomy: how much the agent may do on its own versus when it must stop and ask a human. The honest rule is beautifully simple — tie the agent's freedom to how easily a mistake can be undone. Switch between three kinds of action below and watch the verdict change.</p>
+
+  <p>Not all actions carry the same risk. Reading a file or searching the web changes nothing, so making the agent ask permission each time just wastes everyone's time. Saving a draft or moving a file changes something, but you can undo it in a click. Sending an email, deleting records, or spending money can't be taken back at all. A good design grants freedom on the harmless end and demands a human "yes" on the dangerous end. Pick an action type below and see how the autonomy call is made.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Autonomy, matched to reversibility</span>
+      <div class="controls">
+        <button onclick="cycleShopper()">▶ Cycle action type</button>
+      </div>
+    </div>
+    <div class="pers-wrap">
+      <div class="pers-picker" id="persPicker">
+        <button class="active" onclick="setShopper('read',this)"><span class="dot" style="background:var(--accent)"></span>Read-only</button>
+        <button onclick="setShopper('reversible',this)"><span class="dot" style="background:var(--orange)"></span>Reversible</button>
+        <button onclick="setShopper('irreversible',this)"><span class="dot" style="background:var(--orange-dark)"></span>Irreversible</button>
+      </div>
+      <div class="pers-screen show" id="persScreen">
+        <div class="pers-hero" id="persHero"></div>
+        <div class="pers-sub" id="persSub"></div>
+        <div class="pers-row" id="persRow"></div>
+      </div>
+      <div class="pers-explain" id="persExplain">
+        <strong>The rule of thumb</strong>
+        <span id="persWhy"></span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Guardrails you set once, in plain language</h3>
+  <p>None of this needs code. The guardrails that matter most are decisions you write into the brief: an <strong>allow-list</strong> of tools ("only these three"), a <strong>step and budget cap</strong> ("stop after 20 steps, never spend more than this"), and a <strong>confirmation gate</strong> ("draft it, then wait for my yes before sending"). Together they mean that even a badly confused agent fails small: it runs out of steps, or hits an action it isn't allowed to take alone, and stops — instead of looping a thousand times or firing off something you can't recall.</p>
+
+  <h3>The four traps to sidestep</h3>
+  <p>Every part of designing an agent's job has a matching way to get it wrong. Below are the four mistakes beginners make most often. Flip each card to see the trap on the front and the fix on the back — reading them now is far cheaper than learning them from an agent that ran off the rails.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 5 · Flip the trap → the fix</span>
+      <div class="controls">
+        <button onclick="trapAll()">Show all fixes</button>
+        <button onclick="trapReset()">↺ Back to traps</button>
+      </div>
+    </div>
+    <div class="trap-grid" id="trapGrid">
+      <div class="trap-card" onclick="this.classList.toggle('flipped')">
+        <div class="trap-inner">
+          <div class="trap-face trap-front">
+            <div class="trap-claim">No step cap</div>
+            <div class="trap-sub">The agent loops on and on, burning time and money on a task it can't quite finish.</div>
+            <div class="trap-hint">tap to flip</div>
+          </div>
+          <div class="trap-face trap-back">
+            <div class="trap-lbl">The fix</div>
+            <p>Always set a hard step and budget cap. When it's hit, the agent stops and hands back whatever it has. A bounded failure you can inspect beats an infinite loop you have to kill.</p>
+          </div>
+        </div>
+      </div>
+      <div class="trap-card" onclick="this.classList.toggle('flipped')">
+        <div class="trap-inner">
+          <div class="trap-face trap-front">
+            <div class="trap-claim">Too many tools</div>
+            <div class="trap-sub">You hand it every tool "just in case," widening what a single wrong step can touch.</div>
+            <div class="trap-hint">tap to flip</div>
+          </div>
+          <div class="trap-face trap-back">
+            <div class="trap-lbl">The fix</div>
+            <p>Give the fewest tools the job needs. Every tool you leave out of the box is a whole class of mistake that becomes impossible. Start minimal and add only when a task genuinely needs it.</p>
+          </div>
+        </div>
+      </div>
+      <div class="trap-card" onclick="this.classList.toggle('flipped')">
+        <div class="trap-inner">
+          <div class="trap-face trap-front">
+            <div class="trap-claim">No confirm gate</div>
+            <div class="trap-sub">The agent can send, delete or pay on its own — and one bad step can't be undone.</div>
+            <div class="trap-hint">tap to flip</div>
+          </div>
+          <div class="trap-face trap-back">
+            <div class="trap-lbl">The fix</div>
+            <p>Put a human-in-the-loop gate before anything irreversible. The agent prepares the action and waits for your explicit yes. Keep read-only and easily-undone steps automatic so it stays useful.</p>
+          </div>
+        </div>
+      </div>
+      <div class="trap-card" onclick="this.classList.toggle('flipped')">
+        <div class="trap-inner">
+          <div class="trap-face trap-front">
+            <div class="trap-claim">A vague goal</div>
+            <div class="trap-sub">"Sort out my inbox" — so the agent guesses your meaning and confidently does the wrong thing.</div>
+            <div class="trap-hint">tap to flip</div>
+          </div>
+          <div class="trap-face trap-back">
+            <div class="trap-lbl">The fix</div>
+            <p>Write the goal as a checkable outcome with a clear "done," and state what it must never do. Precise instructions in, sane behaviour out — the agent can only aim at the target you name.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The through-line of every trap</h3>
+  <p>Notice all four traps are the same instinct in different clothes: giving the agent more freedom than the task actually needs. An extra tool, an unbounded loop, a missing gate, a loose goal — each hands the agent room it didn't require and you didn't intend. The discipline of designing an agent's job is subtraction, not addition: the tightest brief that still gets the work done is almost always the safest and the most reliable. You are not limiting the agent for its own sake — you're keeping its power aimed exactly where you want it.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>Designing an agent's job is writing its brief, and the brief is where almost all the safety lives. State the goal as a checkable outcome, give it a role, hand it the fewest tools that finish the work, and set guardrails that match its freedom to how easily a mistake can be undone. A careful brief up front beats anxious watching later — a well-briefed agent is a quiet helper; a vaguely-briefed one is a fast mistake.</p>
+  <ul>
+    <li>A brief answers four things: the goal, the role, the tools, the guardrails</li>
+    <li>A real goal is an outcome with a finish line — and a "never do" list</li>
+    <li>Function-calling = the model picks a named tool; you decide which tools exist</li>
+    <li>Give the fewest tools that get the job done — the rest can't go wrong</li>
+    <li>Match autonomy to reversibility: free on read-only, ask before the irreversible</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 02 of 04 · Next up: Watching an Agent Work →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ============ Figure 1 · Brief anatomy ============ */
+const SPOTS={
+  goal:{n:1,t:"The goal",why:"The one-line objective — what \"done\" actually looks like. Every step the agent takes is measured against this sentence, so it has to be specific and checkable.",ai:"Write the goal as an outcome with a finish line: \"draft a reply to each unread email and save it — do not send.\" Vague goals are the number-one cause of agents going sideways."},
+  context:{n:2,t:"Inputs & context",why:"The material the agent starts with — the files, data or examples it needs to do the job. An agent with no context has to guess, and guessing is where it invents.",ai:"Hand it exactly what a new hire would need, and nothing more. Extra, irrelevant context is just noise that pulls the agent off-task."},
+  role:{n:3,t:"Role & instructions",why:"Who the agent is being asked to be — \"a careful assistant,\" \"a cautious researcher.\" The role shapes its tone, its priorities, and how careful it is by default.",ai:"State the role and the two or three rules that matter most in plain words. \"You are careful; when unsure, you stop and ask\" beats a page of vague personality."},
+  autonomy:{n:4,t:"Autonomy level",why:"How much rope the agent gets — can it act freely, must it ask first, or is it read-only? This is the single most important safety dial on the whole brief.",ai:"Match autonomy to reversibility: let it act alone on read-only and easily-undone steps; require a human yes before anything irreversible. That's Figure 4 in full."},
+  instructions:{n:5,t:"Step instructions",why:"The how — any specific method, order or standard you want followed. Not every step, but the ones that matter: \"always cite the source,\" \"never guess a date.\"",ai:"Give guidance, not a rigid script — if you can script every step, you wanted a workflow, not an agent. Name the must-dos and must-nots, then let it plan the rest."},
+  guardrails:{n:6,t:"Guardrails & stop rules",why:"The fences: how many steps it gets, what it may spend, which actions demand your confirmation, and when it must simply stop. This is what keeps a bad run small.",ai:"Set a step cap and a confirmation gate before anything irreversible. A guardrail you write once saves you from a loop that would otherwise run a thousand times."},
+  tools:{n:7,t:"The toolbox",why:"The exact set of actions you hand the agent — read, draft, search, send. This list is its entire reach; a tool you don't grant is a thing it simply cannot do.",ai:"Give the fewest tools that get the job done. Every extra tool is extra surface area for a mistake. We open the toolbox in Figure 3."}
+};
+const spotOrder=["goal","context","role","autonomy","instructions","guardrails","tools"];
+let tourTimer=null,tourIdx=0;
+function selectSpot(k){
+  document.querySelectorAll('#mock [data-spot]').forEach(e=>e.classList.remove('hl'));
+  const region=document.querySelector('#mock [data-spot="'+k+'"]');
+  if(region)region.classList.add('hl');
+  const d=SPOTS[k],panel=el('spotPanel');
+  el('spTag').textContent='Part '+d.n+' of 7';
+  el('spTitle').textContent=d.t;
+  el('spWhy').textContent=d.why;
+  el('spAi').innerHTML='<strong>How to get it right —</strong> '+d.ai;
+  panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function tourSpots(){
+  stopTour();el('tourBtn').classList.add('active');
+  tourIdx=0;selectSpot(spotOrder[0]);
+  tourTimer=setInterval(()=>{tourIdx++;if(tourIdx>=spotOrder.length){stopTour();return}selectSpot(spotOrder[tourIdx])},3000);
+}
+function stopTour(){if(tourTimer){clearInterval(tourTimer);tourTimer=null}el('tourBtn').classList.remove('active')}
+function resetSpots(){
+  stopTour();
+  document.querySelectorAll('#mock [data-spot]').forEach(e=>e.classList.remove('hl'));
+  el('spTag').textContent='Interactive brief';
+  el('spTitle').textContent='Click any numbered part';
+  el('spWhy').textContent='Each numbered part of the brief does one job — together they turn "do something useful" into a job an agent can actually run safely. Click a dot, or press "Tour all," to walk through them.';
+  el('spAi').innerHTML='<strong>Tip —</strong> the goal, the tools and the guardrails do the heavy lifting. If you only had time to nail three parts, nail those three.';
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){tourSpots();o.unobserve(e.target)}}),{threshold:0.4}).observe(el('mock'));
+
+/* ============ Figure 2 · Sharpen the brief ============ */
+const AFTER="GOAL: draft a reply to every unread email from this week and save each as a draft — never send. ROLE: a careful assistant who stops and asks when unsure. TOOLS: read inbox, read calendar, save draft — nothing else. LIMITS: stop after 20 emails; never send, delete or archive; if an email needs a decision only I can make, flag it and move on. DONE when every unread email has a saved draft or a flag.";
+let baTyper=null;
+function runRewrite(){
+  resetRewrite();
+  el('baBtn').classList.add('active');
+  el('baCur').style.display='inline';
+  const t=el('baText');let i=0;
+  baTyper=setInterval(()=>{
+    i++;t.textContent=AFTER.slice(0,i);
+    if(i>=AFTER.length){clearInterval(baTyper);baTyper=null;el('baCur').style.display='none';el('baMetrics').style.opacity='1';el('baBtn').classList.remove('active')}
+  },12);
+}
+function resetRewrite(){
+  if(baTyper){clearInterval(baTyper);baTyper=null}
+  el('baText').textContent='';el('baCur').style.display='none';
+  el('baMetrics').style.opacity='0';el('baBtn').classList.remove('active');
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runRewrite();o.unobserve(e.target)}}),{threshold:0.4}).observe(el('baText').closest('.ba-after'));
+
+/* ============ Figure 3 · Tool picker ============ */
+const SCENES={
+  plain:{cls:'scene-plain',tool:'the toolbox',label:'The agent\'s toolbox · 4 tools available',cap:'This agent was given four tools: read_calendar, send_email, query_data and read_file. On its own it does nothing — it waits for a task, then picks. Give it a task on the right.'},
+  calendar:{cls:'scene-studio',tool:'read_calendar()',label:'Picked: read_calendar() · read-only',cap:'The model reads the task, sees "calendar," and calls read_calendar() — filling in today\'s date as the argument itself. It only reads, changing nothing, so this needs no confirmation.'},
+  email:{cls:'scene-life',tool:'send_email()',label:'Picked: send_email() · irreversible',cap:'"Email Sam" maps to send_email(). But this one acts in the world and can\'t be unsent — so a good brief makes the agent draft it and stop for your yes before it fires.'},
+  data:{cls:'scene-holiday',tool:'query_data()',label:'Picked: query_data() · read-only',cap:'"How many signups" becomes query_data() with a filter for last week. Read-only again — the agent reads the number back and keeps working without needing to ask.'}
+};
+function setScene(k){
+  const c=el('imgCanvas'),d=SCENES[k];
+  c.className='img-canvas '+d.cls;
+  el('imgProd').textContent=d.tool;
+  el('imgLabel').textContent=d.label;
+  el('imgCaption').textContent=d.cap;
+  document.querySelectorAll('#sceneOpt button').forEach(b=>b.classList.remove('on'));
+  const idx={plain:0,calendar:1,email:2,data:3}[k];
+  document.querySelectorAll('#sceneOpt button')[idx].classList.add('on');
+}
+let sceneTimer=null;
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){
+  const seq=['calendar','email','data','plain'];let i=0;
+  sceneTimer=setInterval(()=>{setScene(seq[i]);i++;if(i>=seq.length)clearInterval(sceneTimer)},1300);
+  o.unobserve(e.target)}}),{threshold:0.4}).observe(el('imgCanvas'));
+
+/* ============ Figure 4 · Autonomy decision ============ */
+const SHOPPERS={
+  read:{hero:"Let it run — no need to ask.",sub:"Read-only actions can't break anything, so the agent acts freely.",
+    cards:[{n:"Search the web",p:"read-only",ic:'<circle cx="11" cy="11" r="6.5" stroke="#008DD2" stroke-width="1.7"/><path d="M16 16l4 4" stroke="#008DD2" stroke-width="1.7"/>'},{n:"Read a file",p:"read-only",ic:'<path d="M5 3h8l4 4v12H5z" stroke="#A34E1C" stroke-width="1.7" fill="none"/><path d="M8 11h7M8 15h7" stroke="#A34E1C" stroke-width="1.7"/>'},{n:"Check the calendar",p:"read-only",ic:'<rect x="3" y="5" width="16" height="14" rx="2" stroke="#C9A227" stroke-width="1.7"/><path d="M3 9h16M8 3v4M14 3v4" stroke="#C9A227" stroke-width="1.7"/>'}],
+    why:"These actions only look; they change nothing. The worst case is a wasted step, so making the agent stop and ask here just slows everyone down. Grant them freely and let it work."},
+  reversible:{hero:"Let it act — but keep an undo.",sub:"Reversible actions are fine to automate as long as you can roll them back.",
+    cards:[{n:"Save a draft",p:"undoable",ic:'<path d="M4 4h11l3 3v11H4z" stroke="#EF7F1A" stroke-width="1.7" fill="none"/><path d="M7 4v5h7V4" stroke="#EF7F1A" stroke-width="1.7"/>'},{n:"Add a calendar hold",p:"undoable",ic:'<rect x="3" y="5" width="16" height="14" rx="2" stroke="#A34E1C" stroke-width="1.7"/><path d="M11 10v6M8 13h6" stroke="#A34E1C" stroke-width="1.7"/>'},{n:"Move a file to a folder",p:"undoable",ic:'<path d="M3 6h6l2 2h8v9H3z" stroke="#412C23" stroke-width="1.7" fill="none"/>'}],
+    why:"These change something, but the change is cheap to undo. Let the agent do them, keep a log of every action so you can see what happened, and make sure a mistake can be reversed in a click."},
+  irreversible:{hero:"Stop and ask a human first.",sub:"Irreversible or costly actions need a human yes before they ever happen.",
+    cards:[{n:"Send an email",p:"can't undo",ic:'<path d="M3 6l8 6 8-6" stroke="#D55222" stroke-width="1.7" fill="none"/><rect x="3" y="6" width="16" height="11" rx="1.5" stroke="#D55222" stroke-width="1.7"/>'},{n:"Delete records",p:"can't undo",ic:'<path d="M5 6h12M9 6V4h4v2M7 6l1 12h6l1-12" stroke="#8B7A6C" stroke-width="1.7" fill="none"/>'},{n:"Spend money / pay",p:"can't undo",ic:'<circle cx="11" cy="11" r="7" stroke="#2F1D19" stroke-width="1.7"/><path d="M11 7v8M9 9.5h3a1.5 1.5 0 010 3h-2a1.5 1.5 0 000 3h3" stroke="#2F1D19" stroke-width="1.5" fill="none"/>'}],
+    why:"You can't unsend an email, un-delete data, or un-spend money. For anything on this list, the safe design is a confirmation gate: the agent prepares the action and waits for your explicit yes."}
+};
+const SHOPORDER=['read','reversible','irreversible'];
+function renderShopper(k){
+  const d=SHOPPERS[k],scr=el('persScreen');
+  el('persHero').textContent=d.hero;
+  el('persSub').textContent=d.sub;
+  let html='';
+  d.cards.forEach(c=>{html+='<div class="pers-card"><div class="pcimg"><svg viewBox="0 0 22 22" fill="none">'+c.ic+'</svg></div><div class="pcname">'+c.n+'</div><div class="pcprice">'+c.p+'</div></div>'});
+  el('persRow').innerHTML=html;
+  el('persWhy').textContent=d.why;
+  scr.classList.remove('show');void scr.offsetWidth;scr.classList.add('show');
+}
+function setShopper(k,btn){
+  document.querySelectorAll('#persPicker button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderShopper(k);
+}
+let shopIdx=0;
+function cycleShopper(){
+  shopIdx=(shopIdx+1)%SHOPORDER.length;
+  const btn=document.querySelectorAll('#persPicker button')[shopIdx];
+  setShopper(SHOPORDER[shopIdx],btn);
+}
+renderShopper('read');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){renderShopper('read');o.unobserve(e.target)}}),{threshold:0.4}).observe(el('persScreen'));
+
+/* ============ Figure 5 · Trap cards ============ */
+function trapAll(){document.querySelectorAll('.trap-card').forEach(c=>c.classList.add('flipped'))}
+function trapReset(){document.querySelectorAll('.trap-card').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){el('trapGrid').classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(el('trapGrid'));
+
+</script>
+</body>
+</html>

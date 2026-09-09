@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Evaluating, Trusting &amp; Shipping Agents · Lesson 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · Run-outcome chart ============ */
+.fc-chart{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.fc-svg-wrap{position:relative}
+.fc-legend{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted)}
+.fc-legend span{display:inline-flex;align-items:center;gap:7px}
+.fc-legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+.fc-legend i.hist{background:var(--brown)}
+.fc-legend i.fore{background:var(--orange);background-image:none}
+.fc-legend i.band{background:rgba(239,127,26,0.25);height:11px;border-radius:3px}
+.fc-read{display:flex;gap:14px;margin-top:18px;flex-wrap:wrap}
+.fc-card{flex:1;min-width:140px;background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+.fc-card .fck{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fc-card .fcv{font-family:'Fraunces',serif;font-size:24px;font-weight:800;color:var(--orange-dark);line-height:1}
+.fc-card .fcn{font-size:11.5px;color:var(--brown);margin-top:4px;max-width:none}
+.dash-path{stroke-dasharray:5 4}
+.grow-line{stroke-dasharray:1200;stroke-dashoffset:1200;transition:stroke-dashoffset 1.6s ease}
+.grow-line.go{stroke-dashoffset:0}
+.fc-band{opacity:0;transition:opacity .8s ease .8s}
+.fc-band.go{opacity:1}
+
+/* ============ Figure 2 · Reliability meter ============ */
+.dp-wrap{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+.dp-sliders{display:grid;gap:20px;margin-bottom:22px}
+.dp-row{display:grid;grid-template-columns:180px 1fr 96px;gap:16px;align-items:center}
+.dp-row label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--brown);font-weight:600}
+.dp-row .dpval{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange-dark);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--cream);border:1px solid var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+.dp-suggest{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.dp-price-block{text-align:center}
+.dp-plabel{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.dp-price{font-family:'Fraunces',serif;font-size:40px;font-weight:800;color:var(--brown-dark);line-height:1;transition:color .3s}
+.dp-arrow{font-size:26px;color:var(--orange);font-weight:700}
+.dp-ai-price{color:var(--orange-dark)}
+.dp-verdict{font-size:14px;color:var(--brown);flex:1;min-width:200px;line-height:1.45;max-width:none}
+.dp-bars{display:flex;gap:12px}
+.dp-bar-card{flex:1;background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:14px;text-align:center}
+.dp-bar-track{height:80px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:8px}
+.dp-bar{width:44px;border-radius:6px 6px 0 0;background:linear-gradient(0deg,var(--tan),var(--orange));transition:height .4s;min-height:4px}
+.dp-bar-card .dbk{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)}
+.dp-bar-card .dbv{font-family:'Fraunces',serif;font-size:19px;font-weight:800;color:var(--orange-dark);margin-top:2px}
+.dp-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:16px;max-width:none}
+.dp-note strong{color:var(--orange-dark)}
+@media(max-width:700px){
+  .dp-row{grid-template-columns:1fr 80px;gap:10px}
+  .dp-row label{grid-column:1/-1}
+  .dp-price{font-size:32px}
+}
+
+/* ============ Figure 3 · Failure → guardrail map ============ */
+.inv-panel{display:grid;gap:12px}
+.inv-item{
+  display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  border-left:5px solid var(--line);transition:all .3s;opacity:0;transform:translateX(-12px);
+}
+.inv-panel.in .inv-item{animation:invIn .5s forwards}
+.inv-panel.in .inv-item:nth-child(1){animation-delay:.05s}
+.inv-panel.in .inv-item:nth-child(2){animation-delay:.15s}
+.inv-panel.in .inv-item:nth-child(3){animation-delay:.25s}
+.inv-panel.in .inv-item:nth-child(4){animation-delay:.35s}
+@keyframes invIn{to{opacity:1;transform:translateX(0)}}
+.inv-item.crit{border-left-color:var(--orange-dark)}
+.inv-item.warn{border-left-color:var(--yellow)}
+.inv-item.ok{border-left-color:#4ADE80}
+.inv-item.over{border-left-color:var(--accent)}
+.inv-main{min-width:0}
+.inv-name{font-family:'Fraunces',serif;font-size:16px;font-weight:700;color:var(--brown-dark);line-height:1.15}
+.inv-bar-wrap{margin-top:8px}
+.inv-bar-track{height:9px;border-radius:5px;background:var(--cream);border:1px solid var(--line);overflow:hidden;position:relative}
+.inv-bar-fill{height:100%;border-radius:5px;width:0;transition:width 1s ease}
+.inv-item.crit .inv-bar-fill{background:var(--orange-dark)}
+.inv-item.warn .inv-bar-fill{background:var(--yellow)}
+.inv-item.ok .inv-bar-fill{background:#4ADE80}
+.inv-item.over .inv-bar-fill{background:var(--accent)}
+.inv-stock{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.04em;color:var(--muted);margin-top:6px}
+.inv-signal{text-align:right;min-width:150px}
+.inv-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:5px}
+.inv-item.crit .inv-badge{background:#FEE2E2;color:#991B1B}
+.inv-item.warn .inv-badge{background:#FEF3C7;color:#92400E}
+.inv-item.ok .inv-badge{background:#DCFCE7;color:#166534}
+.inv-item.over .inv-badge{background:#DBEAFE;color:#1E40AF}
+.inv-action{font-size:11.5px;color:var(--brown);max-width:170px;margin:0;line-height:1.35;display:inline-block}
+@media(max-width:700px){
+  .inv-item{grid-template-columns:1fr}
+  .inv-signal{text-align:left}
+  .inv-action{max-width:none}
+}
+
+/* ============ Figure 4 · Autonomy ladder / decision ============ */
+.loop-wrap{display:grid;grid-template-columns:1fr 320px;gap:26px;align-items:start}
+.loop-ring{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;min-height:320px}
+.loop-node{
+  position:absolute;width:132px;text-align:center;padding:12px 8px;border:2px solid var(--line);
+  border-radius:11px;background:var(--cream);cursor:pointer;transition:all .25s;
+}
+.loop-node:hover{border-color:var(--orange);transform:scale(1.04)}
+.loop-node.active{border-color:var(--brown-dark);background:#FDEBD7;box-shadow:0 8px 18px rgba(239,127,26,0.2)}
+.loop-node .lnn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.loop-node .lnt{font-family:'Fraunces',serif;font-size:14px;color:var(--brown-dark);line-height:1.1;margin-top:2px}
+.loop-node .lntag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.05em;text-transform:uppercase;margin-top:4px;padding:2px 6px;border-radius:4px;display:inline-block}
+.loop-node .lntag.ai{background:rgba(239,127,26,0.16);color:var(--orange-dark)}
+.loop-node .lntag.you{background:rgba(0,141,210,0.14);color:var(--accent)}
+#ln0{top:14px;left:50%;transform:translateX(-50%)}
+#ln0.active{transform:translateX(-50%) scale(1.04)}
+#ln1{top:44%;right:14px}
+#ln2{bottom:14px;left:50%;transform:translateX(-50%)}
+#ln2.active{transform:translateX(-50%) scale(1.04)}
+#ln3{top:44%;left:14px}
+.loop-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.loop-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;min-height:260px;position:sticky;top:90px}
+.loop-panel.swap{animation:bubIn .4s ease}
+@keyframes bubIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.lp-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.lp-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--brown-dark);margin:6px 0 10px}
+.lp-body{font-size:14px;color:var(--ink);margin-bottom:14px;max-width:none}
+.lp-who{font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--brown);padding:11px 14px;border-radius:0 8px 8px 0;max-width:none;margin:0}
+.lp-who strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:880px){
+  .loop-wrap{grid-template-columns:1fr}
+  .loop-panel{position:static}
+  .loop-ring{min-height:360px}
+}
+
+/* ============ Figure 5 · Week recap ============ */
+.recap-chain{display:flex;align-items:center;gap:0;margin-bottom:20px}
+.recap-node{
+  flex:1;text-align:center;padding:16px 8px;background:var(--paper);
+  border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:all .25s;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;color:var(--brown);font-weight:600;
+}
+.recap-node .rcn{display:block;font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:var(--line);margin-bottom:4px;transition:color .25s}
+.recap-node:hover{border-color:var(--orange);transform:translateY(-2px)}
+.recap-node.active{background:var(--brown-dark);border-color:var(--brown-dark);color:var(--paper)}
+.recap-node.active .rcn{color:var(--orange)}
+.recap-link{width:24px;height:3px;background:var(--line);flex-shrink:0;position:relative}
+.recap-link::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border-left:7px solid var(--line);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.recap-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px;min-height:150px}
+.recap-panel.swap{animation:bubIn .4s ease}
+.recap-panel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark);margin-bottom:6px}
+.recap-panel .rtag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:12px}
+.recap-panel p{font-size:14.5px;color:var(--ink);max-width:none;margin-bottom:12px}
+.recap-panel .rthread{font-size:13px;color:var(--brown);background:var(--cream);border-left:3px solid var(--orange);padding:11px 14px;border-radius:0 8px 8px 0;max-width:none;margin:0}
+.recap-panel .rthread strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark)}
+@media(max-width:700px){
+  .recap-chain{flex-wrap:wrap;gap:8px}
+  .recap-node{flex:1 1 40%}
+  .recap-link{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 04 · AI Agents</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M10 31V14.5l6 8.5 6-8.5 6 8.5 6-8.5V31" stroke="#EF7F1A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="10.5" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 3 · Lesson 04 · AI Agents</div>
+  <h1>Trust an agent <em>only as far as you've tested it</em>.</h1>
+  <p class="lede">An agent that dazzles in one demo can quietly fail one time in five — and you'd never know from a single run. Before you let one loose, you have to measure how reliable it actually is, plan for the ways it breaks, and decide exactly how much freedom it has earned. This lesson is about turning a clever demo into something you can actually depend on.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>The same task, run twice, gives two answers</h2>
+  <p class="lead">The first thing to unlearn: an agent is not a calculator. Run the identical task with the identical prompt ten times and you'll get ten slightly different runs — some perfect, some clumsy, the odd one wrong. This is non-determinism, and it's normal.</p>
+
+  <p>Because an agent's output varies run to run, a single successful demo tells you almost nothing. The honest way to measure reliability is to run the same task many times and look at the spread of outcomes — not one lucky result, but the whole cloud of them. A good evaluation isn't a single green checkmark; it's a range, with an average you can quote and a spread you can respect. Watch the runs plot themselves below, then read what the numbers actually tell you.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · The same task, measured over many runs</span>
+      <div class="controls">
+        <button id="fcBtn" onclick="drawForecast()">▶ Run the trials</button>
+        <button onclick="resetForecast()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="fc-chart">
+      <div class="fc-svg-wrap">
+        <svg viewBox="0 0 640 260" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+          <!-- grid -->
+          <line x1="46" y1="30" x2="46" y2="220" stroke="#E8DCC8" stroke-width="1"/>
+          <line x1="46" y1="220" x2="620" y2="220" stroke="#E8DCC8" stroke-width="1"/>
+          <line x1="46" y1="170" x2="620" y2="170" stroke="#F0E7D6" stroke-width="1"/>
+          <line x1="46" y1="120" x2="620" y2="120" stroke="#F0E7D6" stroke-width="1"/>
+          <line x1="46" y1="70" x2="620" y2="70" stroke="#F0E7D6" stroke-width="1"/>
+          <!-- y labels -->
+          <text x="38" y="223" font-size="9" fill="#6E5C50" text-anchor="end">0</text>
+          <text x="38" y="173" font-size="9" fill="#6E5C50" text-anchor="end">low</text>
+          <text x="38" y="123" font-size="9" fill="#6E5C50" text-anchor="end">ok</text>
+          <text x="38" y="73" font-size="9" fill="#6E5C50" text-anchor="end">good</text>
+          <!-- divider between runs-so-far and expected -->
+          <line x1="345" y1="30" x2="345" y2="220" stroke="#D8C9AF" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="345" y="245" font-size="8.5" fill="#A34E1C" text-anchor="middle" letter-spacing="1">NOW</text>
+          <text x="195" y="245" font-size="8.5" fill="#6E5C50" text-anchor="middle" letter-spacing="1">RUNS SO FAR</text>
+          <text x="490" y="245" font-size="8.5" fill="#D55222" text-anchor="middle" letter-spacing="1">LIKELY RANGE</text>
+          <!-- spread band -->
+          <path class="fc-band" id="fcBand" d="M345,150 L400,135 L455,120 L510,100 L565,82 L620,60 L620,120 L565,138 L510,152 L455,166 L400,178 L345,182 Z" fill="rgba(239,127,26,0.22)"/>
+          <!-- run outcomes line -->
+          <polyline class="grow-line" id="fcHist" points="46,175 96,152 146,182 196,140 246,168 296,138 345,150" fill="none" stroke="#412C23" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- expected next runs -->
+          <polyline class="grow-line dash-path" id="fcFore" points="345,150 400,138 455,124 510,110 565,96 620,80" fill="none" stroke="#EF7F1A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="345" cy="150" r="4" fill="#412C23"/>
+          <circle cx="620" cy="80" r="4" fill="#EF7F1A"/>
+        </svg>
+      </div>
+      <div class="fc-legend">
+        <span><i class="hist"></i> Actual run outcomes</span>
+        <span><i class="fore"></i> Expected next runs</span>
+        <span><i class="band"></i> Spread of outcomes</span>
+      </div>
+      <div class="fc-read">
+        <div class="fc-card"><div class="fck">Non-determinism</div><div class="fcv">Varies</div><div class="fcn">Same input, different output — the result wobbles every single run.</div></div>
+        <div class="fc-card"><div class="fck">Measured success</div><div class="fcv">≈ 8 / 10</div><div class="fcn">About eight of ten runs hit the goal. One run alone would have told you nothing.</div></div>
+        <div class="fc-card"><div class="fck">So you should</div><div class="fcv">Test in bulk</div><div class="fcn">Judge reliability from many runs, never a single lucky (or unlucky) demo.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>One demo is a magic trick, not a measurement</h3>
+  <p>The most expensive mistake with agents is trusting the demo. You run it once, it works beautifully, you ship it — and in production it fails one time in five on the same task, because that one perfect run was never the whole story. Professionals treat a single success the way a scientist treats a single data point: interesting, but meaningless alone. Run it many times, count the wins, and quote the rate — that number, not the demo, is the truth about your agent.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Turn many runs into one honest number</h2>
+  <p class="lead">Once you accept that agents vary, evaluation becomes simple arithmetic: run the task N times, count how many succeed, and read the success rate. That percentage is the single most useful fact about any agent you're about to trust.</p>
+
+  <p>A success rate is just wins over attempts — but it moves with the task. A simple, clearly-worded, one-step job might pass 95+ times out of 100. Pile on complexity, a vague prompt and a long chain of steps, and the rate can collapse — because every extra step is another place to slip, and the failures multiply. Drive the three factors below and watch the meter move. It's a model, not a promise, but the shape of it is real.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · Reliability meter — success over 100 runs</span>
+      <div class="controls" id="dpPresets">
+        <button onclick="dpPreset('hot')">Simple task</button>
+        <button onclick="dpPreset('war')">Vague prompt</button>
+        <button onclick="dpPreset('slow')">Long chain</button>
+      </div>
+    </div>
+    <div class="dp-wrap">
+      <div class="dp-suggest">
+        <div class="dp-price-block">
+          <div class="dp-plabel">One green demo</div>
+          <div class="dp-price">✓</div>
+        </div>
+        <div class="dp-arrow">→</div>
+        <div class="dp-price-block">
+          <div class="dp-plabel">Real rate · 100 runs</div>
+          <div class="dp-price dp-ai-price" id="dpSuggest">—%</div>
+        </div>
+        <div class="dp-verdict" id="dpVerdict">Move a factor to see how a real success rate responds — and how far it can fall from that flattering single demo.</div>
+      </div>
+      <div class="dp-sliders">
+        <div class="dp-row">
+          <label for="dpDemand">Task complexity</label>
+          <input type="range" id="dpDemand" min="0" max="100" value="50" oninput="dpCalc()">
+          <div class="dpval" id="dpDemandV">Moderate</div>
+        </div>
+        <div class="dp-row">
+          <label for="dpStock">Instruction clarity</label>
+          <input type="range" id="dpStock" min="0" max="100" value="50" oninput="dpCalc()">
+          <div class="dpval" id="dpStockV">Okay</div>
+        </div>
+        <div class="dp-row">
+          <label for="dpComp">Steps / tools used</label>
+          <input type="range" id="dpComp" min="0" max="100" value="50" oninput="dpCalc()">
+          <div class="dpval" id="dpCompV">Several</div>
+        </div>
+      </div>
+      <div class="dp-bars">
+        <div class="dp-bar-card"><div class="dp-bar-track"><div class="dp-bar" id="barMargin" style="height:50%"></div></div><div class="dbk">Passed</div><div class="dbv" id="dpMargin">50</div></div>
+        <div class="dp-bar-card"><div class="dp-bar-track"><div class="dp-bar" id="barVol" style="height:50%"></div></div><div class="dbk">Failed</div><div class="dbv" id="dpVol">50</div></div>
+        <div class="dp-bar-card"><div class="dp-bar-track"><div class="dp-bar" id="barProfit" style="height:50%"></div></div><div class="dbk">Steps</div><div class="dbv" id="dpProfit">4×</div></div>
+      </div>
+      <p class="dp-note"><strong>One green demo is not a success rate.</strong> Measure over many runs before you trust an agent with anything that matters. The more steps a task chains together, the more the small per-step failures compound.</p>
+    </div>
+  </div>
+
+  <h3>Set the bar by the stakes</h3>
+  <p>There's no universal "good enough" — the required success rate depends entirely on what a failure costs. An agent that drafts ideas for you to review can be gloriously unreliable; a mistake just gets deleted. An agent that touches money or sends things to real people needs to be far higher, and even then it needs a human check. Decide the bar before you measure, based on the damage a single failure could do — then hold the agent to it.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Every way it breaks has a guardrail</h2>
+  <p class="lead">Agents fail in a small, predictable set of ways. The good news: each one has a standard guardrail that contains it. You don't prevent failure — you make sure that when it happens, it's cheap and caught.</p>
+
+  <p>A guardrail is a limit you place around the agent so a mistake can't spiral. Four failure modes cover most of the trouble: it invents a tool that doesn't exist, it gets stuck repeating itself, it grabs the wrong tool for the job, or it burns through cost with no ceiling. For each, there's a well-worn fix — a check, a cap, a clearer setup, a budget. Read the map below; this is the checklist that turns a risky agent into a safe one.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Failure modes and the guardrail for each</span>
+      <div class="controls">
+        <button onclick="invFill()">▶ Map the guardrails</button>
+        <button onclick="invReset()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="inv-panel" id="invPanel">
+      <div class="inv-item crit">
+        <div class="inv-main">
+          <div class="inv-name">Hallucinated tool call</div>
+          <div class="inv-bar-wrap"><div class="inv-bar-track"><div class="inv-bar-fill" data-w="88"></div></div></div>
+          <div class="inv-stock">What it looks like: the agent calls a tool that doesn't exist, or invents arguments it was never given.</div>
+        </div>
+        <div class="inv-signal">
+          <span class="inv-badge">● Hallucination</span>
+          <p class="inv-action">Guardrail: validate every call against a fixed schema and reject anything that doesn't match.</p>
+        </div>
+      </div>
+      <div class="inv-item warn">
+        <div class="inv-main">
+          <div class="inv-name">Infinite loop</div>
+          <div class="inv-bar-wrap"><div class="inv-bar-track"><div class="inv-bar-fill" data-w="64"></div></div></div>
+          <div class="inv-stock">What it looks like: the agent repeats the same step over and over, never deciding it's done.</div>
+        </div>
+        <div class="inv-signal">
+          <span class="inv-badge">◐ Runaway loop</span>
+          <p class="inv-action">Guardrail: cap the number of steps; stop after N turns and hand back to a human.</p>
+        </div>
+      </div>
+      <div class="inv-item over">
+        <div class="inv-main">
+          <div class="inv-name">Wrong tool for the job</div>
+          <div class="inv-bar-wrap"><div class="inv-bar-track"><div class="inv-bar-fill" data-w="46"></div></div></div>
+          <div class="inv-stock">What it looks like: it reaches for the search tool when it should have used the calculator, or the reverse.</div>
+        </div>
+        <div class="inv-signal">
+          <span class="inv-badge">▲ Wrong tool</span>
+          <p class="inv-action">Guardrail: give few, well-scoped tools with clear descriptions, and log every choice.</p>
+        </div>
+      </div>
+      <div class="inv-item crit">
+        <div class="inv-main">
+          <div class="inv-name">Runaway cost</div>
+          <div class="inv-bar-wrap"><div class="inv-bar-track"><div class="inv-bar-fill" data-w="80"></div></div></div>
+          <div class="inv-stock">What it looks like: a long, looping task quietly runs up a huge bill in tokens or API calls.</div>
+        </div>
+        <div class="inv-signal">
+          <span class="inv-badge">● Cost blowout</span>
+          <p class="inv-action">Guardrail: set a hard budget per task and halt the moment it's hit.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Contain, don't just hope</h3>
+  <p>Beginners try to make an agent that never fails and are perpetually disappointed. Builders assume it will fail and make sure the failure is boring — a capped loop that stops itself, a budget that trips before the bill hurts, a schema that rejects a hallucinated call before it does damage. Notice the pattern: every guardrail turns a potential disaster into a small, logged, recoverable event. That's the whole job — not perfection, but containment.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>How much freedom has the agent earned?</h2>
+  <p class="lead">The last decision before shipping isn't technical — it's about trust. For every action an agent can take, you answer one question: can this be undone? Reversible and read-only actions can run on their own; irreversible ones must wait for a human. Click around the ladder to see where the line falls.</p>
+
+  <p>Autonomy isn't all-or-nothing — it's decided action by action, on a simple test: <strong>the harder something is to undo, the more it needs a human first.</strong> A read-only lookup? Let it run. A reversible draft or label? Autonomous, but keep a log. Something that spends money or sends a message to a real person? Require your approval. Something truly irreversible — deleting for good, moving real funds? A human does that by hand. Click each rung to see who owns it and why.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · The trust &amp; autonomy ladder</span>
+      <div class="controls">
+        <button onclick="loopStep(1)">Next rung ▶</button>
+      </div>
+    </div>
+    <div class="loop-wrap">
+      <div class="loop-ring" id="loopRing">
+        <svg class="loop-svg" viewBox="0 0 400 300" preserveAspectRatio="none">
+          <path d="M200,50 C300,55 350,110 350,150 C350,200 290,250 200,250 C110,250 50,200 50,150 C50,110 100,55 200,50" fill="none" stroke="#E8DCC8" stroke-width="2" stroke-dasharray="4 5"/>
+          <path id="loopArc" d="M200,50 C300,55 350,110 350,150" fill="none" stroke="#EF7F1A" stroke-width="2.5" stroke-dasharray="500" stroke-dashoffset="500" style="transition:stroke-dashoffset .6s"/>
+        </svg>
+        <div class="loop-node active" id="ln0" onclick="pickNode(0)"><div class="lnn">Step 1</div><div class="lnt">Read-only</div><span class="lntag ai">Autonomous</span></div>
+        <div class="loop-node" id="ln1" onclick="pickNode(1)"><div class="lnn">Step 2</div><div class="lnt">Reversible</div><span class="lntag ai">Autonomous + log</span></div>
+        <div class="loop-node" id="ln2" onclick="pickNode(2)"><div class="lnn">Step 3</div><div class="lnt">Spends / sends out</div><span class="lntag you">Approve first</span></div>
+        <div class="loop-node" id="ln3" onclick="pickNode(3)"><div class="lnn">Step 4</div><div class="lnt">Irreversible</div><span class="lntag you">Human does it</span></div>
+      </div>
+      <div class="loop-panel" id="loopPanel">
+        <div class="lp-tag" id="lpTag">Rung 1 of 4</div>
+        <div class="lp-title" id="lpTitle">Read-only lookup</div>
+        <p class="lp-body" id="lpBody"></p>
+        <p class="lp-who" id="lpWho"></p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Automate the safe, gate the dangerous</h3>
+  <p>The goal of this whole week wasn't to build an agent you hand the keys to and walk away from — it's to build one you can trust because you know exactly where its freedom ends. Let it run free on everything read-only and reversible, where a mistake is cheap and undoable. Put a human gate in front of everything that spends, sends or can't be taken back. An agent on full autopilot will eventually make a confident, irreversible mistake. An agent that acts freely inside safe limits and asks before the dangerous moves is the one you can actually ship.</p>
+
+  <h3>The whole week, on one line</h3>
+  <p>You've gone from "what even is an agent?" to shipping one you can trust. Click each lesson below to recall its single most important idea — and notice the thread running through all four: an agent supplies tireless, looping action, while you supply the goal, the guardrails, and the judgment at the point where trust and consequences are on the line.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 5 · Week 3 recap — four lessons, one thread</span>
+      <div class="controls">
+        <button onclick="recapStep(1)">Next lesson ▶</button>
+      </div>
+    </div>
+    <div class="recap-wrap">
+      <div class="recap-chain" id="recapChain">
+        <div class="recap-node active" data-k="0" onclick="pickRecap(0)"><span class="rcn">L01</span>What is it</div>
+        <div class="recap-link"></div>
+        <div class="recap-node" data-k="1" onclick="pickRecap(1)"><span class="rcn">L02</span>Design</div>
+        <div class="recap-link"></div>
+        <div class="recap-node" data-k="2" onclick="pickRecap(2)"><span class="rcn">L03</span>Build</div>
+        <div class="recap-link"></div>
+        <div class="recap-node" data-k="3" onclick="pickRecap(3)"><span class="rcn">L04</span>Ship</div>
+      </div>
+      <div class="recap-panel" id="recapPanel"></div>
+    </div>
+  </div>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>An agent earns trust the way anything does — by being measured, not admired. Because it's non-deterministic, you judge it over many runs and quote a success rate, not a demo. You map each way it can break to the guardrail that contains it. And you hand it freedom in proportion to how reversible its actions are — free rein on the safe and undoable, a human gate on the irreversible. Do that, and a clever demo becomes something you can actually depend on.</p>
+  <ul>
+    <li>Agents are non-deterministic — the same task varies every run</li>
+    <li>Measure reliability over many runs; a success rate beats a single demo</li>
+    <li>Every failure mode has a guardrail: schema check, step cap, scoped tools, budget cap</li>
+    <li>Set the required success rate by the cost of a failure</li>
+    <li>Decide autonomy by reversibility — automate the safe, gate the irreversible</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 04 of 04 · Week 3 complete — you can now build, evaluate and ship agents ✦</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ============ Figure 1 · Run-outcome chart ============ */
+function drawForecast(){
+  resetForecast();
+  el('fcBtn').classList.add('active');
+  setTimeout(()=>el('fcHist').classList.add('go'),100);
+  setTimeout(()=>el('fcFore').classList.add('go'),900);
+  setTimeout(()=>el('fcBand').classList.add('go'),1000);
+  setTimeout(()=>el('fcBtn').classList.remove('active'),2600);
+}
+function resetForecast(){
+  el('fcHist').classList.remove('go');
+  el('fcFore').classList.remove('go');
+  el('fcBand').classList.remove('go');
+  el('fcBtn').classList.remove('active');
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){drawForecast();o.unobserve(e.target)}}),{threshold:0.4}).observe(el('fcHist'));
+
+/* ============ Figure 2 · Reliability meter ============ */
+function lbl(v,arr){return arr[Math.min(arr.length-1,Math.floor(v/100*arr.length))]}
+function dpCalc(){
+  const cx=+el('dpDemand').value, cl=+el('dpStock').value, st=+el('dpComp').value;
+  el('dpDemandV').textContent=lbl(cx,['Trivial','Easy','Moderate','Hard','Very hard']);
+  el('dpStockV').textContent=lbl(cl,['Very vague','Vague','Okay','Clear','Crystal']);
+  el('dpCompV').textContent=lbl(st,['1 step','2–3 steps','Several','Many','Long chain']);
+  // per-step success falls with complexity, rises with clarity
+  let base=0.98;
+  base-=cx/100*0.32;
+  base+=(cl-50)/50*0.12;
+  base=Math.max(0.45,Math.min(0.995,base));
+  // more steps compound the failures
+  const nSteps=1+Math.round(st/100*7);   // 1..8 steps
+  let rate=Math.pow(base,nSteps);
+  rate=Math.max(0.05,Math.min(0.99,rate));
+  const pct=Math.round(rate*100);
+  const failed=100-pct;
+  el('dpSuggest').textContent=pct+'%';
+  el('dpMargin').textContent=pct;
+  el('dpVol').textContent=failed;
+  el('dpProfit').textContent=nSteps+'×';
+  el('barMargin').style.height=Math.max(6,pct)+'%';
+  el('barVol').style.height=Math.max(6,failed)+'%';
+  el('barProfit').style.height=Math.max(6,Math.min(100,nSteps/8*100))+'%';
+  let v;
+  if(pct>=88)v='Solid. A simple, clearly-instructed, short task is highly reliable — but still verify the rare miss before it matters.';
+  else if(pct<=62)v='Shaky. Complexity, a vague prompt and a long chain stack up — every extra step multiplies the chance of one slip.';
+  else v='Usable with a safety net. Reliable enough to help, not enough to leave alone. Keep a human checkpoint on anything that counts.';
+  el('dpVerdict').textContent=v;
+}
+function dpPreset(k){
+  const P={hot:[15,90,10],war:[55,20,45],slow:[60,70,95]};
+  el('dpDemand').value=P[k][0];el('dpStock').value=P[k][1];el('dpComp').value=P[k][2];
+  dpCalc();
+}
+dpCalc();
+
+/* ============ Figure 3 · Failure → guardrail map ============ */
+function invFill(){
+  el('invPanel').classList.add('in');
+  document.querySelectorAll('.inv-bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%'});
+}
+function invReset(){
+  el('invPanel').classList.remove('in');
+  document.querySelectorAll('.inv-bar-fill').forEach(b=>{b.style.width='0%'});
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){invFill();o.unobserve(e.target)}}),{threshold:0.3}).observe(el('invPanel'));
+
+/* ============ Figure 4 · Autonomy ladder ============ */
+const NODES=[
+  {t:'Read-only lookup',body:'The action only reads information — a search, a file read, fetching a page. It changes nothing, so a mistake costs nothing but a wasted moment.',who:'Let it run autonomously',whoTxt:'No approval needed. Read-only actions are safe to automate fully; the worst case is a useless answer you can simply ignore.'},
+  {t:'Reversible edit',body:'The action changes something you can easily undo — a draft, a label, a row you can restore. If it goes wrong, one click puts it back.',who:'Autonomous, but logged',whoTxt:'Let it act, but keep a clear log and an undo path. Reversibility is exactly what makes this autonomy safe.'},
+  {t:'Spends money or sends externally',body:'The action reaches the outside world — sending a message, making a purchase, posting publicly. It is not easily taken back, and other people see it.',who:'Require your approval first',whoTxt:'Put a human checkpoint in front of it. The agent proposes; you approve before anything leaves your control.'},
+  {t:'Irreversible action',body:'The action cannot be undone — deleting records for good, moving real funds, anything with permanent consequences. There is no undo button.',who:'A human does it, not the agent',whoTxt:'Do not automate this. The agent can prepare and recommend, but a person makes the final, irreversible move by hand.'}
+];
+let loopIdx=0;
+function pickNode(i){
+  loopIdx=i;
+  for(let k=0;k<4;k++)el('ln'+k).classList.toggle('active',k===i);
+  const d=NODES[i],p=el('loopPanel');
+  el('lpTag').textContent='Rung '+(i+1)+' of 4';
+  el('lpTitle').textContent=d.t;
+  el('lpBody').textContent=d.body;
+  el('lpWho').innerHTML='<strong>'+d.who+'</strong>'+d.whoTxt;
+  p.classList.remove('swap');void p.offsetWidth;p.classList.add('swap');
+  const arc=el('loopArc');
+  arc.style.strokeDashoffset=(500-(i+1)/4*500);
+}
+function loopStep(dir){
+  loopIdx=(loopIdx+dir+4)%4;
+  pickNode(loopIdx);
+}
+pickNode(0);
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickNode(0);o.unobserve(e.target)}}),{threshold:0.3}).observe(el('loopRing'));
+
+/* ============ Figure 5 · Week recap ============ */
+const RECAP=[
+  {t:'Lesson 01 · What Is an AI Agent?',tag:'The loop that makes it an agent',body:'An agent is a model that plans, uses tools, reads the result and decides the next step — looping until a goal is met. That loop is what separates an agent from a one-shot answer.',thread:'An agent acts; you define the goal and the limits.'},
+  {t:"Lesson 02 · Designing an Agent's Job",tag:'Scope before you build',body:'A good agent has a narrow, well-defined job, the right handful of tools, and clear instructions about what it may and may not do. Vague scope is where agents go wrong.',thread:'Give it one clear job, not a vague mission.'},
+  {t:'Lesson 03 · Building Your First Agent',tag:'Grow it one tool at a time',body:'Pick the simplest build surface that works, start with instructions and one tool, test, and add the next tool only when the last one passes. Read the reasoning trace to see what it is doing.',thread:'Small, tested loops beat one heroic setup.'},
+  {t:'Lesson 04 · Evaluating, Trusting & Shipping',tag:'Trust is earned by measurement',body:'Agents are non-deterministic, so judge them over many runs, not one demo. Map each failure mode to its guardrail, and decide autonomy by reversibility — automate the safe, gate the irreversible.',thread:'Measure reliability, contain failures, gate the irreversible.'}
+];
+let recapIdx=0;
+function pickRecap(i){
+  recapIdx=i;
+  document.querySelectorAll('#recapChain .recap-node').forEach(n=>n.classList.toggle('active',+n.dataset.k===i));
+  const d=RECAP[i],p=el('recapPanel');
+  p.innerHTML='<span class="rtag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.body+'</p><div class="rthread"><strong>The thread — </strong>'+d.thread+'</div>';
+  p.classList.remove('swap');void p.offsetWidth;p.classList.add('swap');
+}
+function recapStep(dir){recapIdx=(recapIdx+dir+4)%4;pickRecap(recapIdx)}
+pickRecap(0);
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickRecap(0);o.unobserve(e.target)}}),{threshold:0.3}).observe(el('recapChain'));
+
+</script>
+</body>
+</html>
