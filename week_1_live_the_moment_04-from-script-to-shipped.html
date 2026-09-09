@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4 · From Script to Shipped — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── ACTIVITY 1: LADDER MATCH ── */
+.aud-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media (max-width:760px){.aud-grid{grid-template-columns:1fr}}
+.aud-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;transition:border-color .25s}
+.aud-card.correct{border-color:var(--green);background:var(--green-light)}
+.aud-card.wrong{border-color:var(--red);background:var(--red-light)}
+.aud-name{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy)}
+.aud-pain{font-size:.74rem;color:var(--text-muted);margin:.2rem 0 .6rem;font-style:italic}
+.aud-select{width:100%;padding:.55rem .7rem;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:.8rem;color:var(--text-primary);background:var(--bg-light);cursor:pointer}
+.aud-select:focus{outline:none;border-color:var(--orange)}
+.aud-why{font-size:.74rem;line-height:1.5;margin-top:.55rem;display:none}
+.aud-why.show{display:block}
+.aud-why.good{color:#1F5723}.aud-why.bad{color:#8B2E22}
+
+/* ── ACTIVITY 2: COMMIT TIMELINE BUILDER ── */
+.seq-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media (max-width:760px){.seq-wrap{grid-template-columns:1fr}}
+.seq-pool{display:flex;flex-direction:column;gap:.6rem}
+.seq-block{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;cursor:pointer;transition:all .2s;user-select:none}
+.seq-block:hover{border-color:var(--orange);transform:translateX(3px)}
+.seq-block.used{opacity:.3;pointer-events:none}
+.seq-block.shake{animation:shake .35s ease;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.seq-block-text{font-size:.84rem;font-weight:500;line-height:1.45}
+.seq-slots{display:flex;flex-direction:column;gap:.5rem}
+.seq-slot{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-height:52px;font-size:.8rem;color:var(--text-muted);transition:all .3s;background:rgba(255,255,255,.5)}
+.seq-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.seq-tag{display:inline-block;font-family:var(--mono);font-size:.64rem;font-weight:600;letter-spacing:.06em;color:var(--orange);background:var(--orange-glow);padding:.1rem .45rem;border-radius:4px;margin-bottom:.3rem}
+.seq-hint{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.78rem;color:#7A4A0A;line-height:1.5;display:none}
+.seq-hint.show{display:block;animation:fadeIn .3s ease}
+.phone{max-width:320px;margin:1.4rem auto 0;background:var(--navy-dark);border-radius:14px;padding:1.1rem 1rem;border:1px solid var(--navy);box-shadow:var(--shadow-lg);display:none}
+.phone.show{display:block;animation:fadeIn .5s ease}
+.phone-notch{width:80px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;margin:0 auto .8rem}
+.phone-line{margin-bottom:.55rem;padding:.5rem .7rem;background:rgba(255,255,255,.07);border-radius:8px;position:relative}
+.phone-line .seq-tag{background:rgba(232,122,46,.22)}
+.phone-line p{font-size:.74rem;color:#E8E8EC;line-height:1.5;font-family:var(--mono)}
+
+/* ── ACTIVITY 3: WHAT TO TEST ── */
+.kos-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media (max-width:760px){.kos-grid{grid-template-columns:1fr}}
+.kos-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem}
+.kos-title{font-family:'DM Serif Display',serif;font-size:.98rem;color:var(--navy);margin-bottom:.6rem}
+.kos-metrics{display:grid;grid-template-columns:1fr;gap:.35rem;margin-bottom:.8rem}
+.kos-metric{font-size:.76rem;color:var(--text-secondary);line-height:1.45}
+.kos-metric b{font-family:var(--mono);color:var(--navy);font-weight:600}
+.kos-btns{display:flex;gap:.45rem;flex-wrap:wrap}
+.kos-btn{flex:1;padding:.5rem .4rem;border-radius:6px;border:1.5px solid var(--border);background:var(--bg-light);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text-secondary)}
+.kos-btn:hover{border-color:var(--orange);color:var(--orange)}
+.kos-btn.picked-right{background:var(--green-light);border-color:var(--green);color:#1F5723}
+.kos-btn.picked-wrong{background:var(--red-light);border-color:var(--red);color:#8B2E22}
+.kos-btn.reveal-right{border-color:var(--green);color:#1F5723}
+.kos-btn:disabled{cursor:not-allowed;opacity:.75}
+.kos-verdict{font-size:.74rem;line-height:1.55;margin-top:.7rem;padding:.6rem .75rem;border-radius:6px;display:none}
+.kos-verdict.show{display:block;animation:fadeIn .3s ease}
+.kos-verdict.good{background:var(--green-light);color:#1F5723}
+.kos-verdict.bad{background:#FFF4E5;color:#7A4A0A}
+
+/* ── ACTIVITY 4: TRUST-vs-VERIFY SORTER ── */
+.trust-pool{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.2rem}
+.trust-pool .scenario-card{flex:1 1 260px}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.85rem;color:var(--text-primary);line-height:1.45;font-weight:500}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary);cursor:help}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.trust-cols{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media (max-width:760px){.trust-cols{grid-template-columns:1fr}}
+.tzone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.9rem;min-height:150px;transition:all .25s;background:rgba(255,255,255,.55)}
+.tzone.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.tzone-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.tzone-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700}
+.tzone-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--navy)}
+.tzone-sub{font-size:.66rem;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.wf-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:34px}
+
+/* ── ACTIVITY 5: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.quiz-q.right{border-color:var(--green)}
+.quiz-q.miss{border-color:var(--red)}
+.quiz-q-head{display:flex;gap:.7rem;align-items:baseline;margin-bottom:.7rem}
+.quiz-q-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;flex-shrink:0}
+.quiz-q-text{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.5}
+.quiz-opt{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .6rem;border-radius:6px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);line-height:1.45;transition:background .15s}
+.quiz-opt:hover{background:var(--bg-light)}
+.quiz-opt input{margin-top:.25rem;accent-color:var(--orange);cursor:pointer}
+.quiz-review{font-size:.76rem;line-height:1.55;margin-top:.6rem;padding:.6rem .8rem;border-radius:6px;display:none}
+.quiz-review.show{display:block;animation:fadeIn .3s ease}
+.quiz-review.good{background:var(--green-light);color:#1F5723}
+.quiz-review.bad{background:#FFF4E5;color:#7A4A0A}
+.quiz-lesson{display:inline-block;font-family:var(--mono);font-size:.64rem;color:var(--text-muted);margin-left:.4rem}
+
+/* ── REFLECT / FOOTER ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 4 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 1 · AI Programming</div>
+  <h1>From Script to Shipped — <em>make it something people can trust and use</em></h1>
+  <p class="hero-sub">Your program runs. Now the honest part: turning a one-off script into something reliable. Place projects on the script→tool→product ladder, order a version-control timeline, decide what to test and spot the missing edge case, sort AI's green flags from its red flags, then prove the whole week with an 8-question knowledge check.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+    <div class="progress-dot" id="prog5"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: SCRIPT-TOOL-PRODUCT LADDER ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Place each project on the ladder</h2>
+    <p class="lesson-intro">Not everything needs to be "production software." A <strong>script</strong> runs once, for you. A <strong>tool</strong> runs many times, still mostly for you or your team. A <strong>product</strong> runs for strangers who will never see your code — and that raises the bar on reliability, safety, and polish. Knowing which rung you are on tells you how much testing and hardening is actually worth it. Match each project to its rung, then check.</p>
+
+    <div class="lesson-card">
+      <div class="aud-grid" id="audGrid"></div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkHooks()">Check my matches</button>
+        <button class="btn btn-ghost" onclick="resetHooks()">↻ Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: COMMIT TIMELINE ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">2</span>
+    <h2 class="lesson-title">Order the version-control save-points</h2>
+    <p class="lesson-intro">Version control is just <strong>save-points for code</strong> — each "commit" is a labelled snapshot you can return to if the next change breaks everything. The skill is committing at the <em>right</em> moments: a good history is a series of small, working states, each with a clear message. Click the five save-points in the order a careful builder makes them — a wrong click gets you a nudge. Project: adding a "download as CSV" button to your tool.</p>
+
+    <div class="lesson-card">
+      <div class="seq-wrap">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Save-points (shuffled)</h4>
+          <div class="seq-pool" id="seqPool"></div>
+          <div class="seq-hint" id="seqHint"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Your commit timeline</h4>
+          <div class="seq-slots" id="seqSlots"></div>
+        </div>
+      </div>
+      <div class="phone" id="phonePreview"><div class="phone-notch"></div><div id="phoneLines"></div></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetSeq()">↻ Start over</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: WHAT TO TEST / EDGE CASES ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">3</span>
+    <h2 class="lesson-title">What should you test — and what's the missing edge case?</h2>
+    <p class="lesson-intro">"It worked when I tried it" tests one path: the happy one, with tidy input. Real users feed programs <strong>empty fields, huge numbers, weird characters, and zero</strong>. A test is just a promise you check on purpose — "given this input, I expect this output." For each function below, pick the input most likely to break it: the edge case you forgot.</p>
+
+    <div class="lesson-card">
+      <div class="kos-grid" id="kosGrid"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetKos()">↻ Reset all four</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: TRUST-vs-VERIFY SORTER ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#4CAF50">4</span>
+    <h2 class="lesson-title">Trust vs. verify — green flags and red flags in AI code</h2>
+    <p class="lesson-intro">AI writes plausible code fast — and "plausible" is exactly the danger, because plausible-looking code can still be wrong or unsafe. Your job is to know what to accept and what to stop and check. Drag each item into <strong>Green flag — safe to trust</strong> or <strong>Red flag — stop and verify</strong>. Hover any red pill for the correction.</p>
+
+    <div class="lesson-card">
+      <div class="trust-pool" id="trustPool"></div>
+      <div class="trust-cols">
+        <div class="tzone" data-tzone="green">
+          <div class="tzone-head"><div class="tzone-ico" style="background:linear-gradient(135deg,#66BB6A,#4CAF50)">✓</div><div><div class="tzone-title">Green flag — safe to trust</div><div class="tzone-sub">Normal, verifiable · 4 items</div></div></div>
+          <div class="wf-drop" data-tdrop="green"></div>
+        </div>
+        <div class="tzone" data-tzone="red">
+          <div class="tzone-head"><div class="tzone-ico" style="background:linear-gradient(135deg,#E04E3C,#C43A2A)">✗</div><div><div class="tzone-title">Red flag — stop and verify</div><div class="tzone-sub">Check before you ship · 4 items</div></div></div>
+          <div class="wf-drop" data-tdrop="red"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback4"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity4()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers4()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 5: SHIPPING-READINESS QUIZ ── -->
+<section class="lesson" id="activity-5">
+  <div class="container">
+    <span class="lesson-num" style="background:var(--navy)">5</span>
+    <h2 class="lesson-title">Week 1 knowledge check — 8 questions, whole week</h2>
+    <p class="lesson-intro">The final gate of Week 1, spanning all four lessons: how AI programming actually works, prompting and problem-solving, writing and debugging your first program, and shipping something reliable. Answer all eight, then submit for a per-question review — and if you miss any, you'll see exactly which lesson to revisit.</p>
+
+    <div class="lesson-card">
+      <div id="quizWrap"></div>
+      <div class="activity-feedback" id="feedback5"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="submitQuiz()">Submit answers</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">↻ Reset quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="background:var(--bg-light);padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words moves it from "seen" to "known". (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">You wrote a quick script that works. Before you'd hand it to a stranger as a "product," what changes — and why does the rung on the ladder decide how much effort is worth it?</div>
+        <textarea placeholder="A stranger will feed it inputs I never imagined, so I'd need to handle bad input, ..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">AI gives you code that looks perfect and runs without error. Name two things you'd still verify before shipping it, and why "runs without error" isn't enough.</div>
+        <textarea placeholder="I'd check that any library it used is real, and that it handles the empty/zero case, because ..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Week 1 complete — Week 2 · Building Real Projects with AI</h3>
+      <p>You can pick where to code, run the build loop, read an error, debug with AI, and tell a script from a product. Next: taking a real idea from blank folder to a working, tested, version-controlled project — with AI as your pair, not your autopilot.</p>
+      <a href="#" class="btn btn-primary">Coming next week →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═══ ACTIVITY 1: Project ↔ Ladder-rung match ═══ */
+const AUDIENCES = [
+  {id:'a1', name:'Script — runs once, for you', pain:'Throwaway. Correctness matters only for this one run; no strangers, no polish.'},
+  {id:'a2', name:'Tool — runs many times, for you / your team', pain:'Reused and relied on. Worth some tests and a readable setup, but not stranger-proof.'},
+  {id:'a3', name:'Product — runs for strangers, forever', pain:'Public and unforgiving. Must handle bad input, protect secrets, and not break on people you\'ll never meet.'}
+];
+const HOOKS = [
+  {id:'h1', text:'A one-off script to rename 200 photos on your laptop tonight', aud:'a1', signal:'you run it once, check the folder, and forget it — hardening this would be wasted effort.'},
+  {id:'h2', text:'A quick calculation you paste in to answer a single question, then close', aud:'a1', signal:'it exists for one answer and one moment — a script, not a system.'},
+  {id:'h3', text:'A weekly report generator your small team runs every Monday', aud:'a2', signal:'it is reused and relied on, so it earns some tests and a clear setup — but only your team touches it.'},
+  {id:'h4', text:'An internal dashboard three colleagues open to check numbers', aud:'a2', signal:'repeat internal users mean it should be reliable and documented, yet it is not exposed to the public.'},
+  {id:'h5', text:'A public sign-up page anyone on the internet can submit their email to', aud:'a3', signal:'strangers will feed it anything, so it must validate input, guard secrets, and fail gracefully — full product bar.'},
+  {id:'h6', text:'A paid app customers download and trust with their data', aud:'a3', signal:'people you\'ll never meet depend on it working and staying safe — the highest rung, highest reliability.'}
+];
+const AUD_BY_ID = Object.fromEntries(AUDIENCES.map(a=>[a.id,a]));
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+
+function renderHooks(){
+  const shuffledHooks = shuffle(HOOKS);
+  document.getElementById('audGrid').innerHTML = AUDIENCES.map(a=>`
+    <div class="aud-card" data-aud="${a.id}">
+      <div class="aud-name">${a.name}</div>
+      <div class="aud-pain">${a.pain}</div>
+      <select class="aud-select" data-aud="${a.id}" data-slot="1">
+        <option value="">— pick a project for this rung —</option>
+        ${shuffledHooks.map(h=>`<option value="${h.id}">${h.text}</option>`).join('')}
+      </select>
+      <select class="aud-select" data-aud="${a.id}" data-slot="2" style="margin-top:.5rem">
+        <option value="">— and a second project for this rung —</option>
+        ${shuffledHooks.map(h=>`<option value="${h.id}">${h.text}</option>`).join('')}
+      </select>
+      <div class="aud-why" data-why="${a.id}"></div>
+    </div>`).join('');
+}
+function checkHooks(){
+  let right = 0, unanswered = 0;
+  const picks = [];
+  AUDIENCES.forEach(a=>{
+    const sels = document.querySelectorAll(`.aud-select[data-aud="${a.id}"]`);
+    sels.forEach(s=>picks.push({aud:a.id, val:s.value}));
+  });
+  AUDIENCES.forEach(a=>{
+    const sels = document.querySelectorAll(`.aud-select[data-aud="${a.id}"]`);
+    const card = document.querySelector(`.aud-card[data-aud="${a.id}"]`);
+    const why = document.querySelector(`.aud-why[data-why="${a.id}"]`);
+    card.classList.remove('correct','wrong');
+    why.className = 'aud-why';
+    let cardRight = 0, cardHasBlank = false;
+    const notes = [];
+    sels.forEach(sel=>{
+      if(!sel.value){ unanswered++; cardHasBlank = true; return; }
+      const chosen = HOOKS.find(h=>h.id===sel.value);
+      if(chosen.aud===a.id){ right++; cardRight++; }
+      else {
+        const owner = AUD_BY_ID[chosen.aud];
+        notes.push(`"${chosen.text}" belongs on <em>${owner.name.split(' — ')[0]}</em> — ${chosen.signal}`);
+      }
+    });
+    if(cardHasBlank) return;
+    if(cardRight===2){
+      card.classList.add('correct');
+      why.className='aud-why show good';
+      why.textContent='✓ Both projects belong on this rung.';
+    } else {
+      card.classList.add('wrong');
+      why.className='aud-why show bad';
+      why.innerHTML='✗ '+notes.join(' ');
+    }
+  });
+  const fb = document.getElementById('feedback1');
+  if(unanswered>0){
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${unanswered} slot${unanswered>1?'s':''} still empty.</strong> Each rung takes two projects — fill all six, then check again.`;
+    return;
+  }
+  if(right===6){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>6 of 6 — you read the ladder like a builder.</strong> The whole point: <em>match your effort to the rung.</em> A one-off script deserves no tests and no polish — hardening it is wasted time. A team tool earns some tests and a readable setup. A product for strangers demands the full treatment: validate every input, guard secrets, fail gracefully, because people you\'ll never meet depend on it. Over-engineering a script wastes days; under-engineering a product ships bugs to real users. Knowing the rung is how you spend effort where it actually pays.';
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>You placed ${right} of 6 correctly.</strong> Read the red notes on each rung. The test: <em>who runs it, how often?</em> Once, for you → script (no polish needed). Many times, for you or your team → tool (some tests, clear setup). For strangers, forever → product (validate input, guard secrets, fail gracefully). The mistake that costs most is treating a product like a script — shipping stranger-facing code that assumes tidy input. Fix the reds and check again.`;
+  }
+  document.getElementById('prog1').classList.add('done');
+}
+function resetHooks(){
+  renderHooks();
+  document.getElementById('feedback1').className='activity-feedback';
+  document.getElementById('prog1').classList.remove('done');
+}
+
+/* ═══ ACTIVITY 2: Commit-timeline builder ═══ */
+const SCRIPT = [
+  {tag:'COMMIT 1', text:'"Start clean" — commit the working tool before you touch anything.', note:'A known-good save-point to return to if the new work goes wrong.', hint:'The timeline starts by saving the WORKING state before any changes — so you have a safe point to return to. Find the "start clean" commit.'},
+  {tag:'COMMIT 2', text:'"Add CSV button (not wired up yet)" — commit the button in place.', note:'One small, working step: the button exists and the app still runs.', hint:'Next comes the first small, working step: the button is on screen and the app still runs. Commit that before adding behaviour.'},
+  {tag:'COMMIT 3', text:'"Button now generates the CSV file" — commit once it actually works.', note:'The feature does its job; snapshot it while it is good.', hint:'Now the button actually produces the CSV. Save that working state next — never build the next thing on top of unsaved, working code.'},
+  {tag:'COMMIT 4', text:'"Handle empty-data case so it doesn\'t crash" — commit the edge-case fix.', note:'You tested a weird input, fixed the crash, and locked it in.', hint:'You found and fixed an edge case (empty data). Commit that fix on its own so the message explains exactly what it protects against.'},
+  {tag:'COMMIT 5', text:'"Update README with the new download feature" — final commit before sharing.', note:'Docs match the code; now it is safe to hand off or ship.', hint:'Last: the docs now match the feature. This final commit makes it safe to share — the closing save-point.'}
+];
+let seqNext = 0;
+function renderSeq(){
+  seqNext = 0;
+  const order = shuffle(SCRIPT.map((_,i)=>i));
+  document.getElementById('seqPool').innerHTML = order.map(i=>`
+    <div class="seq-block" data-idx="${i}" onclick="pickBlock(${i},this)">
+      <div class="seq-block-text">${SCRIPT[i].text}</div>
+    </div>`).join('');
+  document.getElementById('seqSlots').innerHTML = SCRIPT.map((s,i)=>`
+    <div class="seq-slot" id="slot${i}">Save-point ${i+1} — waiting…</div>`).join('');
+  document.getElementById('seqHint').className='seq-hint';
+  document.getElementById('phonePreview').className='phone';
+  document.getElementById('feedback2').className='activity-feedback';
+}
+function pickBlock(idx, el){
+  const hint = document.getElementById('seqHint');
+  if(idx!==seqNext){
+    el.classList.add('shake');
+    setTimeout(()=>el.classList.remove('shake'),380);
+    hint.className='seq-hint show';
+    hint.textContent='Not that one yet. '+SCRIPT[seqNext].hint;
+    return;
+  }
+  el.classList.add('used');
+  hint.className='seq-hint';
+  const slot = document.getElementById('slot'+idx);
+  slot.classList.add('filled');
+  slot.innerHTML = `<span class="seq-tag">${SCRIPT[idx].tag}</span><div>${SCRIPT[idx].text}</div><div style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;font-style:italic">${SCRIPT[idx].note}</div>`;
+  seqNext++;
+  if(seqNext===SCRIPT.length) finishSeq();
+}
+function finishSeq(){
+  document.getElementById('phoneLines').innerHTML = SCRIPT.map(s=>`
+    <div class="phone-line"><span class="seq-tag">${s.tag}</span><p>${s.text.replace(/"/g,'')}</p></div>`).join('');
+  document.getElementById('phonePreview').className='phone show';
+  const fb=document.getElementById('feedback2');
+  fb.className='activity-feedback show success';
+  fb.innerHTML='<strong>Timeline built — start clean → button → working feature → edge-case fix → docs.</strong> Why this shape: each commit is a <em>small, working state</em> with a message that says what changed. Commit the working code <em>before</em> you start, so you can always retreat. Commit after every step that runs, so a broken next change is one undo away — not a lost afternoon. Give each commit a clear message ("handle empty-data case"), because six months later that message is the only map you have. This is the same discipline whether you type the commits yourself or an AI assistant proposes them: small steps, working states, honest messages. Version control turns "I broke everything and can\'t undo it" into "let me just go back one step."';
+  document.getElementById('prog2').classList.add('done');
+}
+function resetSeq(){
+  renderSeq();
+  document.getElementById('prog2').classList.remove('done');
+}
+
+/* ═══ ACTIVITY 3: What to test / missing edge case ═══ */
+const KOS = [
+  {title:'Function A — average of a list of numbers', metrics:['It sums the numbers and divides by how many there are.','You tested it with [10, 20, 30] → got 20. Works!'], answer:'empty', labels:{empty:'Empty list',big:'Very large numbers',neg:'Negative numbers'},
+   why:'<strong>Empty list is the edge case.</strong> Dividing by how many there are means dividing by zero when the list is empty — an instant crash. Big and negative numbers average just fine; <em>nothing</em> to average is the trap. The fix: check for an empty list first and decide what it should return (often 0, or a clear message). "Divide by the count" always hides a divide-by-zero when the count is zero.'},
+  {title:'Function B — greet a user by their typed name', metrics:['It reads a name and prints "Hello, NAME!"','You tested it with "Sam" → "Hello, Sam!" Works!'], answer:'blank', labels:{blank:'Blank / no name entered',long:'A normal long name',caps:'Name in ALL CAPS'},
+   why:'<strong>Blank input is the edge case.</strong> Real users hit Enter without typing, and then you greet "Hello, !" — or worse, later code assumes a name exists and crashes. Long names and capitals are harmless. The fix: if the name is empty, ask again or use a sensible default. Any field a human types into can arrive empty — always ask "what happens if they leave it blank?"'},
+  {title:'Function C — divide sales total by number of days', metrics:['It computes average daily sales = total ÷ days.','You tested it with total 700, days 7 → 100. Works!'], answer:'zero', labels:{zero:'Days = 0 (no data yet)',one:'Days = 1',big:'Total in the millions'},
+   why:'<strong>Days = 0 is the edge case.</strong> On day zero — a brand-new account, no data yet — you divide by zero and crash exactly when a new user first opens the app. One day and huge totals compute fine. The fix: guard the zero case before dividing. Any division where the bottom number could be zero is a crash waiting for its moment.'},
+  {title:'Function D — take the first item from search results', metrics:['It returns results[0], the top match.','You tested it with a search that returned 5 results → got the first. Works!'], answer:'none', labels:{none:'A search that returns nothing',many:'Thousands of results',dup:'Duplicate results'},
+   why:'<strong>Zero results is the edge case.</strong> Asking for the "first" item when the list is empty reaches for something that isn\'t there and crashes — and "no matches" is an everyday outcome of search. Thousands of results or duplicates are fine; the empty search is the killer. The fix: check whether there are any results before grabbing the first. Whenever you take "the first" of something, ask "what if there is no first?"'}
+];
+let kosAnswered = {};
+function renderKos(){
+  kosAnswered = {};
+  document.getElementById('kosGrid').innerHTML = KOS.map((k,i)=>`
+    <div class="kos-card" data-kos="${i}">
+      <div class="kos-title">${k.title}</div>
+      <div class="kos-metrics">${k.metrics.map(m=>`<div class="kos-metric">${m}</div>`).join('')}</div>
+      <div class="kos-btns">
+        ${Object.entries(k.labels).map(([key,label])=>`<button class="kos-btn" onclick="answerKos(${i},'${key}',this)">${label}</button>`).join('')}
+      </div>
+      <div class="kos-verdict" id="kosV${i}"></div>
+    </div>`).join('');
+  document.getElementById('feedback3').className='activity-feedback';
+}
+function answerKos(i, choice, btn){
+  if(kosAnswered[i]!==undefined) return;
+  const k = KOS[i];
+  const correct = choice===k.answer;
+  kosAnswered[i]=correct;
+  const card = document.querySelector(`.kos-card[data-kos="${i}"]`);
+  card.querySelectorAll('.kos-btn').forEach(b=>{
+    b.disabled=true;
+    if(b===btn) b.classList.add(correct?'picked-right':'picked-wrong');
+    else if(!correct && b.textContent===k.labels[k.answer]) b.classList.add('reveal-right');
+  });
+  const v = document.getElementById('kosV'+i);
+  v.className='kos-verdict show '+(correct?'good':'bad');
+  v.innerHTML=(correct?'✓ Right — that\'s the edge case. ':'✗ The riskiest input is <em>'+k.labels[k.answer]+'</em>. ')+k.why;
+  if(Object.keys(kosAnswered).length===KOS.length){
+    const score = Object.values(kosAnswered).filter(Boolean).length;
+    const fb=document.getElementById('feedback3');
+    if(score===4){
+      fb.className='activity-feedback show success';
+      fb.innerHTML='<strong>4 of 4 — you test like someone who\'s been burned before.</strong> Every one hid the same family of bug: <em>the empty, the zero, the nothing.</em> Empty list, blank field, zero days, no results — the happy path works and the edge case crashes. The durable habit: for every function ask "what if the input is empty, zero, huge, or weird?" and test that on purpose. "It worked when I tried it" only ever proves the one path you tried. This is also the first thing to check in AI-written code — it usually nails the happy path and quietly skips the edge case.';
+    } else {
+      fb.className='activity-feedback show partial';
+      fb.innerHTML=`<strong>You got ${score} of 4.</strong> Re-read the cards you missed — each is the same lesson wearing a different hat: <em>empty list</em> (divide by zero), <em>blank name</em> (greet nobody), <em>zero days</em> (divide by zero), <em>no results</em> (grab a first that isn\'t there). The reusable move: before you ship, feed each function the empty / zero / nothing case on purpose and watch what it does. Reset and run all four from memory.`;
+    }
+    document.getElementById('prog3').classList.add('done');
+  }
+}
+function resetKos(){
+  renderKos();
+  document.getElementById('prog3').classList.remove('done');
+}
+
+/* ═══ ACTIVITY 4: Trust-vs-verify sorter ═══ */
+const TRUST_FINAL = [
+  {id:'t1', text:'Standard loop or if-statement logic you can read and follow line by line', col:'green', hint:'Plain, readable control flow you can trace yourself is low-risk — you can verify it just by reading it.'},
+  {id:'t2', text:'A well-known, widely-used library imported the normal way', col:'green', hint:'Popular, established libraries are safe to use — a quick check that the name is real and current is enough.'},
+  {id:'t3', text:'Clear variable names and a short comment explaining the tricky part', col:'green', hint:'Readable names and honest comments make code easier to trust and maintain — a genuine green flag.'},
+  {id:'t4', text:'Formatting a date or doing basic arithmetic in an obvious way', col:'green', hint:'Simple, obvious operations you can eyeball are the safest thing AI produces — low stakes, easy to confirm.'},
+  {id:'t6', text:'An import for a library you\'ve never heard of that may not actually exist', col:'red', hint:'AI sometimes invents plausible-sounding libraries that don\'t exist (a "hallucinated" package). Confirm it is real and widely used before relying on it.'},
+  {id:'t7', text:'A real password or API key written directly into the code', col:'red', hint:'A hard-coded secret is a serious security bug — anyone who sees the code gets the key. Move it out into a separate, private config, never in the code.'},
+  {id:'t8', text:'A command that deletes files or wipes a folder, run without asking', col:'red', hint:'Destructive commands (delete, overwrite, wipe) must be read carefully and confirmed before running — an AI suggestion is not a reason to skip that check.'},
+  {id:'t9', text:'A function that clearly only handles the happy path, no empty/zero case', col:'red', hint:'Code that ignores empty, zero, or missing input will crash on real users. Add the edge-case handling before you ship it.'}
+];
+const TCOL_NAMES = {green:'Green flag — safe to trust', red:'Red flag — stop and verify'};
+
+let placed4 = {};
+function renderTrust(){
+  const pool = document.getElementById('trustPool');
+  pool.innerHTML = shuffle(TRUST_FINAL).map(t => `
+    <div class="scenario-card" draggable="true" data-tid="${t.id}">
+      <div class="scenario-text">${t.text}</div>
+    </div>`).join('');
+  pool.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('trust', card.dataset.tid);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupZones4(){
+  document.querySelectorAll('.tzone').forEach(z => {
+    z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('drag-over'); });
+    z.addEventListener('dragleave', () => z.classList.remove('drag-over'));
+    z.addEventListener('drop', e => {
+      e.preventDefault();
+      z.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('trust');
+      if (id) handleDrop4(id, z.dataset.tzone);
+    });
+  });
+}
+function handleDrop4(id, col){
+  const item = TRUST_FINAL.find(t => t.id === id);
+  if (!item || placed4[id]) return;
+  const correct = item.col === col;
+  placed4[id] = {col, correct};
+  const card = document.querySelector(`#trustPool .scenario-card[data-tid="${id}"]`);
+  if (card) card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const drop = document.querySelector(`.wf-drop[data-tdrop="${col}"]`);
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + item.text.replace(/&amp;/g,'&').substring(0, 30) + '…';
+  pill.title = correct ? item.hint : `Belongs in "${TCOL_NAMES[item.col]}". ${item.hint}`;
+  drop.appendChild(pill);
+  checkDone4();
+}
+function checkDone4(){
+  if (Object.keys(placed4).length !== TRUST_FINAL.length) return;
+  const right = Object.values(placed4).filter(p => p.correct).length;
+  const fb = document.getElementById('feedback4');
+  if (right === TRUST_FINAL.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>8 of 8 — that's the eye that keeps AI honest.</strong> The green flags share a trait: they're <em>readable and verifiable</em> — plain logic, well-known libraries, clear names, obvious math. You can confirm them at a glance. The red flags share a different trait: they can <em>hurt you quietly</em>. A hallucinated library breaks the build (or worse, someone registers that fake name with malware). A hard-coded secret leaks the moment the code is shared. A delete command run without asking can wipe real files. And happy-path-only code crashes on the first real user. The rule: <em>trust the boring, verify the powerful.</em> AI is a fast, fallible pair-programmer — you stay the one who ships.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You sorted ${right} of 8 correctly.</strong> Hover the red pills for corrections. The dividing line: <em>green flags are readable and low-stakes</em> (plain logic, known libraries, clear names, simple math) — verify by reading. <em>Red flags can hurt you quietly</em> — a possibly-invented library, a hard-coded secret, a destructive command, or code that only handles the happy path. Those four always get a human check before they ship, no matter how confident the AI sounds. Try again for a clean board.`;
+  }
+  document.getElementById('prog4').classList.add('done');
+}
+function resetActivity4(){
+  placed4 = {};
+  document.getElementById('feedback4').className = 'activity-feedback';
+  document.querySelectorAll('.wf-drop[data-tdrop]').forEach(d => d.innerHTML = '');
+  renderTrust();
+  document.getElementById('prog4').classList.remove('done');
+}
+function showAnswers4(){
+  TRUST_FINAL.forEach(t => { if (!placed4[t.id]) handleDrop4(t.id, t.col); });
+}
+
+/* ═══ ACTIVITY 5: Week 1 knowledge check ═══ */
+const QUIZ = [
+  {lesson:'Lesson 1 · How AI Programming Works', q:'What is the most durable skill in AI-assisted programming — the one that outlasts any tool?',
+   opts:['Memorising the syntax of one language','Breaking a problem down and judging whether the result is correct','Typing quickly','Knowing every AI tool\'s menu by heart'], ans:1,
+   why:'Tools and languages change constantly; the ability to decompose a problem, direct the work, and verify the output does not. AI can produce code — only you can decide if it actually solves the problem. That judgement is the job.'},
+  {lesson:'Lesson 1 · How AI Programming Works', q:'AI coding assistants are best understood as:',
+   opts:['A flawless oracle that is always right','A fast, capable, but fallible collaborator you must check','A replacement for understanding what your code does','A search engine that only copies existing code'], ans:1,
+   why:'A capable pair-programmer that is fast and often right — but confidently wrong sometimes. Treating its output as always-correct is how bugs and security holes ship. You direct it and verify it; it does not replace your understanding.'},
+  {lesson:'Lesson 2 · Prompting & Problem-Solving', q:'Your program throws an error you don\'t understand. What is the most effective next step?',
+   opts:['Delete the whole file and start over','Read the error\'s type, line, and cause — then paste the exact message if still stuck','Change random things until it works','Assume your computer is broken'], ans:1,
+   why:'An error names a type, a location, and a cause. Reading those three usually points straight at a small fix. If it\'s still unclear, pasting the exact message into a search or AI almost always explains it — guessing randomly wastes time and hides the real cause.'},
+  {lesson:'Lesson 2 · Prompting & Problem-Solving', q:'What makes a debugging request an AI can actually act on?',
+   opts:['A long apology and lots of emotion','The exact error, the code that caused it, what you expected, and what actually happened','Just the words "it\'s broken, fix it"','Fifteen unrelated files pasted in','Your real API key so it can test'], ans:1,
+   why:'Those four pieces — exact error, failing code, expected result, actual result — let a helper reason instead of guess. Apologies and unrelated files add noise; and you never paste a real secret, real key, or password anywhere. Replace secrets with a placeholder first.'},
+  {lesson:'Lesson 3 · Your First Program', q:'Why do experienced builders run their code in a small loop instead of writing it all first?',
+   opts:['It uses less electricity','A bug caught after one small change is easy to find; a bug buried in 200 lines is not','The computer prefers small files','It makes the code run faster'], ans:1,
+   why:'Write a little, run it, read the result, fix or extend, repeat. Because each loop is tiny, a break is almost always the last change you made — you never hunt through hundreds of lines for one typo. Running early turns "hope it works" into "watch it work."'},
+  {lesson:'Lesson 3 · Your First Program', q:'A program runs with no error but prints nothing. What is the most likely cause?',
+   opts:['The computer is out of memory','It computed a result but forgot the step that displays it','The language is broken','It needs to be reinstalled'], ans:1,
+   why:'"Runs, no output" almost always means you built a result into a variable and never printed or showed it. No error appears because nothing is syntactically wrong — it just skips the last step. Add the line that displays the result.'},
+  {lesson:'Lesson 4 · From Script to Shipped', q:'You built a quick script for yourself. When does it need real tests, input validation, and hardening?',
+   opts:['Always — every script must be production-grade','When it moves up the ladder toward a tool or a product strangers use','Never — scripts don\'t need testing','Only if it\'s written by AI'], ans:1,
+   why:'Match effort to the rung. A one-off script for you needs none of that. The moment it\'s reused by a team (tool) or exposed to strangers (product), reliability, validation, and safety start to matter — because people now depend on inputs you can\'t predict.'},
+  {lesson:'Lesson 4 · From Script to Shipped', q:'AI hands you code that looks perfect and runs without error. What should you still verify before shipping?',
+   opts:['Nothing — if it runs, it\'s done','That any library is real, no secrets are hard-coded, destructive commands are safe, and edge cases are handled','Only the color of the buttons','That it was written quickly'], ans:1,
+   why:'"Runs without error" only proves the happy path. AI can invent libraries, hard-code secrets, suggest destructive commands, and skip empty/zero cases — all of which run fine until they don\'t. Trust the boring, verify the powerful: those four checks are where shipped bugs and security holes come from.'}
+];
+function renderQuiz(){
+  document.getElementById('quizWrap').innerHTML = QUIZ.map((item,i)=>`
+    <div class="quiz-q" id="qq${i}">
+      <div class="quiz-q-head"><span class="quiz-q-num">Q${i+1}</span><span class="quiz-q-text">${item.q}<span class="quiz-lesson">${item.lesson}</span></span></div>
+      ${item.opts.map((o,j)=>`
+        <label class="quiz-opt"><input type="radio" name="quiz${i}" value="${j}"><span>${o}</span></label>`).join('')}
+      <div class="quiz-review" id="qr${i}"></div>
+    </div>`).join('');
+}
+function submitQuiz(){
+  const fb=document.getElementById('feedback5');
+  const answers = QUIZ.map((_,i)=>{
+    const sel=document.querySelector(`input[name="quiz${i}"]:checked`);
+    return sel? +sel.value : null;
+  });
+  const blank = answers.filter(a=>a===null).length;
+  if(blank>0){
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${blank} question${blank>1?'s':''} unanswered.</strong> Guessing is allowed, blank is not — answer everything and submit again.`;
+    return;
+  }
+  let score=0; const missedLessons=[];
+  QUIZ.forEach((item,i)=>{
+    const card=document.getElementById('qq'+i);
+    const rev=document.getElementById('qr'+i);
+    card.classList.remove('right','miss');
+    const correct = answers[i]===item.ans;
+    if(correct){
+      score++;
+      card.classList.add('right');
+      rev.className='quiz-review show good';
+      rev.innerHTML='✓ Correct. '+item.why;
+    } else {
+      card.classList.add('miss');
+      missedLessons.push(`Q${i+1} → ${item.lesson}`);
+      rev.className='quiz-review show bad';
+      rev.innerHTML=`✗ The answer is "<strong>${item.opts[item.ans]}</strong>". ${item.why}`;
+    }
+  });
+  if(score===8){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>8 of 8 — Week 1 mastery.</strong> You hold the full chain: what AI programming really is (direct and verify, don\'t just accept), how to prompt and problem-solve, how to write, run, and debug a first program, and how to ship something reliable instead of just something that ran once. Week 2 builds real projects on exactly this foundation.';
+  } else if(score>=6){
+    fb.className='activity-feedback show success';
+    fb.innerHTML=`<strong>${score} of 8 — solid grasp of the week.</strong> The misses are patchable in minutes — read the review notes on: <em>${missedLessons.join(' · ')}</em>, then reset and aim for 8. The questions you missed are the ones that cost real time (and real safety) in practice.`;
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${score} of 8 — worth a revisit before Week 2.</strong> No judgment — this week packed four lessons of thinking into your head. Your misses map to: <em>${missedLessons.join(' · ')}</em>. Reopen those lessons, skim their activities, then reset this quiz. Ten minutes of review now saves real confusion later.`;
+  }
+  document.getElementById('prog5').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  document.getElementById('feedback5').className='activity-feedback';
+  document.getElementById('prog5').classList.remove('done');
+}
+
+/* ═══ INIT ═══ */
+window.addEventListener('DOMContentLoaded',()=>{
+  renderHooks();
+  renderSeq();
+  renderKos();
+  renderTrust();
+  setupZones4();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

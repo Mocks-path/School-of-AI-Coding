@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3 · Your First Real Program — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+.lesson-card.alt{background:var(--bg-light)}
+
+/* ── DRAG CARDS + FEEDBACK (shared) ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.85rem;color:var(--text-primary);line-height:1.45;font-weight:500}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary);cursor:help}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit;text-decoration:none}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── ACTIVITY 1: ENVIRONMENT ZONES ── */
+.wireframe{border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg-light)}
+.wf-chrome{display:flex;align-items:center;gap:.4rem;background:var(--navy);padding:.5rem .8rem}
+.wf-chrome span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.35)}
+.wf-chrome .wf-url{flex:1;margin-left:.5rem;background:rgba(255,255,255,.12);border-radius:4px;color:rgba(255,255,255,.7);font-family:var(--mono);font-size:.62rem;padding:.15rem .6rem}
+.wf-zone{border:2px dashed var(--border);margin:.7rem;border-radius:var(--radius-sm);padding:.8rem .9rem;transition:all .25s;background:rgba(255,255,255,.6)}
+.wf-zone.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.wf-zone-title{font-family:'DM Serif Display',serif;font-size:.98rem;color:var(--navy)}
+.wf-zone-sub{font-size:.68rem;color:var(--text-muted);margin-bottom:.55rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.wf-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:34px}
+.wf-fold{display:flex;align-items:center;gap:.5rem;margin:.1rem .9rem;font-size:.62rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.wf-fold::before,.wf-fold::after{content:'';flex:1;border-top:1.5px dashed var(--orange);opacity:.5}
+
+/* ── ACTIVITY 2: BUILD-LOOP SEQUENCE ── */
+.seq-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.seq-wrap{grid-template-columns:1fr}}
+.seq-pool{display:flex;flex-direction:column;gap:.6rem}
+.seq-block{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;cursor:pointer;transition:all .2s;user-select:none}
+.seq-block:hover{border-color:var(--orange);transform:translateX(3px)}
+.seq-block.used{opacity:.3;pointer-events:none}
+.seq-block.shake{animation:shake .35s ease;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.seq-block-text{font-size:.84rem;font-weight:500;line-height:1.45}
+.seq-slots{display:flex;flex-direction:column;gap:.5rem}
+.seq-slot{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;min-height:52px;font-size:.8rem;color:var(--text-muted);transition:all .3s;background:rgba(255,255,255,.5)}
+.seq-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.seq-tag{display:inline-block;font-family:var(--mono);font-size:.64rem;font-weight:600;letter-spacing:.06em;color:var(--orange);background:var(--orange-glow);padding:.1rem .45rem;border-radius:4px;margin-bottom:.3rem}
+.seq-hint{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.78rem;color:#7A4A0A;line-height:1.5;display:none}
+.seq-hint.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 3: ERROR DIAGNOSIS (A/B PAIRS reused) ── */
+.ab-pair{margin-top:1.4rem;padding-top:1.4rem;border-top:1px solid var(--border)}
+.ab-pair:first-child{margin-top:0;padding-top:0;border-top:none}
+.ab-q{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:.8rem}
+.ab-q .ab-tag{font-family:var(--mono);font-size:.68rem;color:var(--orange);font-weight:600;letter-spacing:.04em;display:block;margin-bottom:.2rem}
+.err-block{background:var(--navy-dark);border-radius:var(--radius-sm);padding:.9rem 1rem;margin-bottom:.9rem;font-family:var(--mono);font-size:.74rem;line-height:1.55;color:#F5C9A0;overflow-x:auto;white-space:pre-wrap}
+.err-block .err-type{color:#FF8A75;font-weight:600}
+.err-block .err-dim{color:rgba(255,255,255,.55)}
+.ab-cards{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media (max-width:760px){.ab-cards{grid-template-columns:1fr}}
+.ab-card{background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:pointer;transition:all .25s;position:relative}
+.ab-card:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.ab-card.locked{cursor:default;pointer-events:none}
+.ab-card.win{border-color:var(--green);background:var(--green-light)}
+.ab-card.lose{opacity:.55}
+.ab-card.picked-wrong{border-color:var(--red);background:var(--red-light)}
+.ab-letter{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:.72rem;font-weight:700;margin-bottom:.5rem}
+.ab-copy{font-size:.85rem;line-height:1.55;color:var(--text-primary)}
+.ab-verdict{margin-top:.8rem;font-size:.8rem;line-height:1.55;padding:.7rem .9rem;border-radius:6px;display:none}
+.ab-verdict.show{display:block;animation:fadeIn .35s ease}
+.ab-verdict.good{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.ab-verdict.bad{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── ACTIVITY 4: DEBUG REQUEST BUILDER (TRUST COLUMNS reused) ── */
+.trust-pool{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.2rem}
+.trust-pool .scenario-card{flex:1 1 260px}
+.trust-cols{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+@media (max-width:760px){.trust-cols{grid-template-columns:1fr}}
+.tzone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.9rem;min-height:150px;transition:all .25s;background:rgba(255,255,255,.55)}
+.tzone.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.tzone-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem}
+.tzone-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:700}
+.tzone-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--navy)}
+.tzone-sub{font-size:.66rem;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+
+/* ── ACTIVITY 5: WHAT BROKE QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.quiz-q.right{border-color:var(--green)}
+.quiz-q.miss{border-color:var(--red)}
+.quiz-q-head{display:flex;gap:.7rem;align-items:baseline;margin-bottom:.7rem}
+.quiz-q-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;flex-shrink:0}
+.quiz-q-text{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.5}
+.quiz-code{font-family:var(--mono);font-size:.74rem;line-height:1.5;background:var(--navy-dark);color:#E8E8EC;border-radius:6px;padding:.7rem .85rem;margin:.6rem 0 .7rem;white-space:pre-wrap;overflow-x:auto}
+.quiz-code .cmt{color:#8A8D9C}
+.quiz-opt{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .6rem;border-radius:6px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);line-height:1.45;transition:background .15s}
+.quiz-opt:hover{background:var(--bg-light)}
+.quiz-opt input{margin-top:.25rem;accent-color:var(--orange);cursor:pointer}
+.quiz-review{font-size:.76rem;line-height:1.55;margin-top:.6rem;padding:.6rem .8rem;border-radius:6px;display:none}
+.quiz-review.show{display:block;animation:fadeIn .3s ease}
+.quiz-review.good{background:var(--green-light);color:#1F5723}
+.quiz-review.bad{background:#FFF4E5;color:#7A4A0A}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 3 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 1 · AI Programming</div>
+  <h1>Your First Real Program — <em>write it, run it, read the error, fix it</em></h1>
+  <p class="hero-sub">Five hands-on drills. Pick a low-friction place to write code for each scenario, put the build loop in the order that actually works, learn to read an error message instead of fearing it, assemble a debugging request an AI can actually act on, and diagnose what broke in five short snippets.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+    <div class="progress-dot" id="prog5"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ENVIRONMENT MATCH ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Pick the lowest-friction place to write it</h2>
+    <p class="lesson-intro">Where you write code matters less than that you <strong>run it today</strong>. The goal for a first program is fewest steps between an idea and a working result — no hour lost to installing things. Match each scenario to the kind of environment that gets you running fastest. These are <em>categories</em>, not brand endorsements: the same reasoning applies whatever tool is popular this year. Wrong drops turn red — hover them to see where the scenario belongs and why.</p>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="elemList"></div>
+        <div class="wireframe">
+          <div class="wf-chrome"><span></span><span></span><span></span><div class="wf-url">where-do-i-write-this-code?</div></div>
+          <div class="wf-zone" data-zone="browser">
+            <div class="wf-zone-title">Browser sandbox / online editor</div>
+            <div class="wf-zone-sub">Nothing to install · runs in a tab · 2 items</div>
+            <div class="wf-drop" data-drop="browser"></div>
+          </div>
+          <div class="wf-zone" data-zone="notebook">
+            <div class="wf-zone-title">Notebook environment</div>
+            <div class="wf-zone-sub">Run code in chunks · see output inline · 2 items</div>
+            <div class="wf-drop" data-drop="notebook"></div>
+          </div>
+          <div class="wf-fold">once the project outgrows a single file</div>
+          <div class="wf-zone" data-zone="editor">
+            <div class="wf-zone-title">Local editor + AI assistant</div>
+            <div class="wf-zone-sub">Real project on your machine · 2 items</div>
+            <div class="wf-drop" data-drop="editor"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: BUILD LOOP ORDER ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">2</span>
+    <h2 class="lesson-title">Put the build loop in the order that works</h2>
+    <p class="lesson-intro">Beginners try to write a whole program, then run it once at the end and drown in errors. Experienced builders run a tiny loop, over and over, so a mistake is caught while it is still small. Click the six steps in the order the loop actually runs — a wrong click gets you a nudge. Task: a program that greets a user by name.</p>
+
+    <div class="lesson-card">
+      <div class="seq-wrap">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Loop steps (shuffled)</h4>
+          <div class="seq-pool" id="seqPool"></div>
+          <div class="seq-hint" id="seqHint"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The loop, in order</h4>
+          <div class="seq-slots" id="seqSlots"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetSeq()">↻ Start over</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: READ THE ERROR ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">3</span>
+    <h2 class="lesson-title">Read the error — what does it mean, what do you do?</h2>
+    <p class="lesson-intro">An error message is not the program yelling at you — it is the program <em>telling you where it got stuck and why</em>. Almost every message names a <strong>type</strong>, a <strong>location</strong>, and a <strong>cause</strong>. Read three real-shaped errors below. For each, click the reading that correctly says what it means and what to do next; you get the verdict instantly.</p>
+
+    <div class="lesson-card" id="abWrap"></div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: BUILD THE DEBUG REQUEST ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#4CAF50">4</span>
+    <h2 class="lesson-title">Assemble a debugging request an AI can actually fix</h2>
+    <p class="lesson-intro">"It's broken, fix it" wastes everyone's time — the AI has to guess, and it guesses wrong. A good debugging request gives it the three things it needs to reason: what you ran, what happened, and what you wanted instead. Drag each item into <strong>Include</strong> or <strong>Leave out</strong>. Hover any red pill for the correction.</p>
+
+    <div class="lesson-card">
+      <div class="trust-pool" id="trustPool"></div>
+      <div class="trust-cols">
+        <div class="tzone" data-tzone="include">
+          <div class="tzone-head"><div class="tzone-ico" style="background:linear-gradient(135deg,#66BB6A,#4CAF50)">✓</div><div><div class="tzone-title">Include in the request</div><div class="tzone-sub">Helps it reason · 4 items</div></div></div>
+          <div class="wf-drop" data-tdrop="include"></div>
+        </div>
+        <div class="tzone" data-tzone="leave">
+          <div class="tzone-head"><div class="tzone-ico" style="background:linear-gradient(135deg,#E04E3C,#C43A2A)">✗</div><div><div class="tzone-title">Leave out</div><div class="tzone-sub">Noise, or unsafe to share · 3 items</div></div></div>
+          <div class="wf-drop" data-tdrop="leave"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback4"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity4()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers4()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 5: WHAT BROKE MINI-QUIZ ── -->
+<section class="lesson" id="activity-5">
+  <div class="container">
+    <span class="lesson-num" style="background:var(--navy)">5</span>
+    <h2 class="lesson-title">"What broke?" — read the snippet, find the bug</h2>
+    <p class="lesson-intro">You don't need to memorise a language to reason about a bug — you need to read carefully and ask "what did I expect versus what would this actually do?" Five short snippets, each with one thing wrong. Pick the real cause, then submit for a per-question review.</p>
+
+    <div class="lesson-card">
+      <div id="quizWrap"></div>
+      <div class="activity-feedback" id="feedback5"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="submitQuiz()">Submit answers</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">↻ Reset quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what makes it stay. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">You run your program and get a red error message you don't understand. Before you panic or paste it to an AI, what three parts of the message do you look for?</div>
+        <textarea placeholder="The error type, the line/location it points to, and the ..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Why does running your code in a small loop — write a little, run it, read the result — beat writing the whole thing before running it once?</div>
+        <textarea placeholder="Because a bug caught after three lines is easy to find, but a bug hidden in ..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 4 · From Script to Shipped</h3>
+      <p>Your program runs on your machine — now make it something other people can trust and use. Next: the ladder from script to product, saving your work safely with version control, deciding what to test, and telling AI's green flags from its red ones.</p>
+      <a href="04-from-script-to-shipped.html" class="btn btn-primary">Continue to Lesson 4 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ─── shared helper ─── */
+function shuffle(arr){ return [...arr].sort(() => Math.random() - 0.5); }
+
+/* ─── ACTIVITY 1: Environment matcher ─── */
+const ELEMENTS = [
+  {id:'e1', text:'You want to try a 5-line idea right now, on a borrowed laptop, without installing anything', zone:'browser', hint:'A browser sandbox runs in a tab with nothing to set up — perfect when the whole point is to test a tiny idea in the next two minutes.'},
+  {id:'e2', text:'You are following a tutorial and just want to paste in each example and see it run', zone:'browser', hint:'Tutorials assume zero setup. A browser editor lets you paste, run, and move on — no install step to derail you before you have learned anything.'},
+  {id:'e3', text:'You are exploring data step by step and want to see each result before writing the next line', zone:'notebook', hint:'A notebook runs code in chunks and shows each output inline — ideal when you want to inspect a result, then decide the next step, rather than run everything at once.'},
+  {id:'e4', text:'You are learning by experimenting — tweak a number, re-run just that cell, watch what changes', zone:'notebook', hint:'Re-running a single cell without re-running the whole file is exactly what a notebook is for: fast, isolated experiments while you build intuition.'},
+  {id:'e5', text:'Your project is now five files and you want the AI to see the whole thing while you edit', zone:'editor', hint:'Once a project spans multiple files, a local editor with an AI assistant lets it read across the codebase — a single-tab sandbox cannot hold a real project.'},
+  {id:'e6', text:'You are ready to save your work in version control and run it the way real users will', zone:'editor', hint:'Version control, a proper file structure, and running the app like a user does all live in a local editor — this is where a toy becomes a real project.'}
+];
+const ZONE_NAMES = {browser:'Browser sandbox / online editor', notebook:'Notebook environment', editor:'Local editor + AI assistant'};
+const ZONE_LIMIT = {browser:2, notebook:2, editor:2};
+
+let placed1 = {};
+function renderElements(){
+  const list = document.getElementById('elemList');
+  list.innerHTML = shuffle(ELEMENTS).map(e => `
+    <div class="scenario-card" draggable="true" data-id="${e.id}">
+      <div class="scenario-text">${e.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('elem', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupZones1(){
+  document.querySelectorAll('.wf-zone').forEach(z => {
+    z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('drag-over'); });
+    z.addEventListener('dragleave', () => z.classList.remove('drag-over'));
+    z.addEventListener('drop', e => {
+      e.preventDefault();
+      z.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('elem');
+      if (id) handleDrop1(id, z.dataset.zone);
+    });
+  });
+}
+function handleDrop1(id, zone){
+  const el = ELEMENTS.find(x => x.id === id);
+  if (!el || placed1[id]) return;
+  const correct = el.zone === zone;
+  placed1[id] = {zone, correct};
+  const card = document.querySelector(`#elemList .scenario-card[data-id="${id}"]`);
+  if (card) card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const drop = document.querySelector(`.wf-drop[data-drop="${zone}"]`);
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + el.text.substring(0, 34) + (el.text.length > 34 ? '…' : '');
+  pill.title = correct ? el.hint : `Belongs in "${ZONE_NAMES[el.zone]}". ${el.hint}`;
+  drop.appendChild(pill);
+  checkDone1();
+}
+function checkDone1(){
+  if (Object.keys(placed1).length !== ELEMENTS.length) return;
+  const right = Object.values(placed1).filter(p => p.correct).length;
+  const fb = document.getElementById('feedback1');
+  if (right === ELEMENTS.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>All six placed — 6 of 6.</strong> You just applied the one rule that gets beginners writing code today instead of "next weekend": <em>choose the environment with the fewest steps between your idea and a running result.</em> A browser sandbox wins when you want to try something in two minutes with nothing installed. A notebook wins when you want to run code in chunks and study each result. A local editor with an AI assistant wins once the project outgrows a single file and needs version control. The tool names change every year — this reasoning does not.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You placed ${right} of 6 correctly.</strong> Hover each red pill for its true home and the reason. The mental model: match the environment to the <em>friction you can afford right now</em>. Trying a tiny idea or following a tutorial → a browser sandbox, because setup is the enemy. Exploring data or experimenting cell by cell → a notebook, because inline output is the point. A multi-file project that needs version control → a local editor with an AI assistant. Hit <em>Try again</em> and re-sort.`;
+  }
+  document.getElementById('prog1').classList.add('done');
+}
+function resetActivity1(){
+  placed1 = {};
+  document.getElementById('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('.wf-drop[data-drop]').forEach(d => d.innerHTML = '');
+  renderElements();
+  document.getElementById('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  ELEMENTS.forEach(e => { if (!placed1[e.id]) handleDrop1(e.id, e.zone); });
+}
+
+/* ─── ACTIVITY 2: Build-loop sequence ─── */
+const SCRIPT = [
+  {tag:'PLAN', text:'Say in one plain sentence what the program should do: "ask for a name, then print a greeting to it."', note:'Know the goal before you type — a blank plan is a blank result.', hint:'The loop starts with a PLAN. Before any code, pin down in plain words what "done" looks like — the step that has no code in it at all.'},
+  {tag:'WRITE A LITTLE', text:'Write the smallest first piece — just enough to produce one visible result (e.g. print a fixed "Hello!").', note:'A tiny slice you can run, not the whole program.', hint:'Next: WRITE A LITTLE. Not the whole thing — the smallest piece that could actually run and show you something.'},
+  {tag:'RUN IT', text:'Run that small piece right now and look at what actually happens on screen.', note:'Running is how you learn; not running is how bugs hide.', hint:'You wrote a little — now RUN IT. The whole point of a small piece is to run it immediately, not later.'},
+  {tag:'READ THE RESULT', text:'Read the output or the error carefully — did it do what you expected, yes or no?', note:'Compare what happened to what you wanted. Green or red, read it.', hint:'After running, READ THE RESULT. Whether it worked or threw an error, you have to look at what came back before doing anything else.'},
+  {tag:'FIX OR EXTEND', text:'If it broke, fix that one thing; if it worked, add the next small piece (now ask for the name).', note:'One change at a time — fix the break, or grow by one step.', hint:'Now decide: FIX OR EXTEND. Broke? Fix the single thing. Worked? Add the next small piece — one change, not ten.'},
+  {tag:'REPEAT', text:'Go back and run again — keep looping in tiny steps until the whole task is done.', note:'The loop is the method: small step, run, read, repeat.', hint:'Last: REPEAT. The loop only works because you go around it again and again in small steps — this is the final block.'}
+];
+let seqNext = 0;
+function renderSeq(){
+  seqNext = 0;
+  const order = shuffle(SCRIPT.map((_,i)=>i));
+  document.getElementById('seqPool').innerHTML = order.map(i=>`
+    <div class="seq-block" data-idx="${i}" onclick="pickBlock(${i},this)">
+      <div class="seq-block-text">${SCRIPT[i].text}</div>
+    </div>`).join('');
+  document.getElementById('seqSlots').innerHTML = SCRIPT.map((s,i)=>`
+    <div class="seq-slot" id="slot${i}">Step ${i+1} — waiting…</div>`).join('');
+  document.getElementById('seqHint').className='seq-hint';
+  document.getElementById('feedback2').className='activity-feedback';
+}
+function pickBlock(idx, el){
+  const hint = document.getElementById('seqHint');
+  if(idx!==seqNext){
+    el.classList.add('shake');
+    setTimeout(()=>el.classList.remove('shake'),380);
+    hint.className='seq-hint show';
+    hint.textContent='Not that one yet. '+SCRIPT[seqNext].hint;
+    return;
+  }
+  el.classList.add('used');
+  hint.className='seq-hint';
+  const slot = document.getElementById('slot'+idx);
+  slot.classList.add('filled');
+  slot.innerHTML = `<span class="seq-tag">${SCRIPT[idx].tag}</span><div>${SCRIPT[idx].text}</div><div style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;font-style:italic">${SCRIPT[idx].note}</div>`;
+  seqNext++;
+  if(seqNext===SCRIPT.length) finishSeq();
+}
+function finishSeq(){
+  const fb=document.getElementById('feedback2');
+  fb.className='activity-feedback show success';
+  fb.innerHTML='<strong>Loop assembled — PLAN → WRITE A LITTLE → RUN IT → READ THE RESULT → FIX OR EXTEND → REPEAT.</strong> Why this order beats "write it all, then run once": every trip around the loop is short, so when something breaks you know it was the <em>last</em> small change — you are never hunting through 200 lines for one typo. Running early and often turns programming from "hope it works" into "watch it work, one step at a time." This is the loop AI-assisted builders use too: even when AI writes the code, you still run it, read the result, and decide the next step. The method is the skill — the language is just details.';
+  document.getElementById('prog2').classList.add('done');
+}
+function resetSeq(){
+  renderSeq();
+  document.getElementById('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Read-the-error diagnosis ─── */
+const PAIRS = [
+  {
+    tag:'Error 1 · a name the program has never seen',
+    err:`<span class="err-type">NameError</span>: name 'total_prise' is not defined
+  <span class="err-dim">line 8:  print(total_prise)</span>`,
+    losing:'The program crashed because the price data is missing — I need to download the file again.',
+    winning:'I used a name the program was never told about. Line 8 says "total_prise" but I defined it as "total_price" — it is a typo in the name. Fix: make the two spellings match.',
+    why:'A NameError almost always means one thing: you used a name that was never created — usually a typo or a spelling that does not match where you defined it. The message even hands you the exact bad name ("total_prise") and the line (8). It has nothing to do with missing files. The fix is to compare the two spellings and make them identical.',
+    lesson:'NameError = "I have never heard of this name." Look for a typo or a mismatched spelling on the named line.'
+  },
+  {
+    tag:'Error 2 · a number where text was needed',
+    err:`<span class="err-type">TypeError</span>: can only concatenate str (not "int") to str
+  <span class="err-dim">line 4:  message = "You have " + items + " items"</span>`,
+    losing:'The whole approach is wrong and the program can never join text together — I should start over.',
+    winning:'I tried to glue a number ("items") directly onto text. The types do not match: text and number cannot be joined as-is. Fix: turn the number into text first, then join it.',
+    why:'A TypeError is the program saying "these two things are different kinds and cannot be combined like that." Here, text ("You have ") and a number (items) cannot be stuck together directly. This is a tiny, local fix — convert the number to text before joining — not a reason to abandon the whole program. The message even tells you the two types involved: str and int.',
+    lesson:'TypeError = "wrong kinds of thing combined." Read which two types it names, then convert one to match the other.'
+  },
+  {
+    tag:'Error 3 · reaching past the end of a list',
+    err:`<span class="err-type">IndexError</span>: list index out of range
+  <span class="err-dim">line 6:  print(names[3])</span>`,
+    losing:'The list is corrupted and the data is unusable — nothing I do will fix this.',
+    winning:'I asked for the 4th item (index 3) but the list has fewer items than that, so there is nothing there. Fix: check how many items the list really has, and only ask for positions that exist.',
+    why:'An IndexError means you reached for a position in a list that does not exist — like asking for the 4th seat in a 3-seat row. The data is fine; the request was out of bounds. The fix is to check the list length and make sure the position you ask for is actually there (remember many languages count from 0, so a 3-item list has positions 0, 1, 2).',
+    lesson:'IndexError = "you asked for a slot that isn\'t there." Check the list length; don\'t reach past the last real position.'
+  }
+];
+let abDone = 0;
+function renderPairs(){
+  abDone = 0;
+  const wrap = document.getElementById('abWrap');
+  wrap.innerHTML = PAIRS.map((p, i) => {
+    const winFirst = Math.random() < 0.5;
+    const cards = [
+      {label:'A', copy: winFirst ? p.winning : p.losing, win: winFirst},
+      {label:'B', copy: winFirst ? p.losing : p.winning, win: !winFirst}
+    ];
+    return `
+    <div class="ab-pair" data-pair="${i}">
+      <div class="ab-q"><span class="ab-tag">${p.tag}</span>Which reading is right — what does it mean, and what do you do?</div>
+      <div class="err-block">${p.err}</div>
+      <div class="ab-cards">
+        ${cards.map(c => `
+        <div class="ab-card" data-win="${c.win ? 1 : 0}" onclick="pickAB(this, ${i})">
+          <span class="ab-letter">${c.label}</span>
+          <div class="ab-copy">${c.copy}</div>
+        </div>`).join('')}
+      </div>
+      <div class="ab-verdict" id="verdict${i}"></div>
+    </div>`;
+  }).join('') + `
+    <div class="activity-feedback" id="feedback2b"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetActivity3()">↻ New round (sides reshuffle)</button>
+    </div>`;
+}
+function pickAB(card, i){
+  const pair = card.closest('.ab-pair');
+  if (pair.dataset.locked) return;
+  pair.dataset.locked = '1';
+  const pickedWin = card.dataset.win === '1';
+  pair.querySelectorAll('.ab-card').forEach(c => {
+    c.classList.add('locked');
+    if (c.dataset.win === '1') c.classList.add('win');
+    else c.classList.add(c === card ? 'picked-wrong' : 'lose');
+  });
+  const v = document.getElementById('verdict' + i);
+  v.className = 'ab-verdict show ' + (pickedWin ? 'good' : 'bad');
+  v.innerHTML = (pickedWin ? '<strong>Right reading.</strong> ' : '<strong>The other reading is right.</strong> ') + PAIRS[i].why;
+  pair.dataset.score = pickedWin ? '1' : '0';
+  abDone++;
+  if (abDone === PAIRS.length) finishAB();
+}
+function finishAB(){
+  const score = [...document.querySelectorAll('.ab-pair')].reduce((s, p) => s + (p.dataset.score === '1' ? 1 : 0), 0);
+  const fb = document.getElementById('feedback2b');
+  if (score === PAIRS.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>3 for 3 — you read errors like a builder, not a bystander.</strong> Notice the pattern in all three: the message named a <em>type</em> (NameError, TypeError, IndexError), pointed to a <em>line</em>, and hinted at the <em>cause</em>. None of them meant "start over" — each was a small, local, fixable thing. That reframe is the whole game: an error is a map to the fix, not a verdict on you. When you don't recognise a message, paste the <em>exact</em> text into a search or an AI and it will almost always explain it in one reply.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You read ${score} of 3 correctly.</strong> Re-read the verdicts — they are the lesson. The losing readings all made the same mistake: they treated a small, local error ("this name has a typo", "convert this number to text") as a catastrophe ("the data is corrupted", "start over"). Errors rarely mean start over. Look for the <em>type</em>, the <em>line</em>, and the <em>cause</em> the message hands you, and make the smallest fix that addresses exactly that. Reshuffle and run it again.`;
+  }
+  document.getElementById('prog3').classList.add('done');
+}
+function resetActivity3(){
+  renderPairs();
+  document.getElementById('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Build the debug request ─── */
+const TRUST_FINAL = [
+  {id:'t1', text:'The full, exact error message — copied, not paraphrased', col:'include', hint:'The exact text (type + line + message) is the single most useful thing you can share — paraphrasing loses the detail that points to the fix.'},
+  {id:'t2', text:'The small piece of code that produced the error', col:'include', hint:'The AI has to see the code that broke to reason about it — the relevant snippet around the failing line, not the whole project.'},
+  {id:'t3', text:'What you expected to happen', col:'include', hint:'"Expected vs got" is how a helper tells a bug from intended behaviour. Without the expectation, it cannot know what "fixed" even means.'},
+  {id:'t4', text:'What actually happened (the wrong output or crash)', col:'include', hint:'Pairing the actual result with the expected one frames the whole problem in one line — this is the other half of "expected vs got".'},
+  {id:'t6', text:'A long apology and the story of how frustrated you are', col:'leave', hint:'Feelings are human, but they add no information the AI can act on — they just bury the useful details it needs to read.'},
+  {id:'t7', text:'Your real API key or password pasted straight into the message', col:'leave', hint:'Never paste live secrets anywhere. Replace them with a placeholder like YOUR_KEY_HERE before sharing code — a leaked key can be abused instantly.'},
+  {id:'t8', text:'Fifteen unrelated files "just in case it helps"', col:'leave', hint:'Dumping the whole project buries the signal. Share the failing snippet and its immediate context, not everything — more noise means worse answers.'}
+];
+const TCOL_NAMES = {include:'Include in the request', leave:'Leave out'};
+
+let placed4 = {};
+function renderTrust(){
+  const pool = document.getElementById('trustPool');
+  pool.innerHTML = shuffle(TRUST_FINAL).map(t => `
+    <div class="scenario-card" draggable="true" data-tid="${t.id}">
+      <div class="scenario-text">${t.text}</div>
+    </div>`).join('');
+  pool.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('trust', card.dataset.tid);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupZones4(){
+  document.querySelectorAll('.tzone').forEach(z => {
+    z.addEventListener('dragover', e => { e.preventDefault(); z.classList.add('drag-over'); });
+    z.addEventListener('dragleave', () => z.classList.remove('drag-over'));
+    z.addEventListener('drop', e => {
+      e.preventDefault();
+      z.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('trust');
+      if (id) handleDrop4(id, z.dataset.tzone);
+    });
+  });
+}
+function handleDrop4(id, col){
+  const item = TRUST_FINAL.find(t => t.id === id);
+  if (!item || placed4[id]) return;
+  const correct = item.col === col;
+  placed4[id] = {col, correct};
+  const card = document.querySelector(`#trustPool .scenario-card[data-tid="${id}"]`);
+  if (card) card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const drop = document.querySelector(`.wf-drop[data-tdrop="${col}"]`);
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + item.text.replace(/&amp;/g,'&').substring(0, 32) + '…';
+  pill.title = correct ? item.hint : `Belongs in "${TCOL_NAMES[item.col]}". ${item.hint}`;
+  drop.appendChild(pill);
+  checkDone4();
+}
+function checkDone4(){
+  if (Object.keys(placed4).length !== TRUST_FINAL.length) return;
+  const right = Object.values(placed4).filter(p => p.correct).length;
+  const fb = document.getElementById('feedback4');
+  if (right === TRUST_FINAL.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>7 of 7 — that is a request an AI can actually fix.</strong> The four "include" items are the anatomy of every good debugging ask: the <em>exact error</em>, the <em>code that caused it</em>, what you <em>expected</em>, and what <em>actually happened</em>. Together they let a helper — human or AI — reason instead of guess. The "leave out" pile matters just as much: apologies and frustration add no signal, dumping fifteen files buries the one that matters, and pasting a live secret is a genuine security mistake — always swap real keys for a placeholder before you share code. Master this template and you turn "it's broken" into "here's exactly what broke," which gets you a real answer on the first try.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You sorted ${right} of 7 correctly.</strong> Hover the red pills for corrections. The template to remember: <em>include</em> the exact error, the failing code, what you expected, and what actually happened — that is enough to reason about almost any bug. <em>Leave out</em> anything that adds noise (long apologies, a whole project's worth of unrelated files) and anything unsafe to share (real API keys or passwords — replace them with a placeholder first). Try again for a clean board.`;
+  }
+  document.getElementById('prog4').classList.add('done');
+}
+function resetActivity4(){
+  placed4 = {};
+  document.getElementById('feedback4').className = 'activity-feedback';
+  document.querySelectorAll('.wf-drop[data-tdrop]').forEach(d => d.innerHTML = '');
+  renderTrust();
+  document.getElementById('prog4').classList.remove('done');
+}
+function showAnswers4(){
+  TRUST_FINAL.forEach(t => { if (!placed4[t.id]) handleDrop4(t.id, t.col); });
+}
+
+/* ─── ACTIVITY 5: "What broke?" mini-quiz ─── */
+const QUIZ = [
+  {q:'The program should greet the user, but it prints nothing and shows no error. What broke?',
+   code:'name = input("Your name: ")\ngreeting = "Hello, " + name\n<span class="cmt"># (nothing else)</span>',
+   opts:['The input line is wrong','It builds the greeting but never prints it — there is no print step','The quotes are the wrong kind','The name variable is spelled wrong'], ans:1,
+   why:'The code builds the greeting into a variable but never displays it. "Runs with no output" almost always means you computed a result and forgot to show it — add a line that prints "greeting". No error appears because nothing is actually wrong syntactically; it just does not do the last step.'},
+  {q:'This should add two numbers a user types, but 2 + 3 prints "23" instead of 5. What broke?',
+   code:'a = input("First: ")\nb = input("Second: ")\nprint(a + b)   <span class="cmt"># prints 23, not 5</span>',
+   opts:['The print function is broken','Input gives back text, so "+" joins "2" and "3" instead of adding them','The numbers are too small','The variables need different names'], ans:1,
+   why:'Typed input arrives as text, not numbers. Adding two pieces of text glues them ("2"+"3" → "23"). To do math, convert each to a number first. This is the single most common beginner surprise — the code runs without error but does the wrong operation because the values are the wrong type.'},
+  {q:'The loop should print numbers 1 to 5, but it runs forever and never stops. What broke?',
+   code:'i = 1\nwhile i &lt;= 5:\n    print(i)\n    <span class="cmt"># i never changes</span>',
+   opts:['The comparison is backwards','The counter "i" is never increased, so the stop condition is never reached','Print cannot be used in a loop','The number 5 is too small'], ans:1,
+   why:'A loop keeps going until its condition becomes false. Here "i" stays 1 forever because nothing ever increases it, so "i <= 5" is always true — an infinite loop. The fix is to add a step inside the loop that moves the counter forward. Whenever a loop hangs, check whether the thing it is testing ever actually changes.'},
+  {q:'The program should work, but crashes on the very first line with "IndentationError". What broke?',
+   code:'def greet():\nprint("Hi")   <span class="cmt"># not indented under greet</span>',
+   opts:['The function name is illegal','The body of the function is not indented under it, so the structure is broken','Print is misspelled','You cannot define a function this way at all'], ans:1,
+   why:'In many languages, indentation shows what belongs inside what. The print line needs to be indented under the function so the language knows it is part of it. An IndentationError is a structural signal, not a logic bug — line up the block correctly and it runs.'},
+  {q:'You ask AI for code, paste it in, and it crashes with "ModuleNotFoundError: no module named \'requests\'". What is the right first move?',
+   code:'import requests   <span class="cmt"># ModuleNotFoundError here</span>',
+   opts:['The AI hallucinated a fake library — delete the line','The code needs an external library that is not installed yet — install it, then re-run','Rewrite the whole program from scratch','Ignore it; the error does not matter'], ans:1,
+   why:'This error means the code relies on an add-on package that is not yet installed in your environment — a very common, expected step, not a broken program. The fix is to install that package and run again. (It is worth a quick check that the library is real and widely used, since AI can occasionally invent a name — but a well-known one like this just needs installing.)'}
+];
+function renderQuiz(){
+  document.getElementById('quizWrap').innerHTML = QUIZ.map((item,i)=>`
+    <div class="quiz-q" id="qq${i}">
+      <div class="quiz-q-head"><span class="quiz-q-num">Q${i+1}</span><span class="quiz-q-text">${item.q}</span></div>
+      <div class="quiz-code">${item.code}</div>
+      ${item.opts.map((o,j)=>`
+        <label class="quiz-opt"><input type="radio" name="quiz${i}" value="${j}"><span>${o}</span></label>`).join('')}
+      <div class="quiz-review" id="qr${i}"></div>
+    </div>`).join('');
+}
+function submitQuiz(){
+  const fb=document.getElementById('feedback5');
+  const answers = QUIZ.map((_,i)=>{
+    const sel=document.querySelector(`input[name="quiz${i}"]:checked`);
+    return sel? +sel.value : null;
+  });
+  const blank = answers.filter(a=>a===null).length;
+  if(blank>0){
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${blank} question${blank>1?'s':''} unanswered.</strong> Guessing is allowed, blank is not — answer everything and submit again.`;
+    return;
+  }
+  let score=0;
+  QUIZ.forEach((item,i)=>{
+    const card=document.getElementById('qq'+i);
+    const rev=document.getElementById('qr'+i);
+    card.classList.remove('right','miss');
+    const correct = answers[i]===item.ans;
+    if(correct){
+      score++;
+      card.classList.add('right');
+      rev.className='quiz-review show good';
+      rev.innerHTML='✓ Correct. '+item.why;
+    } else {
+      card.classList.add('miss');
+      rev.className='quiz-review show bad';
+      rev.innerHTML=`✗ The answer is "<strong>${item.opts[item.ans]}</strong>". ${item.why}`;
+    }
+  });
+  if(score===5){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>5 of 5 — you debug by reasoning, not guessing.</strong> Every one of these had the same cure: read what the code actually does, compare it to what you wanted, and change the one thing responsible. Forgot to print, joined text instead of adding numbers, a loop counter that never moves, a mis-indented block, a package to install — these are the bugs every beginner meets in week one, and now you can name them on sight.';
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>You got ${score} of 5.</strong> Re-read the reviews on the ones you missed — each is a bug you will meet again and again. The reasoning that solves all five is identical: state what you <em>expected</em>, watch what the code <em>actually does</em>, and fix the single step where those two diverge. Reset and run it again from memory.`;
+  }
+  document.getElementById('prog5').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  document.getElementById('feedback5').className='activity-feedback';
+  document.getElementById('prog5').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderElements();
+  setupZones1();
+  renderSeq();
+  renderPairs();
+  renderTrust();
+  setupZones4();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

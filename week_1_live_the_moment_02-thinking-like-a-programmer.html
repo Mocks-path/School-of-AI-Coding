@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 2 · Thinking Like a Programmer — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── ACTIVITY 1: CONCEPT SORTER ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:.9rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card:nth-child(4) .compare-icon{background:linear-gradient(135deg,#8E6BC0,#6E4BA0)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-card ul{list-style:none;padding:0;margin-top:.6rem;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-card li{font-size:.74rem;color:var(--text-secondary);padding:.15rem 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.45}
+.compare-card li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+
+/* ── ACTIVITY 2: DECOMPOSE / BUILD STEPS ── */
+.prompt-pool{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.frag-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.8rem;line-height:1.45;cursor:pointer;transition:all .2s;max-width:360px;user-select:none;font-weight:500}
+.frag-chip:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.frag-chip.used{opacity:0;pointer-events:none;position:absolute;visibility:hidden}
+.frag-chip.shake{animation:shake .35s ease;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.prompt-slots{margin-top:1.4rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:90px;background:rgba(255,255,255,0.5)}
+.slot-line{display:flex;align-items:flex-start;gap:.6rem;padding:.45rem .2rem;font-size:.83rem;line-height:1.5;animation:fadeIn .35s ease}
+.slot-tag{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.05em;color:#fff;background:var(--navy);padding:.18rem .5rem;border-radius:4px;flex-shrink:0;margin-top:.1rem;text-transform:uppercase;min-width:60px;text-align:center}
+.slot-line.t-step .slot-tag{background:#5B8FE0}
+.prompt-hint{margin-top:.8rem;padding:.7rem .9rem;background:var(--red-light);border-left:3px solid var(--red);border-radius:4px;font-size:.78rem;color:#7A2A1E;line-height:1.55;display:none}
+.prompt-hint.show{display:block;animation:fadeIn .3s ease}
+.prompt-preview{margin-top:1.2rem;background:#1A1B2E;border-radius:var(--radius-sm);padding:1.2rem 1.4rem;font-family:var(--mono);font-size:.78rem;line-height:1.85;color:#E8E8EC;display:none;border:1px solid var(--navy)}
+.prompt-preview.show{display:block;animation:fadeIn .4s ease}
+.prompt-preview .pp-label{color:var(--orange-light);font-weight:600;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.6rem}
+.prompt-preview ol{margin:0;padding-left:1.4rem}
+.structure-bar{display:flex;gap:.4rem;margin-top:1rem;flex-wrap:wrap;align-items:center}
+.structure-step{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3rem .7rem;border-radius:50px;color:#fff;background:#5B8FE0}
+.structure-arrow{color:var(--text-muted);font-weight:700;align-self:center;font-size:.75rem}
+
+/* ── ACTIVITY 3: SPEC BUILDER (missing pieces) ── */
+.validate-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.validate-grid{grid-template-columns:1fr}}
+.product-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow-sm)}
+.product-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.2rem}
+.product-tag{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);margin-bottom:.8rem;display:block}
+.vague-box{background:var(--red-light);border:1px solid var(--red);border-radius:var(--radius-sm);padding:.7rem .9rem;font-family:var(--mono);font-size:.78rem;color:#7A2A1E;line-height:1.5;margin-bottom:1rem}
+.check-block{margin-top:.4rem;padding-top:.9rem;border-top:2px solid var(--border)}
+.check-block h5{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem}
+.check-item{display:flex;align-items:flex-start;gap:.6rem;padding:.4rem .5rem;border-radius:6px;font-size:.8rem;line-height:1.45;cursor:pointer;transition:background .2s}
+.check-item:hover{background:var(--bg-light)}
+.check-item input{margin-top:.2rem;accent-color:var(--orange);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.check-item.row-right{background:var(--green-light)}
+.check-item.row-wrong{background:var(--red-light)}
+.row-note{font-size:.7rem;color:#933;margin:.1rem 0 .3rem 2.1rem;line-height:1.5;display:none}
+.row-note.show{display:block;animation:fadeIn .3s ease}
+.verdict-pill{display:none;margin-top:.9rem;padding:.6rem .9rem;border-radius:var(--radius-sm);font-size:.8rem;font-weight:600;line-height:1.5}
+.verdict-pill.show{display:block;animation:fadeIn .4s ease}
+.verdict-pill.go{background:var(--green-light);color:#1F5723;border:1px solid var(--green)}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.5rem}
+.quiz-code{background:#1A1B2E;border-radius:var(--radius-sm);padding:.9rem 1.1rem;font-family:var(--mono);font-size:.78rem;line-height:1.7;color:#E8E8EC;margin-bottom:.9rem;white-space:pre;overflow-x:auto}
+.quiz-code .kw{color:#F5943E}.quiz-code .st{color:#8FD98F}.quiz-code .cm{color:#9597A6}.quiz-code .nm{color:#7FB3F0}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 2 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 1 · AI Programming</div>
+  <h1>Thinking Like a Programmer — <em>the skill AI can't do for you</em></h1>
+  <p class="hero-sub">Four hands-on activities. Break a real goal into ordered steps, turn a vague prompt into a spec an AI can actually act on, match the four core concepts to their plain-English meanings, then read a snippet of code and predict what it does. This is the thinking underneath every program — with or without AI.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: CONCEPT SORTER ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Match the concept — the four building blocks of almost every program</h2>
+    <p class="lesson-intro">Programs look endlessly varied, but nearly all of them are built from the same four ideas. Study the plain-English cards, then drag each real-world example into the concept it demonstrates. Guess freely — wrong answers come with an explanation you can hover to read.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">VAR</div>
+        <h4>Variable</h4>
+        <p>A named box that <strong>holds a value</strong> you can look up or change later.</p>
+        <ul>
+          <li>Stores one thing under a label</li>
+          <li>Can be updated as the program runs</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">IF</div>
+        <h4>Conditional</h4>
+        <p>A fork in the road: <strong>if</strong> something is true, do one thing; otherwise, do another.</p>
+        <ul>
+          <li>Makes a decision based on a test</li>
+          <li>Branches the program's behavior</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">LOOP</div>
+        <h4>Loop</h4>
+        <p><strong>Repeat</strong> the same action many times — for each item, or until a condition is met.</p>
+        <ul>
+          <li>Handles "do this to every one of them"</li>
+          <li>Saves you writing the step by hand N times</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">FUNC</div>
+        <h4>Function</h4>
+        <p>A <strong>named, reusable</strong> mini-program: give it inputs, it does a job and hands back a result.</p>
+        <ul>
+          <li>Bundles steps under one name you can reuse</li>
+          <li>Takes inputs, returns an output</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lesson-card" style="margin-top:1.5rem">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="scenarioList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="variable">
+            <div class="bucket-title">Variable</div>
+            <div class="bucket-sub">Holds a named value</div>
+            <div class="bucket-drop" data-drop="variable"></div>
+          </div>
+          <div class="bucket" data-bucket="conditional">
+            <div class="bucket-title">Conditional</div>
+            <div class="bucket-sub">If this, then that</div>
+            <div class="bucket-drop" data-drop="conditional"></div>
+          </div>
+          <div class="bucket" data-bucket="loop">
+            <div class="bucket-title">Loop</div>
+            <div class="bucket-sub">Repeat for each / until</div>
+            <div class="bucket-drop" data-drop="loop"></div>
+          </div>
+          <div class="bucket" data-bucket="function">
+            <div class="bucket-title">Function</div>
+            <div class="bucket-sub">Reusable named job</div>
+            <div class="bucket-drop" data-drop="function"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: DECOMPOSE A GOAL INTO STEPS ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Decompose the goal — build the steps in order</h2>
+    <p class="lesson-intro">The core move of thinking like a programmer is <strong>decomposition</strong>: turning one big fuzzy goal into a sequence of small, obvious steps. The goal below is "<em>read a list of names from a file and greet each person</em>". Its steps are scrambled — click them in the order they must run. A wrong click tells you why it doesn't fit yet.</p>
+
+    <div class="structure-bar">
+      <span class="structure-step">Input</span><span class="structure-arrow">→</span>
+      <span class="structure-step">Process each</span><span class="structure-arrow">→</span>
+      <span class="structure-step">Output</span>
+    </div>
+
+    <div class="lesson-card">
+      <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy)">Click the next step of the plan</h4>
+      <div class="prompt-pool" id="fragPool"></div>
+      <div class="prompt-hint" id="promptHint"></div>
+      <div class="prompt-slots" id="promptSlots">
+        <div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your step-by-step plan will build up here, one step at a time…</div>
+      </div>
+      <div class="prompt-preview" id="promptPreview"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity2()">↻ Start over</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: VAGUE → SPECIFIC SPEC BUILDER ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#4CAF50">3</span>
+    <h2 class="lesson-title">From vague to specific — tick the pieces a good spec needs</h2>
+    <p class="lesson-intro">"Make me a program that sorts my expenses" gives an AI almost nothing to work with — it will guess, and guess wrong. A useful spec names five pieces: <strong>context, inputs, outputs, constraints, and an example</strong>. Below are two prompts. Tick a checklist item only if the prompt <em>actually supplies</em> that piece. Then get the verdict.</p>
+
+    <div class="lesson-card">
+      <div class="validate-grid">
+        <div class="product-card" id="cardA">
+          <span class="product-tag">Prompt A — the vague one</span>
+          <h4>What the AI receives</h4>
+          <div class="vague-box">"Make me a program that sorts my expenses."</div>
+          <div class="check-block">
+            <h5>Which pieces are present? Tick only what's actually there</h5>
+            <div id="checksA"></div>
+          </div>
+          <div class="verdict-pill" id="verdictA"></div>
+        </div>
+        <div class="product-card" id="cardB">
+          <span class="product-tag">Prompt B — the specific one</span>
+          <h4>What the AI receives</h4>
+          <div class="vague-box">"I have a CSV file expenses.csv with columns date, category, amount (a beginner's personal budget). Write a Python script that reads it and prints the total spent per category, highest first. Amounts are positive numbers; skip any row with a blank amount. Example: groceries 240.50, transport 88.00."</div>
+          <div class="check-block">
+            <h5>Which pieces are present? Tick only what's actually there</h5>
+            <div id="checksB"></div>
+          </div>
+          <div class="verdict-pill" id="verdictB"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="getVerdict()">Get verdict</button>
+        <button class="btn btn-ghost" onclick="resetActivity3()">↻ Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: READ-THE-CODE QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Read the code — what does it do?</h2>
+    <p class="lesson-intro">You don't have to <em>write</em> code to <em>read</em> it — and reading is the skill that lets you trust or reject what an AI hands you. Below are five short snippets in plain, beginner-friendly pseudocode. For each, pick what it actually does. The explanations are where the real learning is.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Take a small everyday goal ("email everyone who hasn't replied"). Break it into 3–4 ordered steps, naming the input, the thing you repeat, and the output.</div>
+        <textarea placeholder="1. Read the list of people. 2. For each person, check if they replied. 3. If not, send the email..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Rewrite "make me a program that sorts my expenses" into a spec. Which of the five pieces — context, inputs, outputs, constraints, example — was missing that you'd add first?</div>
+        <textarea placeholder="It was missing the inputs and the output format. I'd say: I have a CSV with columns..., print the total per category..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 3 · Your First Program</h3>
+      <p>You can decompose a goal, write a real spec, and read the core concepts. Next: put it together and build your first small working program end to end — describe, generate, run, read, fix.</p>
+      <a href="03-your-first-program.html" class="btn btn-primary">Continue to Lesson 3 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Concept Sorter ─── */
+const CONCEPTS = [
+  {id:'p1', text:'score = 0, then later score = 12 — a labelled box that holds and updates a value.', hint:'A named box that stores a value you can change is the definition of a variable.', bucket:'variable', why:'"score" is a name pointing at a value that can be read and updated — a variable.'},
+  {id:'p2', text:'A named block called greet(name) that takes a name and returns "Hello, " + name.', hint:'A reusable named job that takes inputs and returns a result is a function.', bucket:'function', why:'greet(name) bundles steps under a name, takes an input, and returns an output — a function.'},
+  {id:'p3', text:'For every email in the inbox, mark it as read — the same action applied to each one.', hint:'Doing the same action once per item is a loop.', bucket:'loop', why:'"For every email, do X" repeats one action across a collection — that\'s a loop.'},
+  {id:'p4', text:'If the balance is below zero, show a warning; otherwise, show the balance.', hint:'Choosing between two paths based on a test is a conditional.', bucket:'conditional', why:'"If below zero … otherwise …" branches based on a condition — a conditional.'},
+  {id:'p5', text:'userName holds the text "Priya" so the program can greet her by name later.', hint:'Storing "Priya" under the label userName is exactly what a variable does.', bucket:'variable', why:'userName is a labelled container holding a value for later use — a variable.'},
+  {id:'p6', text:'Keep asking for a password until the person types the correct one — repeat until true.', hint:'"Keep doing X until a condition is met" is a loop.', bucket:'loop', why:'Repeating an ask "until correct" is a loop that runs until its condition is satisfied.'},
+  {id:'p7', text:'If today is a weekend, skip the reminder; if it is a weekday, send it.', hint:'Two different actions chosen by a test is a conditional.', bucket:'conditional', why:'Weekend vs weekday chooses a branch based on a test — a conditional.'},
+  {id:'p8', text:'A reusable block calculateTax(amount) you can call from anywhere to get the tax back.', hint:'A named, reusable block that takes an input and returns a result is a function.', bucket:'function', why:'calculateTax(amount) is a named reusable job returning a value — a function.'}
+];
+const BUCKET_NAMES = {variable:'Variable', conditional:'Conditional', loop:'Loop', function:'Function'};
+
+let placed = {};
+function renderScenarios(){
+  const list = $('scenarioList');
+  const shuffled = [...CONCEPTS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(p => `
+    <div class="scenario-card" draggable="true" data-id="${p.id}">
+      <div class="scenario-text">${p.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop(id, bucket){
+  const concept = CONCEPTS.find(p => p.id === id);
+  if (!concept || placed[id]) return;
+  const correct = concept.bucket === bucket;
+  placed[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + concept.text.substring(0, 34) + (concept.text.length > 34 ? '…' : '');
+  pill.title = correct ? concept.why : `Correct concept: ${BUCKET_NAMES[concept.bucket]}. ${concept.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity1Done();
+}
+function checkActivity1Done(){
+  if (Object.keys(placed).length === CONCEPTS.length) {
+    const right = Object.values(placed).filter(p => p.correct).length;
+    const fb = $('feedback1');
+    if (right === CONCEPTS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All eight correct — you can already spot the building blocks.</strong> Variables hold, conditionals decide, loops repeat, functions bundle-and-reuse. Almost every program you'll ever read is these four, combined. When AI hands you code, naming these pieces is how you start to <em>read</em> it.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 8.</strong> Hover any red pill to see the right concept and why. The usual mix-up: a <em>loop</em> ("for each / until") vs a <em>conditional</em> ("if / otherwise") — a loop repeats, a conditional chooses. And any named, reusable block with inputs and a result is a <em>function</em>. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog1').classList.add('done');
+  }
+}
+function resetActivity1(){
+  placed = {};
+  $('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('.bucket-drop').forEach(d => d.innerHTML = '');
+  renderScenarios();
+  $('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  CONCEPTS.forEach(p => { if (!placed[p.id]) handleDrop(p.id, p.bucket); });
+}
+
+/* ─── ACTIVITY 2: Decompose a Goal into Ordered Steps ─── */
+const FRAGMENTS = [
+  {order:1, text:'Open the file and read the list of names into the program.'},
+  {order:2, text:'Check the file actually had names — if it is empty, stop and say so.'},
+  {order:3, text:'Start going through the names one at a time (begin the loop).'},
+  {order:4, text:'For the current name, build the greeting text "Hello, <name>!".'},
+  {order:5, text:'Print that greeting so it appears on screen.'},
+  {order:6, text:'Move to the next name and repeat until every name is greeted.'},
+  {order:7, text:'After the last name, print how many people were greeted in total.'}
+];
+const STEP_HINT = 'Steps must run in order: first get the INPUT (read the file, check it), then PROCESS each item inside the loop (build and print each greeting, move on), then produce the final OUTPUT (the count) once the loop ends.';
+let promptStep = 0, promptMistakes = 0;
+function renderFragments(){
+  const shuffled = [...FRAGMENTS].sort(()=>Math.random()-0.5);
+  $('fragPool').innerHTML = shuffled.map(f =>
+    `<div class="frag-chip" data-order="${f.order}" onclick="pickFragment(${f.order}, this)">${f.text}</div>`
+  ).join('');
+}
+function pickFragment(order, chip){
+  const hint = $('promptHint');
+  if (order !== promptStep + 1) {
+    promptMistakes++;
+    chip.classList.remove('shake'); void chip.offsetWidth;
+    chip.classList.add('shake');
+    const expected = FRAGMENTS.find(f => f.order === promptStep + 1);
+    hint.innerHTML = `<strong>Not yet — that step comes later.</strong> ${STEP_HINT} (You're looking for step ${promptStep + 1}: it should be "${expected.text}")`;
+    hint.classList.add('show');
+    return;
+  }
+  hint.classList.remove('show');
+  promptStep++;
+  chip.classList.add('used');
+  const frag = FRAGMENTS.find(f => f.order === order);
+  const ph = $('slotPlaceholder');
+  if (ph) ph.remove();
+  const line = document.createElement('div');
+  line.className = 'slot-line t-step';
+  line.innerHTML = `<span class="slot-tag">Step ${order}</span><span>${frag.text}</span>`;
+  $('promptSlots').appendChild(line);
+  if (promptStep === FRAGMENTS.length) finishPrompt();
+}
+function finishPrompt(){
+  const preview = $('promptPreview');
+  preview.innerHTML = `<span class="pp-label">Your decomposed plan — this is what you'd hand an AI, step by step</span>` +
+    '<ol>' + FRAGMENTS.map(f => `<li>${f.text}</li>`).join('') + '</ol>';
+  preview.classList.add('show');
+  const fb = $('feedback2');
+  const whys = `<ul style="margin:.6rem 0 0 1.1rem;line-height:1.7">
+    <li><strong>Input first</strong> — you can't process names you haven't read in yet.</li>
+    <li><strong>Guard early</strong> — checking for an empty file before the loop stops a whole class of crashes.</li>
+    <li><strong>Loop in the middle</strong> — "for each name, greet it" is the repeated core of the job.</li>
+    <li><strong>Output last</strong> — the total count only makes sense after every name is done.</li></ul>`;
+  if (promptMistakes === 0) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Perfect decomposition — zero wrong clicks.</strong> You turned a fuzzy goal into an ordered plan of tiny, obvious steps. That plan <em>is</em> the hard part of programming; handing it to an AI (or coding it yourself) is the easy part. Why the order holds:${whys}`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Assembled — with ${promptMistakes} wrong click${promptMistakes > 1 ? 's' : ''} on the way.</strong> That's fine: getting the <em>order</em> right is the whole skill — read the input, then repeat the core action, then produce the final result. Why it holds:${whys} Hit <em>Start over</em> and try for a clean run.`;
+  }
+  $('prog2').classList.add('done');
+}
+function resetActivity2(){
+  promptStep = 0; promptMistakes = 0;
+  $('promptHint').classList.remove('show');
+  $('promptPreview').className = 'prompt-preview';
+  $('feedback2').className = 'activity-feedback';
+  $('promptSlots').innerHTML = '<div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your step-by-step plan will build up here, one step at a time…</div>';
+  renderFragments();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Vague → Specific Spec Builder ─── */
+const CHECK_ITEMS = [
+  {key:'context', label:'Context: says what this is for and who it\'s for (the situation)'},
+  {key:'inputs',  label:'Inputs: names the exact data going in (file, columns, types)'},
+  {key:'outputs', label:'Outputs: says exactly what should come out and how it\'s ordered'},
+  {key:'constraints', label:'Constraints: rules and edge cases (e.g. skip blanks, positive numbers)'},
+  {key:'example', label:'Example: shows a concrete sample of the expected result'}
+];
+/* Prompt A (vague) supplies NONE of the five. Prompt B (specific) supplies ALL five. */
+const CORRECT_EVAL = {
+  A: {context:false, inputs:false, outputs:false, constraints:false, example:false},
+  B: {context:true,  inputs:true,  outputs:true,  constraints:true,  example:true}
+};
+const EVAL_NOTES = {
+  A: {
+    context:'"Sorts my expenses" never says what for or whose — the AI has to guess the whole situation.',
+    inputs:'No file, no columns, no data types. Sort what, exactly? Numbers? A spreadsheet? The AI can\'t tell.',
+    outputs:'"Sorts" is undefined: sorted by amount? by date? printed, saved, or returned? No output is specified.',
+    constraints:'No rules at all — nothing about blanks, negatives, currencies, or edge cases.',
+    example:'There is no sample result to aim at, so you can\'t even check if the answer is right.'
+  },
+  B: {
+    context:'"a beginner\'s personal budget" tells the AI the situation and audience.',
+    inputs:'"expenses.csv with columns date, category, amount" names the exact input and its shape.',
+    outputs:'"prints the total spent per category, highest first" defines the output precisely.',
+    constraints:'"positive numbers; skip any row with a blank amount" states the rules and an edge case.',
+    example:'"groceries 240.50, transport 88.00" is a concrete sample of the expected result.'
+  }
+};
+function renderChecks(){
+  ['A','B'].forEach(prod => {
+    $('checks' + prod).innerHTML = CHECK_ITEMS.map(c => `
+      <label class="check-item" id="row-${prod}-${c.key}">
+        <input type="checkbox" data-prod="${prod}" data-key="${c.key}">
+        <span>${c.label}</span>
+      </label>
+      <div class="row-note" id="note-${prod}-${c.key}"></div>`).join('');
+  });
+}
+function getVerdict(){
+  let right = 0;
+  ['A','B'].forEach(prod => {
+    CHECK_ITEMS.forEach(c => {
+      const box = document.querySelector(`input[data-prod="${prod}"][data-key="${c.key}"]`);
+      const row = $(`row-${prod}-${c.key}`);
+      const note = $(`note-${prod}-${c.key}`);
+      const correct = CORRECT_EVAL[prod][c.key];
+      row.classList.remove('row-right','row-wrong');
+      note.classList.remove('show');
+      if (box.checked === correct) {
+        right++;
+        row.classList.add('row-right');
+      } else {
+        row.classList.add('row-wrong');
+        note.textContent = (correct ? 'This piece IS present: ' : 'This piece is NOT present: ') + EVAL_NOTES[prod][c.key];
+        note.classList.add('show');
+      }
+    });
+  });
+  const vA = $('verdictA'), vB = $('verdictB');
+  vA.className = 'verdict-pill show go';
+  vA.innerHTML = 'Verdict on A: <strong>0 of 5 pieces present.</strong> A vague prompt forces the AI to guess context, inputs, outputs, rules, and target — so it will confidently build the wrong thing.';
+  vA.style.background = 'var(--red-light)'; vA.style.color = '#7A2A1E'; vA.style.borderColor = 'var(--red)';
+  vB.className = 'verdict-pill show go';
+  vB.innerHTML = '✓ Verdict on B: <strong>5 of 5 pieces present.</strong> Context, inputs, outputs, constraints, and an example — the AI now has everything it needs to produce code you can actually check.';
+  const fb = $('feedback3');
+  if (right === 10) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>10/10 — you can see exactly what a spec is missing.</strong> Prompt A supplies none of the five pieces; Prompt B supplies all five. The lesson isn't "write longer prompts" — it's <em>think through the problem</em> until you can name the context, inputs, outputs, constraints, and an example. That thinking is the same whether AI writes the code or you do.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>${right}/10 rows matched.</strong> Every mis-ticked row now shows its reasoning in red. The common trap: seeing the word "sorts" or "expenses" in Prompt A and assuming that counts as an <em>output</em> or <em>input</em> — it doesn't, because it never says sorted <em>how</em> or from <em>what data</em>. A piece only counts if it's actually specified. Fix your ticks and click <em>Get verdict</em> again.`;
+  }
+  $('prog3').classList.add('done');
+}
+function resetActivity3(){
+  document.querySelectorAll('#checksA input, #checksB input').forEach(b => b.checked = false);
+  document.querySelectorAll('.check-item').forEach(r => r.classList.remove('row-right','row-wrong'));
+  document.querySelectorAll('.row-note').forEach(n => n.classList.remove('show'));
+  $('verdictA').className = 'verdict-pill';
+  $('verdictB').className = 'verdict-pill';
+  $('feedback3').className = 'activity-feedback';
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Read-the-Code Quiz ─── */
+const QUIZ = [
+  {
+    q:'What does this snippet do?',
+    code:'<span class="kw">set</span> total = <span class="nm">0</span>\n<span class="kw">for each</span> price <span class="kw">in</span> cart:\n    total = total + price\n<span class="kw">print</span> total',
+    opts:[
+      {t:'Adds up every price in the cart and prints the sum', ok:true, ex:'total starts at 0, the loop adds each price to it, and the final total is printed. This is the classic "running total" pattern — a variable plus a loop.'},
+      {t:'Prints each individual price, one per line', ok:false, ex:'print is outside the loop (it runs once, after), and it prints total, not each price. It shows one number: the sum.'},
+      {t:'Finds the most expensive item in the cart', ok:false, ex:'It never compares prices to each other; it only adds them. Finding a maximum would need an "if price > biggest" check inside the loop.'}
+    ]
+  },
+  {
+    q:'What does this snippet do?',
+    code:'<span class="kw">if</span> age >= <span class="nm">18</span>:\n    <span class="kw">print</span> <span class="st">"You can vote"</span>\n<span class="kw">else</span>:\n    <span class="kw">print</span> <span class="st">"Too young"</span>',
+    opts:[
+      {t:'Prints "You can vote" only when age is 18 or more, otherwise "Too young"', ok:true, ex:'This is a conditional. >= means "greater than or equal to", so 18 passes. Exactly one of the two branches runs, based on the test.'},
+      {t:'Prints both messages every time', ok:false, ex:'if/else runs one branch OR the other, never both. Only the branch whose condition matches executes.'},
+      {t:'Prints "You can vote" only when age is over 18 (so 18 fails)', ok:false, ex:'Careful with the operator: >= includes 18 itself. If it were just > (greater than), then 18 would fail — a classic off-by-one reading error.'}
+    ]
+  },
+  {
+    q:'What does this function return when you call greet("Sam")?',
+    code:'<span class="kw">function</span> greet(name):\n    <span class="kw">return</span> <span class="st">"Hi, "</span> + name + <span class="st">"!"</span>',
+    opts:[
+      {t:'It returns the text: Hi, Sam!', ok:true, ex:'The function takes name as input and joins the pieces with + (string concatenation). Called with "Sam", it returns "Hi, Sam!". Reusable named job = function.'},
+      {t:'It prints "Hi, name!" literally, with the word name', ok:false, ex:'name is a parameter (a placeholder), not literal text. When called with "Sam", name becomes "Sam". Also, it returns the text rather than printing it.'},
+      {t:'It runs "Sam" as a command', ok:false, ex:'"Sam" is just data (a string) being joined into a greeting. Nothing here executes it as a command.'}
+    ]
+  },
+  {
+    q:'This loop is meant to count down. What actually happens?',
+    code:'<span class="kw">set</span> n = <span class="nm">3</span>\n<span class="kw">while</span> n > <span class="nm">0</span>:\n    <span class="kw">print</span> n\n    <span class="cm"># (forgot to change n)</span>',
+    opts:[
+      {t:'It prints 3 forever — an infinite loop, because n never changes', ok:true, ex:'A while loop repeats as long as its condition stays true. n stays 3, so n > 0 is always true and it never stops. The fix: decrease n each pass (n = n - 1). Spotting missing loop updates is core debugging.'},
+      {t:'It prints 3, 2, 1 and stops', ok:false, ex:'That\'s what it was meant to do — but nothing decreases n, so the countdown never happens. Reading what code does, not what it intends, is the whole skill here.'},
+      {t:'It prints nothing because 3 is not greater than 0', ok:false, ex:'3 IS greater than 0, so the loop enters and prints. The problem is the opposite: it enters and never leaves.'}
+    ]
+  },
+  {
+    q:'What does this snippet print?',
+    code:'<span class="kw">set</span> names = [<span class="st">"Ana"</span>, <span class="st">"Bo"</span>, <span class="st">"Cy"</span>]\n<span class="kw">for each</span> name <span class="kw">in</span> names:\n    <span class="kw">if</span> length(name) > <span class="nm">2</span>:\n        <span class="kw">print</span> name',
+    opts:[
+      {t:'Only "Ana" — the loop checks each name and prints it only if it has more than 2 letters', ok:true, ex:'This combines a loop and a conditional. "Ana" is 3 letters (> 2, prints); "Bo" and "Cy" are 2 letters (not > 2, skipped). Loops and conditionals nest together constantly.'},
+      {t:'All three names, one per line', ok:false, ex:'The if filters them: only names longer than 2 letters print. "Bo" and "Cy" are exactly 2, so they\'re skipped.'},
+      {t:'The number 3, because there are three names', ok:false, ex:'It never counts the list; it prints qualifying names themselves. length(name) measures each name\'s letters, not how many names there are.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-code">${q.code}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you can read code, not just run it.</strong> You traced a running total, told >= from >, saw a function return its text, caught an infinite loop from a missing update, and followed a loop-plus-conditional filter. That's exactly how you check whether AI-written code actually does what you asked — the skill that keeps you in control.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations — the wrong options are the exact traps of reading too fast: assuming code does what it <em>intends</em> (the countdown), missing where print sits relative to the loop, or misreading an operator like >= vs >. Reading carefully, line by line, is a skill that grows fast with practice. Retake the quiz for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderScenarios();
+  setupBuckets();
+  renderFragments();
+  renderChecks();
+  renderQuiz();
+});
+</script>
+</body>
+</html>
