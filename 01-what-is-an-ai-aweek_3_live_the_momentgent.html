@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1 · What Is an AI Agent? — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── ACTIVITY 1: CLASSIFIER ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:.82rem;font-weight:700;font-family:var(--mono);color:#fff;letter-spacing:.02em}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-card ul{list-style:none;padding:0;margin-top:.6rem;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-card li{font-size:.74rem;color:var(--text-secondary);padding:.15rem 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.45}
+.compare-card li::before{content:'▹';color:var(--orange);font-weight:700;flex-shrink:0}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 2: MYTH VS REALITY SORTER ── */
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.split-grid{grid-template-columns:1fr}}
+.split-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem}
+.split-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.split-card .split-eyebrow{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;display:block}
+.split-card.brand .split-eyebrow{color:var(--orange)}
+.split-card.market .split-eyebrow{color:#5B8FE0}
+.split-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+
+/* ── ACTIVITY 3: ORDER THE LOOP ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.84rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 1 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 3 · AI Agents</div>
+  <h1>What Is an AI Agent? — <em>the difference between talking and doing</em></h1>
+  <p class="hero-sub">Four hands-on activities. Assemble the parts that turn a chatbot into an agent, put the agent's think-and-act loop in order, separate hype from the honest picture, then lock it in with a quiz on when an agent is the right tool — and when it's overkill. By the end you'll know exactly what "agent" means, and what it doesn't.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ASSEMBLE THE PARTS OF AN AGENT ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Assemble the parts — what actually makes an agent?</h2>
+    <p class="lesson-intro">An agent isn't a new kind of AI. It's the same language model you already met, wrapped in three parts that let it <strong>do</strong> things instead of just talk. Study the three parts below, then drag each capability into the part that provides it. Guess freely — wrong pills carry a hover hint with the answer.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">MODEL</div>
+        <h4>The Model — its brain</h4>
+        <p>The <strong>language model</strong> that understands your request, reasons about it, and decides the next step. On its own it can only think and write — it can't touch anything in the world.</p>
+        <ul>
+          <li>Understands a messy request in plain words</li>
+          <li>Plans and chooses the next step</li>
+          <li>Explains its reasoning back to you</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">TOOLS</div>
+        <h4>Tools — its hands</h4>
+        <p>The <strong>functions you connect</strong> so the agent can act: search, send, save, calculate, run code. Without tools, a model is just a chatbot that can describe an action but never take it.</p>
+        <ul>
+          <li>Searches the web and reads results</li>
+          <li>Sends a message or writes a file</li>
+          <li>Runs a calculation or a script</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">ENGINE</div>
+        <h4>The Loop + Goal + Memory — its engine</h4>
+        <p>What turns a single reply into a persistent worker: a <strong>goal</strong> to aim at, a <strong>loop</strong> that repeats until it's done, and <strong>memory</strong> of what already happened.</p>
+        <ul>
+          <li>Holds a goal steady across many steps</li>
+          <li>Repeats: act, check the result, act again</li>
+          <li>Remembers what it already tried</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-note">💡 <strong>Why the parts matter:</strong> when someone calls a tool "an AI agent," ask <em>which parts does it really have?</em> A model with no tools is a chatbot. A model with tools but no loop does one step and stops. Only a model with tools <em>and</em> a goal-driven loop is a true agent. And even the best agents today still fail a meaningful share of multi-step tasks on public tests — closer to a capable intern than an autopilot.</div>
+
+    <div class="lesson-card" style="margin-top:1.5rem">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="scenarioList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="model">
+            <div class="bucket-title">The Model — its brain</div>
+            <div class="bucket-sub">Understands &amp; decides</div>
+            <div class="bucket-drop" data-drop="model"></div>
+          </div>
+          <div class="bucket" data-bucket="tools">
+            <div class="bucket-title">Tools — its hands</div>
+            <div class="bucket-sub">Acts on the world</div>
+            <div class="bucket-drop" data-drop="tools"></div>
+          </div>
+          <div class="bucket" data-bucket="engine">
+            <div class="bucket-title">Loop + Goal + Memory</div>
+            <div class="bucket-sub">Keeps it going</div>
+            <div class="bucket-drop" data-drop="engine"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: MYTH VS REALITY SORTER ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Myth or reality? — sort the hype from the honest picture</h2>
+    <p class="lesson-intro">Agents are genuinely useful, and they are genuinely oversold. Believing the myths is how beginners lose money and trust. Read the two mindsets, then drag each statement to where it belongs. Some are hype the demos want you to believe; others are the honest picture builders live with. Wrong pills hover-hint the truth.</p>
+
+    <div class="split-grid">
+      <div class="split-card brand">
+        <span class="split-eyebrow">The hype</span>
+        <h4>What the demos promise</h4>
+        <p>Slick videos make an agent look like a tireless employee that never errs and needs no supervision. It's an exciting story — and it quietly teaches you to trust the wrong things and skip the guardrails.</p>
+      </div>
+      <div class="split-card market">
+        <span class="split-eyebrow">The honest picture</span>
+        <h4>What builders actually see</h4>
+        <p>Agents reason and act in a loop, which is powerful — and they also drift, get stuck, and make confident mistakes. They shine when you give them a clear goal, real limits, and a way to check the result.</p>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="splitList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket2="myth">
+            <div class="bucket-title">Myth</div>
+            <div class="bucket-sub">Hype · believe it at your peril</div>
+            <div class="bucket-drop" data-drop2="myth"></div>
+          </div>
+          <div class="bucket" data-bucket2="reality">
+            <div class="bucket-title">Reality</div>
+            <div class="bucket-sub">The honest picture</div>
+            <div class="bucket-drop" data-drop2="reality"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity2()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers2()">Show me the answers</button>
+      </div>
+      <div class="tip-note">💡 <strong>The most expensive myth:</strong> "agents are reliable out of the box." They are not. A useful agent is one you've tested, fenced with limits, and pointed at a task where mistakes are cheap to catch. Treat it like a fast new hire, not a finished machine.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: ORDER THE AGENT LOOP ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Order the loop — how an agent thinks and acts</h2>
+    <p class="lesson-intro">A chatbot answers once. An agent runs a <strong>loop</strong>: it looks, thinks, does one thing, checks the result, and goes again until the goal is met. The seven steps below are shuffled. Click them <strong>in the order the loop actually runs</strong> — a wrong click shakes red and hints at what comes next.</p>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Shuffled steps — click the next one</h4>
+          <div class="chain-pool" id="chainPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The agent loop, in order</h4>
+          <div class="chain-slots" id="chainSlots"></div>
+        </div>
+      </div>
+      <div class="chain-hintbox" id="chainHint"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetChain()">↻ Reset the loop</button>
+      </div>
+      <div class="tip-note">💡 <strong>Notice the shape:</strong> the middle four moves — perceive, reason, act, observe — repeat until the goal is met. That repeating loop is the one thing that separates an agent from a chatbot. It's also why smart builders add a limit: without a cap on steps, a confused agent can circle forever.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Agent check — is it even an agent, and is it worth it?</h2>
+    <p class="lesson-intro">Five real situations. For each, decide what you're really looking at — a chatbot, a fixed workflow, or an agent — and whether an agent is the right call at all. Every option comes with an explanation, and the wrong ones are where the useful learning hides. Answer all five to see your score.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">In your own words, name the three parts that turn a plain chatbot into an agent, and say what each one adds. Which part do people most often forget?</div>
+        <textarea placeholder="A model (the brain that decides), tools (the hands that act), and a loop with a goal and memory that..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of a task from your own life. Would you use a chatbot, a fixed workflow, or an agent for it — and why? Where would an agent be overkill?</div>
+        <textarea placeholder="For renaming files by one rule I'd use a fixed workflow, not an agent, because the steps never change and..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 2 · Designing an Agent's Job</h3>
+      <p>You know what an agent is and when to reach for one. Next we design one safely — writing a clear brief with a real goal and boundaries, matching tools to the moments the agent should use them, and deciding what it can do on its own versus what needs your sign-off.</p>
+      <a href="02-designing-an-agents-job.html" class="btn btn-primary">Continue to Lesson 2 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Assemble the parts of an agent ─── */
+const TOOLS = [
+  {id:'t1', text:'Reading your messy, half-formed request and figuring out what you actually meant.', hint:'Understanding language and intent is thinking — that\'s the Model, the brain.', bucket:'model', why:'Understanding a vague request and reasoning about it is pure thinking: the job of the Model (the brain).'},
+  {id:'t2', text:'Actually running a web search and pulling back the results to read.', hint:'Reaching out to the web is an action — that needs a Tool, the hands.', bucket:'tools', why:'Searching the web and fetching results is an action on the outside world — that requires a Tool (the hands).'},
+  {id:'t3', text:'After each result, deciding whether the goal is met or another step is needed.', hint:'Checking progress against the goal and going again is the Loop, the engine.', bucket:'engine', why:'Judging "am I done, or do I go again?" against the goal is the job of the Loop + Goal (the engine).'},
+  {id:'t4', text:'Writing and sending an email, or saving a file to your computer.', hint:'Sending and saving change the world — that\'s a Tool, the hands.', bucket:'tools', why:'Sending an email or writing a file changes something outside the model — that is a Tool (the hands).'},
+  {id:'t5', text:'Recalling what it already tried three steps ago so it doesn\'t repeat the same move.', hint:'Holding on to earlier steps is Memory — part of the engine.', bucket:'engine', why:'Keeping track of what already happened is Memory, part of the loop-and-memory engine that keeps an agent coherent.'},
+  {id:'t6', text:'Weighing two options and explaining the trade-off back to you in plain English.', hint:'Reasoning and explaining is thinking — that\'s the Model, the brain.', bucket:'model', why:'Weighing options and explaining them in words is reasoning and language — the Model (the brain) at work.'}
+];
+const BUCKET_NAMES = {model:'The Model (its brain)', tools:'Tools (its hands)', engine:'Loop + Goal + Memory (its engine)'};
+
+let placed = {};
+function renderScenarios(){
+  const list = $('scenarioList');
+  const shuffled = [...TOOLS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket[data-bucket]').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop(id, bucket){
+  const tool = TOOLS.find(s => s.id === id);
+  if (!tool || placed[id]) return;
+  const correct = tool.bucket === bucket;
+  placed[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + tool.text.substring(0, 40) + (tool.text.length > 40 ? '…' : '');
+  pill.title = correct ? tool.why : `Correct part: ${BUCKET_NAMES[tool.bucket]}. ${tool.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity1Done();
+}
+function checkActivity1Done(){
+  if (Object.keys(placed).length === TOOLS.length) {
+    const right = Object.values(placed).filter(p => p.correct).length;
+    const fb = $('feedback1');
+    if (right === TOOLS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six correct.</strong> You can now name the machine: the Model thinks and decides, Tools act on the world, and the Loop + Goal + Memory keep it going until the job is done. Every agent you meet in this course is some mix of these three — and if a "tool" is missing one, it isn't really an agent.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for the right part and why. The quick test: <em>is it just thinking or explaining?</em> → Model. <em>Does it change something in the world?</em> → Tool. <em>Is it tracking the goal or what happened?</em> → the Loop engine. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog1').classList.add('done');
+  }
+}
+function resetActivity1(){
+  placed = {};
+  $('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('[data-drop]').forEach(d => d.innerHTML = '');
+  renderScenarios();
+  $('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  TOOLS.forEach(s => { if (!placed[s.id]) handleDrop(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 2: Myth vs Reality sorter ─── */
+const TRAITS = [
+  {id:'r1', text:'Agents work reliably right out of the box — set it up once and forget it.', bucket:'myth', why:'This is the most expensive myth. Agents need testing, guardrails, and iteration; untended, they drift and make confident mistakes.'},
+  {id:'r2', text:'An agent will sometimes take a wrong step, so it needs limits and a way to check its work.', bucket:'reality', why:'True. Wrong steps are normal, so real designs add limits and verification — that\'s the honest picture builders plan around.'},
+  {id:'r3', text:'Give an agent any goal and it will always find the smartest path to it.', bucket:'myth', why:'A myth. Agents can loop, pick the wrong tool, or get stuck. A clear goal helps, but it never guarantees a smart path.'},
+  {id:'r4', text:'Agents are most trustworthy on tasks that are reversible or easy to verify.', bucket:'reality', why:'Reality. Where a mistake is cheap to catch or undo, an agent is safe to lean on — that\'s exactly where they earn their keep.'},
+  {id:'r5', text:'More autonomy is always better — the less a human is involved, the more advanced it is.', bucket:'myth', why:'A myth. The right amount of autonomy depends on the risk. For irreversible actions, keeping a human in the loop is the advanced choice.'},
+  {id:'r6', text:'A good agent design starts by writing down the goal, the limits, and what "done" looks like.', bucket:'reality', why:'Reality. The honest picture is that design work comes first — the brief and boundaries are what make an agent useful and safe.'}
+];
+const BUCKET2_NAMES = {myth:'Myth', reality:'Reality'};
+let placed2 = {};
+function renderSplit(){
+  const list = $('splitList');
+  const shuffled = [...TRAITS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id2="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('id2', card.dataset.id2);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets2(){
+  document.querySelectorAll('.bucket[data-bucket2]').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop2(e.dataTransfer.getData('id2'), b.dataset.bucket2);
+    });
+  });
+}
+function handleDrop2(id, bucket){
+  const trait = TRAITS.find(s => s.id === id);
+  if (!trait || placed2[id]) return;
+  const correct = trait.bucket === bucket;
+  placed2[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id2="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + trait.text.substring(0, 40) + (trait.text.length > 40 ? '…' : '');
+  pill.title = correct ? trait.why : `This is actually: ${BUCKET2_NAMES[trait.bucket]}. ${trait.why}`;
+  document.querySelector(`[data-drop2="${bucket}"]`).appendChild(pill);
+  checkActivity2Done();
+}
+function checkActivity2Done(){
+  if (Object.keys(placed2).length === TRAITS.length) {
+    const right = Object.values(placed2).filter(p => p.correct).length;
+    const fb = $('feedback2');
+    if (right === TRAITS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six correct.</strong> You can hear a claim about agents and tell hype from truth: they are not reliable by default, more autonomy isn't automatically better, and good design starts with a written goal and limits. That skepticism is what keeps a beginner from getting burned by a slick demo.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for the truth. The tell: anything that promises <em>effortless, hands-off perfection</em> is hype; anything that talks about <em>limits, checking, and clear goals</em> is the honest picture. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetActivity2(){
+  placed2 = {};
+  $('feedback2').className = 'activity-feedback';
+  document.querySelectorAll('[data-drop2]').forEach(d => d.innerHTML = '');
+  renderSplit();
+  $('prog2').classList.remove('done');
+}
+function showAnswers2(){
+  TRAITS.forEach(s => { if (!placed2[s.id]) handleDrop2(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 3: Order the agent loop ─── */
+const CHAIN = [
+  {text:'Set the goal — give the agent the task and a clear picture of what "done" looks like.', hint:'Nothing runs until the agent has a goal to aim at. This is where every loop begins.'},
+  {text:'Perceive — the agent reads the current situation: your request, the latest result, what it knows so far.', hint:'Before it can think, the agent has to take in the current state of things.'},
+  {text:'Reason — it thinks through the goal and plans the single next step to take.', hint:'Once it has perceived the situation, it decides what to do next.'},
+  {text:'Act — it uses a tool: runs a search, sends a message, writes a file, or does a calculation.', hint:'After planning, the agent actually does one concrete thing with a tool.'},
+  {text:'Observe — it reads what that action returned and whether it worked.', hint:'Right after acting, the agent must look at the result of what it just did.'},
+  {text:'Check — it asks: is the goal met now, or is another step still needed?', hint:'With the result in hand, the agent compares where it is against the goal.'},
+  {text:'Repeat or finish — loop back to perceive if not done, or stop and report if the goal is met.', hint:'The loop only ends when the goal is reached (or a safety limit stops it).'}
+];
+let chainNext = 0;
+function renderChain(){
+  const pool = $('chainPool');
+  const slots = $('chainSlots');
+  const order = CHAIN.map((_, i) => i).sort(()=>Math.random()-0.5);
+  pool.innerHTML = order.map(i => `<div class="chain-chip" data-step="${i}" onclick="clickChain(${i})">${CHAIN[i].text}</div>`).join('');
+  slots.innerHTML = CHAIN.map((_, i) => `
+    <div class="chain-slot" id="slot${i}">
+      <span class="chain-slot-num">${i+1}</span>
+      <span class="chain-slot-text">Waiting for step ${i+1}…</span>
+    </div>`).join('');
+}
+function clickChain(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('chainHint');
+  if (!chip || chip.classList.contains('used')) return;
+  if (i !== chainNext) {
+    chip.classList.remove('shake');
+    void chip.offsetWidth;
+    chip.classList.add('shake');
+    hintBox.className = 'chain-hintbox show';
+    hintBox.innerHTML = `<strong>Not yet.</strong> That step comes later. Think about step ${chainNext+1}: ${CHAIN[chainNext].hint}`;
+    setTimeout(() => chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('slot' + i);
+  slot.classList.add('filled');
+  slot.querySelector('.chain-slot-text').textContent = CHAIN[i].text;
+  hintBox.className = 'chain-hintbox';
+  chainNext++;
+  if (chainNext >= CHAIN.length) {
+    const fb = $('feedback3');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Loop complete — all 7 steps in order.</strong> Notice the shape: <em>goal → perceive → reason → act → observe → check → repeat</em>. The four middle moves cycle until the goal is met. That cycle is the whole difference between an agent and a chatbot — and the reason every good agent needs a limit, so a confused one can't circle forever.`;
+    $('prog3').classList.add('done');
+  }
+}
+function resetChain(){
+  chainNext = 0;
+  $('feedback3').className = 'activity-feedback';
+  $('chainHint').className = 'chain-hintbox';
+  renderChain();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {
+    q:'Every time someone fills in your sign-up form, the same welcome email goes out and their name is added to a list — no decisions, same steps every time. What is this?',
+    opts:[
+      {t:'A fixed workflow — identical steps every time, with no reasoning', ok:true, ex:'Exactly. When the steps never change and nothing is decided along the way, it\'s a fixed workflow (automation), not an agent. Reliable and cheap — reach for this whenever the path is always the same.'},
+      {t:'An agent — it\'s doing a task for you automatically', ok:false, ex:'"Automatic" isn\'t the same as "agent." An agent reasons and adapts step by step. This just replays the same fixed steps, so it\'s a workflow — and that\'s the right, simpler tool here.'},
+      {t:'A chatbot — because it sends a message', ok:false, ex:'A chatbot holds a back-and-forth conversation. This never converses; it just fires the same actions on a trigger. That makes it a fixed workflow.'}
+    ]
+  },
+  {
+    q:'You ask a system: "Research three suppliers, compare their prices, and email me the best option." It searches, reads pages, decides, and drafts the email, adjusting as it goes. What is it?',
+    opts:[
+      {t:'A chatbot — it\'s just answering a question', ok:false, ex:'It\'s doing far more than answering. It uses tools (search, email), makes decisions between steps, and adapts — that\'s beyond a chatbot, which only talks back.'},
+      {t:'An agent — it uses tools, decides between steps, and loops until the goal is met', ok:true, ex:'Right. A goal, tools, and a reason-act-observe loop that adapts as it goes: that\'s the definition of an agent. This is exactly the kind of open-ended, multi-step task agents are for.'},
+      {t:'A fixed workflow — it follows set steps', ok:false, ex:'The steps here aren\'t fixed — which supplier to compare next depends on what it just read. Because it decides and adapts, it\'s an agent, not a scripted workflow.'}
+    ]
+  },
+  {
+    q:'You need to rename 500 files by one clear rule (add the date to the front of each name). Should you build an agent for it?',
+    opts:[
+      {t:'Yes — agents are the modern way to handle any repetitive task', ok:false, ex:'Overkill. An agent adds cost, unpredictability, and the chance of a creative mistake — for a task that has one exact right answer. "Modern" isn\'t the same as "appropriate."'},
+      {t:'No — a fixed rule or short script does it perfectly and predictably; an agent adds risk for nothing', ok:true, ex:'Correct. When the steps are fully known and never change, a simple script or workflow is cheaper, faster, and more reliable. Save the agent for tasks that actually need judgment.'},
+      {t:'Yes — only an agent could reliably process that many files', ok:false, ex:'A plain script handles 500 or 5 million files without breaking a sweat, and does exactly the same thing each time. Reaching for an agent here trades reliability for nothing.'}
+    ]
+  },
+  {
+    q:'A friend says: "I\'ll set up an agent to run my email inbox and never look at it again." What\'s the honest response?',
+    opts:[
+      {t:'Great idea — modern agents are reliable enough to run unsupervised', ok:false, ex:'This is the "reliable out of the box" myth. Agents make confident mistakes, and email involves irreversible actions (sending to the wrong person). Unsupervised, a small error becomes a real one.'},
+      {t:'Risky — agents make confident mistakes, so anything irreversible like sending needs limits and a human check', ok:true, ex:'Exactly. The honest design keeps a human in the loop for irreversible actions: let it draft and sort freely, but require your approval before it sends. Autonomy should match how costly a mistake is.'},
+      {t:'Fine, as long as it\'s from a big-name company', ok:false, ex:'The brand doesn\'t change the physics. Any agent can misfire, and a big name won\'t un-send an email that went to the wrong person. Guardrails, not reputation, are what make it safe.'}
+    ]
+  },
+  {
+    q:'So when is reaching for an agent actually the right call, rather than a chatbot or a fixed workflow?',
+    opts:[
+      {t:'Whenever a chatbot could also do the job', ok:false, ex:'If a chatbot can already do it, you don\'t need the extra machinery of tools and a loop. Adding an agent there is complexity you\'ll pay for without benefit.'},
+      {t:'When the task needs several steps that can\'t be scripted in advance, and the tool must use tools and adapt as it goes', ok:true, ex:'That\'s the sweet spot. When the path isn\'t known ahead of time and the work needs real actions plus adaptation, an agent earns its keep. If the steps are always the same, use a workflow instead.'},
+      {t:'Whenever the task repeats the exact same steps every single time', ok:false, ex:'That\'s the case <em>against</em> an agent. Identical, predictable steps are a job for a fixed workflow — cheaper and more reliable. Agents shine precisely when the steps aren\'t fixed.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you can tell an agent from its lookalikes.</strong> You can spot a fixed workflow, a chatbot, and a true agent, and you know an agent is worth it only when the steps can't be scripted and the work needs judgment and tools. That instinct — reach for the simplest tool that fits — is the backbone of everything in Week 3.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations — the wrong options are the exact traps beginners fall into ("agents run unsupervised", "use an agent for everything", "automatic means agent"). The thread: name what you\'re really looking at, then pick the simplest tool that fits. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderScenarios();
+  setupBuckets();
+  renderSplit();
+  setupBuckets2();
+  renderChain();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

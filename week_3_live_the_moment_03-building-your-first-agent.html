@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3 · Building Your First Agent — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── SHARED FEEDBACK / BUTTONS ── */
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 1: MATCH SCENARIO → BUILD APPROACH ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-tag{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.3rem}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+
+/* ── ACTIVITY 2: ORDER THE BUILD LOOP ── */
+.prompt-pool{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.frag-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.8rem;line-height:1.45;cursor:pointer;transition:all .2s;max-width:360px;user-select:none;font-weight:500}
+.frag-chip:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.frag-chip.used{opacity:0;pointer-events:none;position:absolute;visibility:hidden}
+.frag-chip.shake{animation:shake .45s ease;border-color:var(--red);background:var(--red-light)}
+.prompt-slots{margin-top:1.4rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:90px;background:rgba(255,255,255,0.5)}
+.slot-line{display:flex;align-items:flex-start;gap:.6rem;padding:.45rem .2rem;font-size:.83rem;line-height:1.5;animation:fadeIn .35s ease}
+.slot-tag{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.05em;color:#fff;padding:.18rem .5rem;border-radius:4px;flex-shrink:0;margin-top:.1rem;text-transform:uppercase}
+.slot-line.t-ack .slot-tag{background:#5B8FE0}
+.slot-line.t-answer .slot-tag{background:var(--orange)}
+.slot-line.t-action .slot-tag{background:#66BB6A}
+.slot-line.t-safety .slot-tag{background:#8E6BC0}
+.prompt-hint{margin-top:.8rem;padding:.7rem .9rem;background:var(--red-light);border-left:3px solid var(--red);border-radius:4px;font-size:.78rem;color:#7A2A1E;line-height:1.55;display:none}
+.prompt-hint.show{display:block;animation:fadeIn .3s ease}
+.prompt-preview{margin-top:1.2rem;background:#1A1B2E;border-radius:var(--radius-sm);padding:1.2rem 1.4rem;font-size:.82rem;line-height:1.75;color:#E8E8EC;display:none;border:1px solid var(--navy)}
+.prompt-preview.show{display:block;animation:fadeIn .4s ease}
+.prompt-preview .pp-label{color:var(--orange-light);font-weight:600;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.6rem;font-family:var(--mono)}
+.structure-bar{display:flex;gap:.4rem;margin-top:1rem;flex-wrap:wrap}
+.structure-step{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3rem .7rem;border-radius:50px;color:#fff}
+.structure-step:nth-child(1){background:#5B8FE0}.structure-step:nth-child(3){background:var(--orange)}
+.structure-step:nth-child(5){background:#66BB6A}.structure-step:nth-child(7){background:#8E6BC0}
+.structure-arrow{color:var(--text-muted);font-weight:700;align-self:center;font-size:.75rem}
+
+/* ── ACTIVITY 3: HEALTHY OR MISBEHAVING ── */
+.mf-grid{display:grid;gap:.8rem;margin-top:.5rem}
+.mf-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem;transition:all .25s}
+.mf-card.right{border-color:var(--green);background:var(--green-light)}
+.mf-card.miss{border-color:var(--red);background:var(--red-light)}
+.mf-context{font-size:.72rem;color:var(--text-muted);font-style:italic;margin-bottom:.4rem;line-height:1.5}
+.mf-statement{font-size:.84rem;font-weight:500;color:var(--navy);line-height:1.6;margin-bottom:.7rem;font-family:var(--mono);background:var(--bg-light);border:1px solid var(--border);border-radius:6px;padding:.7rem .8rem}
+.mf-buttons{display:flex;gap:.5rem}
+.mf-btn{padding:.4rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--bg-card);font-size:.74rem;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-secondary)}
+.mf-btn:hover{border-color:var(--orange);color:var(--orange)}
+.mf-btn:disabled{cursor:not-allowed;opacity:.55}
+.mf-btn.picked-right{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.mf-btn.picked-wrong{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+.mf-explain{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;color:var(--text-secondary);border-top:1px dashed var(--border);padding-top:.6rem}
+.mf-explain.show{display:block;animation:fadeIn .3s ease}
+.mf-verdict{font-weight:700;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.mf-verdict.v-right{color:#256B29}
+.mf-verdict.v-miss{color:#A03A2C}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-trace{font-family:var(--mono);font-size:.74rem;line-height:1.7;color:#E8E8EC;background:#1A1B2E;border-radius:6px;padding:.8rem 1rem;margin:.7rem 0 .2rem;white-space:pre-wrap}
+.quiz-trace .t-th{color:#8FB4EE}.quiz-trace .t-tool{color:var(--orange-light)}.quiz-trace .t-obs{color:#8FE0A0}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 3 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 3 · AI Agents</div>
+  <h1>Building Your First Agent — <em>start tiny, test every step, add one thing at a time</em></h1>
+  <p class="hero-sub">Four hands-on activities. Match a real project to the right build approach, put the agent-build loop in order, read a reasoning trace and pick the agent's next move, then diagnose agents that misbehave. An agent isn't magic — it's clear instructions plus a few tools, grown one careful loop at a time.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: MATCH SCENARIO → BUILD APPROACH ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Match the project to the right build approach</h2>
+    <p class="lesson-intro">You don't need code to build every agent — and you shouldn't reach for code when a simpler tool would ship it faster. There are four broad ways to build (tools change; these categories don't): a <strong>no-code agent builder</strong>, an <strong>assistant / chat platform</strong>, a <strong>visual automation</strong>, or a <strong>code framework</strong>. Drag each project to the approach that fits it best. Hover a red pill for the reasoning.</p>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="ticketList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="nocode">
+            <div class="bucket-title">No-code agent builder</div>
+            <div class="bucket-sub">Drag-and-drop · single task · no install</div>
+            <div class="bucket-drop" data-drop="nocode"></div>
+          </div>
+          <div class="bucket" data-bucket="assistant">
+            <div class="bucket-title">Assistant / chat platform</div>
+            <div class="bucket-sub">Instructions + your docs · conversational</div>
+            <div class="bucket-drop" data-drop="assistant"></div>
+          </div>
+          <div class="bucket" data-bucket="visual">
+            <div class="bucket-title">Visual automation</div>
+            <div class="bucket-sub">Trigger → steps · connect apps</div>
+            <div class="bucket-drop" data-drop="visual"></div>
+          </div>
+          <div class="bucket" data-bucket="code">
+            <div class="bucket-title">Code framework</div>
+            <div class="bucket-sub">Full control · custom tools · versioned</div>
+            <div class="bucket-drop" data-drop="code"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity1()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswers1()">Show me the answers</button>
+      </div>
+      <div class="tip-note">💡 <strong>Pick the lightest tool that can do the job:</strong> most first agents don't need code at all. Start with the simplest approach that fits, and only move to something heavier when the task truly outgrows it. The skill that lasts is reading the task, not memorizing a product.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: ORDER THE BUILD LOOP ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Order the build loop — grow it one tool at a time</h2>
+    <p class="lesson-intro">Beginners try to build the whole agent at once, then can't tell what broke. Pros grow it in a tight loop: <strong>START SMALL → TEST → EXPAND → REPEAT</strong>. Clear instructions plus one tool, test it, add one more tool, test again, and keep looping until it's reliable. The eight steps below are scrambled — click them in the right order. A wrong click explains why it doesn't come next.</p>
+
+    <div class="structure-bar">
+      <span class="structure-step">1 · Start small</span><span class="structure-arrow">→</span>
+      <span class="structure-step">2 · Test</span><span class="structure-arrow">→</span>
+      <span class="structure-step">3 · Expand</span><span class="structure-arrow">→</span>
+      <span class="structure-step">4 · Repeat</span>
+    </div>
+
+    <div class="lesson-card">
+      <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy)">Click the next step of the build loop</h4>
+      <div class="prompt-pool" id="fragPool"></div>
+      <div class="prompt-hint" id="promptHint"></div>
+      <div class="prompt-slots" id="promptSlots">
+        <div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your build loop will assemble here, step by step…</div>
+      </div>
+      <div class="prompt-preview" id="promptPreview"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity2()">↻ Start over</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: HEALTHY OR MISBEHAVING ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Healthy or misbehaving? — read the trace and diagnose</h2>
+    <p class="lesson-intro">When an agent goes wrong, it leaves clues in its <em>trace</em> — the record of what it thought, which tool it called, and what it observed. Each card below shows a task and the agent's trace. Click <strong>Healthy</strong> or <strong>Misbehaving</strong>. The explanation names the exact failure mode — wrong tool, infinite loop, hallucinated result, forgot the goal, or stopped early — and the fix. Answer all six to see your score.</p>
+
+    <div class="lesson-card">
+      <div class="mf-grid" id="mfGrid"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetMF()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">"Why did it do that?" — the reasoning quiz</h2>
+    <p class="lesson-intro">Five real moments from an agent's run. Read the trace, then pick the honest answer — every option comes with an explanation, and the wrong ones are the tempting shortcuts that quietly break agents. Answer all five to see your score.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of one small agent you'd like to build. What is the single tool you'd give it first, and how would you test that first version?</div>
+        <textarea placeholder="I'd build an agent that drafts replies. Its first tool would be... and I'd test it by..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">In your own words, what does an agent's "trace" let you see, and why is it the first thing you'd read when something goes wrong?</div>
+        <textarea placeholder="The trace shows each thought, tool call, and observation — so when it fails I can spot exactly where..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 4 · Evaluating, Trusting & Shipping Agents</h3>
+      <p>You can build one — now, can you trust it? Next: build a mini eval and read a real success rate, set the guardrails that catch each failure mode, decide what an agent may do on its own versus what needs your approval, and run the shipping-readiness checklist.</p>
+      <a href="04-evaluating-trusting-shipping-agents.html" class="btn btn-primary">Continue to Lesson 4 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Match project → build approach ─── */
+const TICKETS = [
+  {id:'k1', tag:'Project', text:'"I\'ve never written code and I want to ship one small agent this afternoon — no setup, no install."', bucket:'nocode', why:'A single, well-defined task with zero coding experience is exactly what a no-code builder is for — you assemble it from ready-made blocks in an hour.'},
+  {id:'k2', tag:'Project', text:'"I just want to try an idea fast by dragging a few ready-made steps together, not learn a whole framework."', bucket:'nocode', why:'Quick, throwaway experiments favor a no-code builder — you validate the idea before investing in anything heavier.'},
+  {id:'k3', tag:'Project', text:'"I want a back-and-forth helper that answers questions using only my own uploaded study notes."', bucket:'assistant', why:'A grounded, conversational Q&A helper over your own documents is the core use case of an assistant / chat platform — instructions plus a knowledge source.'},
+  {id:'k4', tag:'Project', text:'"A study buddy that keeps a persona, remembers the material I gave it, and quizzes me in conversation."', bucket:'assistant', why:'A persistent persona plus a knowledge base and chat is what an assistant platform is built for — no workflow wiring or code needed.'},
+  {id:'k5', tag:'Project', text:'"When a new response lands in my form, look it up, label it, and post the result to my team channel."', bucket:'visual', why:'A trigger ("when a new response lands") followed by fixed steps across several apps is the signature of a visual automation.'},
+  {id:'k6', tag:'Project', text:'"Connect three apps I already use into a reliable when-this-then-that pipeline that runs on its own."', bucket:'visual', why:'Chaining existing apps on a trigger, with each step visible as a node, is exactly what visual-automation tools do best.'},
+  {id:'k7', tag:'Project', text:'"I need full control: custom logic between steps, tools I build myself, and everything tracked in version control."', bucket:'code', why:'Custom logic, self-built tools, and versioning point to a code framework — the only approach that gives you that level of control.'},
+  {id:'k8', tag:'Project', text:'"The task branches into many decisions and needs a tool that doesn\'t exist yet — I want to program it directly."', bucket:'code', why:'Heavy branching plus a tool you must build yourself is beyond drag-and-drop — a code framework lets you program the behavior exactly.'}
+];
+const BUCKET_NAMES = {nocode:'No-code agent builder', assistant:'Assistant / chat platform', visual:'Visual automation', code:'Code framework'};
+let placed = {};
+function renderTickets(){
+  const list = $('ticketList');
+  const shuffled = [...TICKETS].sort(()=>Math.random()-0.5);
+  list.innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-tag">${s.tag}</div>
+      <div class="scenario-text">${s.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(){
+  document.querySelectorAll('.bucket[data-bucket]').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      handleDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleDrop(id, bucket){
+  const ticket = TICKETS.find(s => s.id === id);
+  if (!ticket || placed[id]) return;
+  const correct = ticket.bucket === bucket;
+  placed[id] = {bucket, correct};
+  const card = document.querySelector(`.scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + ticket.text.substring(1, 34) + '…';
+  pill.title = correct ? ticket.why : `Best fit: ${BUCKET_NAMES[ticket.bucket]}. ${ticket.why}`;
+  document.querySelector(`[data-drop="${bucket}"]`).appendChild(pill);
+  checkActivity1Done();
+}
+function checkActivity1Done(){
+  if (Object.keys(placed).length === TICKETS.length) {
+    const right = Object.values(placed).filter(p => p.correct).length;
+    const fb = $('feedback1');
+    if (right === TICKETS.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All eight matched.</strong> You read the task, not the brand: a single quick task → no-code, a chat helper over your docs → assistant platform, a trigger-and-steps pipeline → visual automation, and custom logic with your own tools → a code framework. The same instinct works no matter which product is popular this year.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 8.</strong> Hover any red pill for the reasoning. The test: <em>Is it one quick task?</em> → no-code. <em>A conversation grounded in my documents?</em> → assistant. <em>A trigger that fires steps across apps?</em> → visual automation. <em>Custom logic and tools I control?</em> → code. Click <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog1').classList.add('done');
+  }
+}
+function resetActivity1(){
+  placed = {};
+  $('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('[data-drop]').forEach(d => d.innerHTML = '');
+  renderTickets();
+  $('prog1').classList.remove('done');
+}
+function showAnswers1(){
+  TICKETS.forEach(s => { if (!placed[s.id]) handleDrop(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 2: Order the build loop ─── */
+const FRAGMENTS = [
+  {order:1, tag:'ack',    text:'Write clear instructions: tell the agent its goal, its limits, and how it should behave.'},
+  {order:2, tag:'ack',    text:'Give it exactly one tool to begin — the single most important thing it needs to reach the goal.'},
+  {order:3, tag:'answer', text:'Run it on one real example and read the trace: what did it think, which tool did it call, what did it observe?'},
+  {order:4, tag:'answer', text:'Compare the result to what you wanted — did it use the tool correctly and stop once the goal was met?'},
+  {order:5, tag:'action', text:'Add one more tool that covers a case the first version couldn\'t handle.'},
+  {order:6, tag:'action', text:'Update the instructions so the agent knows when to reach for the new tool instead of guessing.'},
+  {order:7, tag:'safety', text:'Test again on fresh examples — including the messy ones that broke earlier versions.'},
+  {order:8, tag:'safety', text:'Repeat the small loop — add, test, adjust — until it\'s reliable, instead of building it all at once.'}
+];
+const STAGE_HINTS = {
+  ack:'START SMALL comes first: clear instructions, then one single tool — never the whole toolbox at once.',
+  answer:'TEST is next: run one real example and read the trace to see what actually happened.',
+  action:'EXPAND follows a passing test: add just one more tool, then teach the instructions when to use it.',
+  safety:'REPEAT closes the loop: test the bigger version on fresh, messy cases and keep looping until it\'s reliable.'
+};
+let promptStep = 0, promptMistakes = 0;
+function renderFragments(){
+  const shuffled = [...FRAGMENTS].sort(()=>Math.random()-0.5);
+  $('fragPool').innerHTML = shuffled.map(f =>
+    `<div class="frag-chip" data-order="${f.order}" onclick="pickFragment(${f.order}, this)">${f.text}</div>`
+  ).join('');
+}
+function pickFragment(order, chip){
+  const hint = $('promptHint');
+  if (order !== promptStep + 1) {
+    promptMistakes++;
+    chip.classList.remove('shake'); void chip.offsetWidth;
+    chip.classList.add('shake');
+    const expected = FRAGMENTS.find(f => f.order === promptStep + 1);
+    hint.innerHTML = `<strong>Not yet.</strong> ${STAGE_HINTS[expected.tag]} (Step ${promptStep + 1} of 8.)`;
+    hint.classList.add('show');
+    return;
+  }
+  hint.classList.remove('show');
+  promptStep++;
+  chip.classList.add('used');
+  const frag = FRAGMENTS.find(f => f.order === order);
+  const ph = $('slotPlaceholder');
+  if (ph) ph.remove();
+  const line = document.createElement('div');
+  line.className = 'slot-line t-' + frag.tag;
+  const label = frag.tag === 'ack' ? 'start small' : frag.tag === 'answer' ? 'test' : frag.tag === 'action' ? 'expand' : 'repeat';
+  line.innerHTML = `<span class="slot-tag">${label}</span><span>${frag.text}</span>`;
+  $('promptSlots').appendChild(line);
+  if (promptStep === FRAGMENTS.length) finishPrompt();
+}
+function finishPrompt(){
+  const preview = $('promptPreview');
+  preview.innerHTML = `<span class="pp-label">The build loop — the same shape works for any agent</span>` +
+    'Start small (instructions + one tool) → test on a real example → expand by one tool → test again → repeat until reliable.';
+  preview.classList.add('show');
+  const fb = $('feedback2');
+  const whys = `<ul style="margin:.6rem 0 0 1.1rem;line-height:1.7">
+    <li><strong>Start small</strong> — instructions plus one tool, so when it works you know exactly why.</li>
+    <li><strong>Test</strong> — run a real example and read the trace before you add anything.</li>
+    <li><strong>Expand</strong> — add one tool at a time, and update the instructions to match.</li>
+    <li><strong>Repeat</strong> — loop in small steps; the messy cases you keep testing are what make it reliable.</li></ul>`;
+  if (promptMistakes === 0) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Perfect order — zero wrong clicks.</strong> You've internalized the loop that keeps agent-building sane: one tool, one test, one addition at a time. Build this way and every failure is easy to trace, because you only changed one thing since it last worked.${whys}`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Assembled — with ${promptMistakes} wrong click${promptMistakes > 1 ? 's' : ''} on the way.</strong> That's fine: the order <em>is</em> the lesson — never jump ahead to a second tool before the first version passes a test.${whys} Hit <em>Start over</em> and try for a clean run.`;
+  }
+  $('prog2').classList.add('done');
+}
+function resetActivity2(){
+  promptStep = 0; promptMistakes = 0;
+  $('promptHint').classList.remove('show');
+  $('promptPreview').className = 'prompt-preview';
+  $('feedback2').className = 'activity-feedback';
+  $('promptSlots').innerHTML = '<div style="font-size:.75rem;color:var(--text-muted);font-style:italic" id="slotPlaceholder">Your build loop will assemble here, step by step…</div>';
+  renderFragments();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Healthy or misbehaving ─── */
+const MF = [
+  {ctx:'Task: "Find today\'s date and write it into the file."',
+   s:'Thought: I need today\'s date. → Tool: clock → Observation: 2026-03-14 → Wrote "2026-03-14" to the file → Done.', a:'good',
+   e:'A clean run: one clear thought, the right tool, a real observation, the goal met, and then it stopped. This is exactly what "working" looks like — nothing to fix.'},
+  {ctx:'Task: "Look up the current weather for the user\'s city."',
+   s:'Thought: I\'ll just answer. → (no tool called) → "It\'s 24°C and sunny." — a figure it was never given.', a:'bad',
+   e:'Hallucinated result: it produced a confident answer without ever calling the weather tool. Fix: require the tool call and check the tool actually returned a value before the agent is allowed to answer.'},
+  {ctx:'Task: "Summarize the article, then email the summary."',
+   s:'Thought: search → Tool: web_search → Thought: search → Tool: web_search → Thought: search → Tool: web_search → … (never summarizes, never emails).', a:'bad',
+   e:'Infinite loop: it keeps repeating the same step and never advances toward the goal. Fix: add a step cap so it stops after N tries, and tighten the instructions so it moves on to summarizing and emailing.'},
+  {ctx:'Task: "Convert 20 US dollars to euros."',
+   s:'Thought: I need to convert currency. → Tool: calendar → Observation: no events today → "Done."', a:'bad',
+   e:'Wrong tool: it reached for the calendar to do a currency conversion. Fix: give it the right tool (a converter or calculator) and spell out in the instructions which tool to use for which job.'},
+  {ctx:'Task: "Research three laptops and recommend one under $800."',
+   s:'Thought: find laptops → Tool: web_search → Observation: 3 models → Thought: compare specs → Recommends a $1,200 model.', a:'bad',
+   e:'Forgot the goal: the "$800" budget constraint got dropped along the way. Fix: put hard constraints up front in the instructions and have the agent check its answer against them before replying.'},
+  {ctx:'Task: "Book a table for 4, then text the confirmation to the group."',
+   s:'Thought: book the table → Tool: booking → Observation: table booked → "All set!" (never texts the group).', a:'bad',
+   e:'Stopped early: it did the first half of the goal and quit before the second. Fix: restate the full, multi-part goal in the instructions and have it confirm every part is done before it finishes.'}
+];
+let mfAnswered = {};
+function renderMF(){
+  const grid = $('mfGrid');
+  grid.innerHTML = MF.map((m, i) => `
+    <div class="mf-card" id="mfCard${i}">
+      <div class="mf-context">${i+1}. ${m.ctx}</div>
+      <div class="mf-statement">${m.s}</div>
+      <div class="mf-buttons">
+        <button class="mf-btn" id="mfG${i}" onclick="answerMF(${i},'good')">HEALTHY</button>
+        <button class="mf-btn" id="mfB${i}" onclick="answerMF(${i},'bad')">MISBEHAVING</button>
+      </div>
+      <div class="mf-explain" id="mfEx${i}"></div>
+    </div>`).join('');
+}
+function answerMF(i, choice){
+  if (mfAnswered[i] !== undefined) return;
+  const m = MF[i];
+  const right = choice === m.a;
+  mfAnswered[i] = right;
+  const card = $('mfCard' + i);
+  const pickedBtn = $(choice === 'good' ? 'mfG'+i : 'mfB'+i);
+  const otherBtn = $(choice === 'good' ? 'mfB'+i : 'mfG'+i);
+  card.classList.add(right ? 'right' : 'miss');
+  pickedBtn.classList.add(right ? 'picked-right' : 'picked-wrong');
+  pickedBtn.disabled = true; otherBtn.disabled = true;
+  const ex = $('mfEx' + i);
+  const label = m.a === 'good' ? 'HEALTHY' : 'MISBEHAVING';
+  ex.className = 'mf-explain show';
+  ex.innerHTML = `<span class="mf-verdict ${right ? 'v-right' : 'v-miss'}">${right ? '✓ Correct' : '✗ Not quite'} — this trace is ${label}.</span><br>${m.e}`;
+  if (Object.keys(mfAnswered).length === MF.length) {
+    const score = Object.values(mfAnswered).filter(Boolean).length;
+    const fb = $('feedback3');
+    if (score === MF.length) {
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>6 of 6 — you can read a trace.</strong> The five failure modes each leave a signature: no tool call before a confident answer (hallucination), the same step on repeat (loop), the wrong tool for the job, a dropped constraint (forgot the goal), and a half-finished task (stopped early). Spotting them in the trace is how you actually debug an agent.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You scored ${score} of 6.</strong> Re-read the red cards — each names a specific failure mode and its fix. The habit: don't judge an agent by its final sentence, judge it by its trace. Hit <em>Try again</em> to retake it.`;
+    }
+    $('prog3').classList.add('done');
+  }
+}
+function resetMF(){
+  mfAnswered = {};
+  $('feedback3').className = 'activity-feedback';
+  renderMF();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {
+    q:'An agent\'s trace so far — what should it do <em>next</em>?',
+    trace:'<span class="t-th">Thought:</span> I need the user\'s order status.\n<span class="t-tool">Tool:</span> lookup_order(id=10428)\n<span class="t-obs">Observation:</span> status = "shipped", eta = "tomorrow"\n<span class="t-th">Thought:</span> ?',
+    opts:[
+      {t:'Answer the user with the status and eta from the observation, then stop.', ok:true, ex:'The goal — the order status — is now known from a real observation. The correct next move is to use it and stop. Knowing when the goal is met is half of what makes an agent reliable.'},
+      {t:'Call lookup_order again to be sure the answer is right.', ok:false, ex:'It already has a valid observation. Re-calling the same tool with the same input returns the same result and is exactly how loops and runaway costs begin.'},
+      {t:'Guess a slightly different delivery time in case the tool was wrong.', ok:false, ex:'Overriding a real observation with a guess is how hallucinated answers happen. Trust the observation you actually received.'}
+    ]
+  },
+  {
+    q:'An agent confidently gave a customer the wrong store phone number. Its trace shows it never called any lookup tool. Why did it most likely do that?',
+    opts:[
+      {t:'The lookup tool must have been broken that day.', ok:false, ex:'There\'s no evidence of a broken tool — the tell is that it never called one at all. Blaming the tool misreads the trace.'},
+      {t:'It answered from a guess instead of using a tool — a hallucination. It should be required to look the number up and verify it.', ok:true, ex:'Right. With no tool call in the trace, the number came from the model\'s guess. The durable fix is to force the tool call and ground the answer in the real result.'},
+      {t:'Agents can\'t be wrong, so the customer must have misheard.', ok:false, ex:'Agents absolutely can be wrong — confidently so. Assuming they can\'t is how bad answers reach real people unchecked.'}
+    ]
+  },
+  {
+    q:'Read this trace. Why is the agent stuck, and what\'s the durable fix?',
+    trace:'<span class="t-th">Thought:</span> find a good source\n<span class="t-tool">Tool:</span> web_search("best budget laptop")\n<span class="t-th">Thought:</span> find a good source\n<span class="t-tool">Tool:</span> web_search("best budget laptop")\n<span class="t-th">Thought:</span> find a good source …',
+    opts:[
+      {t:'It\'s in an infinite loop — repeating one step without progressing. Add a step cap and tighten the instructions so it moves on.', ok:true, ex:'Right. The identical thought-and-tool pair repeats forever. A step cap stops the runaway, and clearer instructions ("after one good result, move to the next stage") prevent it recurring.'},
+      {t:'It just needs more time — let it keep searching until it finds the perfect source.', ok:false, ex:'Nothing changes between iterations, so more time only burns more cost. Waiting out a loop is not a fix.'},
+      {t:'The web is down, so there\'s nothing you can do.', ok:false, ex:'The searches are running — the problem is the agent never uses the results and never advances. That\'s a design issue, not an outage.'}
+    ]
+  },
+  {
+    q:'You\'re about to let an agent handle refunds. It can either draft a refund for you to approve, or issue refunds on its own. While you\'re still learning to trust it, what\'s the safer default?',
+    opts:[
+      {t:'Let it issue refunds on its own — approvals just slow things down.', ok:false, ex:'Sending money is irreversible. Handing an unproven agent an action you can\'t undo is exactly where a single mistake becomes expensive and hard to walk back.'},
+      {t:'Have it draft the refund and wait for your approval — put a human gate on irreversible, high-stakes actions.', ok:true, ex:'Right. Reversible, low-stakes steps can run freely; anything that moves money or can\'t be undone should pause for a human until the agent has earned trust through a track record.'},
+      {t:'Only let it work on weekends when it\'s quieter.', ok:false, ex:'Timing doesn\'t change the risk. An irreversible action is just as irreversible on a Tuesday — the safeguard is an approval gate, not a schedule.'}
+    ]
+  },
+  {
+    q:'Across these examples, what\'s the honest takeaway about why agents "do that"?',
+    opts:[
+      {t:'Agents are unpredictable black boxes — you can only hope they behave.', ok:false, ex:'Not so. The trace shows their reasoning step by step, so misbehavior is diagnosable — you can see the wrong tool, the loop, the missing constraint. Hope isn\'t the plan; reading the trace is.'},
+      {t:'Most failures trace back to fixable causes — vague instructions, a missing or wrong tool, no stopping rule — and the trace shows you which.', ok:true, ex:'Exactly. "Why did it do that?" almost always has a concrete answer in the trace. Tighten the instructions, give the right tool, add a stopping rule, and re-test. That\'s the whole craft.'},
+      {t:'If an agent misbehaves once, it can never be trusted and should be scrapped.', ok:false, ex:'Overcorrection. First versions misbehave — that\'s expected. You diagnose from the trace, fix one thing, and re-test. Scrapping at the first failure means never shipping anything.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      ${q.trace ? `<div class="quiz-trace">${q.trace}</div>` : ''}
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you think in traces.</strong> You know when a goal is met, you spot a hallucination by the missing tool call, you break a loop with a step cap, you gate irreversible actions behind approval, and you treat misbehavior as diagnosable — not mysterious. That's how a beginner debugs an agent like a builder.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations — the wrong options are the tempting stories ("the tool was broken", "let it keep going", "scrap it"). The thread: the trace tells you why, and almost every failure has a concrete, fixable cause. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderTickets();
+  setupBuckets();
+  renderFragments();
+  renderMF();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

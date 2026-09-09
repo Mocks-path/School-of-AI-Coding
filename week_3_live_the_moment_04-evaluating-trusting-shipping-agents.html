@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4 · Evaluating, Trusting & Shipping Agents — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── SHARED FEEDBACK / BUTTONS ── */
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 1: BUILD A MINI EVAL ── */
+.math-scenario{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1rem 0 1.4rem}
+@media (max-width:760px){.math-scenario{grid-template-columns:1fr 1fr}}
+.math-stat{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem .9rem}
+.math-stat-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.25rem}
+.math-stat-value{font-family:var(--mono);font-size:1.05rem;font-weight:600;color:var(--navy)}
+.forecast-chart{display:flex;align-items:flex-end;gap:.5rem;height:130px;margin:1rem 0 .4rem;padding:.6rem;background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.fc-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:.3rem}
+.fc-bar{width:100%;max-width:46px;border-radius:5px 5px 0 0;transition:height .4s;background:linear-gradient(180deg,var(--orange-light),var(--orange))}
+.fc-bar.p-full{background:linear-gradient(180deg,#7BD389,#4CAF50)}
+.fc-bar.p-part{background:linear-gradient(180deg,#F0B24A,#E8942E)}
+.fc-bar.p-none{background:linear-gradient(180deg,#EC6A5A,#E04E3C)}
+.fc-week{font-size:.66rem;color:var(--text-muted);font-weight:600}
+.fc-val{font-family:var(--mono);font-size:.66rem;color:var(--navy);font-weight:600}
+.fc-legend{display:flex;gap:1rem;font-size:.72rem;color:var(--text-secondary);margin-bottom:1rem;flex-wrap:wrap}
+.fc-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.fc-dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+.math-options{display:grid;gap:.6rem}
+.math-option{display:flex;align-items:flex-start;gap:.7rem;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;cursor:pointer;transition:all .2s;font-size:.86rem;line-height:1.5}
+.math-option:hover{border-color:var(--orange)}
+.math-option input{margin-top:.25rem;accent-color:var(--orange)}
+.math-option .opt-amount{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.math-option.reveal-right{border-color:var(--green);background:var(--green-light)}
+.math-option.reveal-wrong{border-color:var(--red);background:var(--red-light)}
+
+/* ── ACTIVITY 2: SET THE SAFETY CAP ── */
+.price-scenario{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1rem 0 1.2rem}
+@media (max-width:760px){.price-scenario{grid-template-columns:1fr 1fr}}
+.slider-wrap{margin:1.4rem 0 .6rem}
+.slider-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6rem}
+.slider-label .s-name{font-size:.8rem;font-weight:600;color:var(--navy)}
+.slider-label .s-price{font-family:var(--mono);font-size:1.5rem;font-weight:600;color:var(--orange)}
+input[type=range]{width:100%;accent-color:var(--orange);height:6px;cursor:pointer}
+.price-readout{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1.2rem}
+@media (max-width:760px){.price-readout{grid-template-columns:1fr}}
+.readout-stat{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem .9rem;text-align:center}
+.readout-label{font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.3rem}
+.readout-value{font-family:var(--mono);font-size:1.15rem;font-weight:600;color:var(--navy)}
+.readout-value.good{color:#256B29}.readout-value.bad{color:#A03A2C}
+.zone-bar{height:12px;border-radius:6px;margin:.5rem 0 .3rem;background:linear-gradient(90deg,#E04E3C 0%,#E04E3C 28%,#E8A040 28%,#E8A040 38%,#4CAF50 38%,#4CAF50 62%,#E8A040 62%,#E8A040 84%,#E04E3C 84%,#E04E3C 100%);position:relative}
+.zone-marker{position:absolute;top:-4px;width:4px;height:20px;background:var(--navy);border-radius:2px;transition:left .15s}
+.zone-scale{display:flex;justify-content:space-between;font-size:.62rem;color:var(--text-muted);font-family:var(--mono)}
+
+/* ── ACTIVITY 3: MATCH FAILURE → GUARDRAIL ── */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.match-grid{grid-template-columns:1fr}}
+.match-col-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.7rem}
+.match-pool{display:flex;flex-direction:column;gap:.6rem}
+.match-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem .9rem;font-size:.82rem;line-height:1.45;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.match-chip:hover{border-color:var(--orange);transform:translateY(-1px)}
+.match-chip .kpi-name{font-family:var(--mono);font-size:.72rem;color:var(--orange);font-weight:600;display:block;margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.03em}
+.match-chip.selected{border-color:var(--orange);background:var(--orange-glow)}
+.match-chip.done{opacity:.35;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.match-slot{display:flex;flex-direction:column;gap:.2rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.75rem .9rem;min-height:58px;transition:all .2s;cursor:pointer;background:rgba(255,255,255,0.5)}
+.match-slot:hover{border-color:var(--orange)}
+.match-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);cursor:default}
+.match-slot.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+.match-scenario{font-size:.83rem;font-weight:600;color:var(--navy);line-height:1.45}
+.match-answer{font-size:.78rem;color:#1F5723;line-height:1.45;display:none}
+.match-slot.filled .match-answer{display:block}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 4 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 3 · AI Agents</div>
+  <h1>Evaluating, Trusting & Shipping Agents — <em>prove it works before you let it loose</em></h1>
+  <p class="hero-sub">Four hands-on activities. Build a mini eval and read an honest success rate, set the safety cap that catches loops and runaway cost, match each failure mode to the guardrail that stops it, and run the shipping-readiness checklist. "It worked once" is not the same as "I can trust it" — this lesson is the difference.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: BUILD A MINI EVAL ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Build a mini eval — read the real success rate</h2>
+    <p class="lesson-intro">An "eval" is just a small set of realistic test tasks you run the agent on — <em>several times each</em>, because an agent can answer the same task differently on different runs. You picked 5 real tasks and ran each 3 times. The bars show how many of the 3 runs passed per task. Read them together, then choose the honest next step.</p>
+
+    <div class="lesson-card">
+      <div class="math-scenario">
+        <div class="math-stat"><div class="math-stat-label">Test tasks</div><div class="math-stat-value">5</div></div>
+        <div class="math-stat"><div class="math-stat-label">Runs per task</div><div class="math-stat-value">3</div></div>
+        <div class="math-stat"><div class="math-stat-label">Overall success</div><div class="math-stat-value">11/15 · 73%</div></div>
+      </div>
+
+      <div class="fc-legend">
+        <span><span class="fc-dot" style="background:#4CAF50"></span> Passed all 3 runs</span>
+        <span><span class="fc-dot" style="background:#E8942E"></span> Flaky (passed some)</span>
+        <span><span class="fc-dot" style="background:#E04E3C"></span> Failed every run</span>
+      </div>
+      <div class="forecast-chart" id="evalChart"></div>
+      <p style="font-size:.75rem;color:var(--text-secondary);margin-bottom:1.2rem;line-height:1.5">The tasks: <strong>T1</strong> summarize a note · <strong>T2</strong> extract a date · <strong>T3</strong> convert a currency amount · <strong>T4</strong> look up a fact and cite it · <strong>T5</strong> finish a 2-step task end-to-end. Notice: <strong>T5 failed 0/3</strong>, and <strong>T3 passed only 2/3</strong> — it's flaky. A single run could easily have hidden both.</p>
+
+      <div class="math-options" id="mathOptions">
+        <label class="math-option" data-opt="a"><input type="radio" name="mathQ" value="a"><span><span class="opt-amount">73% is a passing grade</span> — ship it as it is.</span></label>
+        <label class="math-option" data-opt="b"><input type="radio" name="mathQ" value="b"><span><span class="opt-amount">Run the whole eval once more;</span> if the number ticks up, you're good to go.</span></label>
+        <label class="math-option" data-opt="c"><input type="radio" name="mathQ" value="c"><span><span class="opt-amount">Don't ship yet.</span> Fix T5 (fails every time), investigate the flaky T3 (2/3), then re-run the eval and watch the rate climb.</span></label>
+        <label class="math-option" data-opt="d"><input type="radio" name="mathQ" value="d"><span><span class="opt-amount">Scrap the agent</span> — 73% means it plainly doesn't work.</span></label>
+      </div>
+
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkForecast()">Check my answer</button>
+        <button class="btn btn-ghost" onclick="resetForecast()">↻ Reset</button>
+      </div>
+      <div class="tip-note">💡 <strong>Why run each task more than once?</strong> Agents aren't perfectly repeatable — the same task can pass one run and fail the next. One green run feels reassuring and proves almost nothing. A success <em>rate</em> across several runs is what tells you whether you can actually trust it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: SET THE SAFETY CAP ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Set the safety cap — enough to finish, tight enough to catch a loop</h2>
+    <p class="lesson-intro">A step cap is a simple guardrail: the agent is allowed at most N steps before it must stop. Too low and it gets cut off before finishing real work; too high and a runaway loop can burn time and cost before anything halts. Slide to set the cap. Watch the readouts react, find the safe zone, then hit check.</p>
+
+    <div class="lesson-card">
+      <div class="price-scenario">
+        <div class="math-stat"><div class="math-stat-label">Normal run needs</div><div class="math-stat-value">~8 steps</div></div>
+        <div class="math-stat"><div class="math-stat-label">Hard case needs</div><div class="math-stat-value">up to 12</div></div>
+        <div class="math-stat"><div class="math-stat-label">Each extra step</div><div class="math-stat-value">costs a little</div></div>
+      </div>
+
+      <div class="slider-wrap">
+        <div class="slider-label">
+          <span class="s-name">Max steps before the agent must stop</span>
+          <span class="s-price" id="capDisplay">8</span>
+        </div>
+        <input type="range" id="capSlider" min="4" max="30" step="1" value="8" oninput="updateCap()">
+        <div class="zone-bar"><div class="zone-marker" id="zoneMarker" style="left:15%"></div></div>
+        <div class="zone-scale"><span>4</span><span>Too tight</span><span>Safe cap</span><span>Too loose</span><span>30</span></div>
+      </div>
+
+      <div class="price-readout">
+        <div class="readout-stat"><div class="readout-label">Finishes a hard case?</div><div class="readout-value" id="finishOut">No</div></div>
+        <div class="readout-stat"><div class="readout-label">Catches a loop?</div><div class="readout-value" id="loopOut">Yes</div></div>
+        <div class="readout-stat"><div class="readout-label">Verdict</div><div class="readout-value" id="zoneOut">Too tight</div></div>
+      </div>
+
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkCap()">Check this cap</button>
+        <button class="btn btn-ghost" onclick="resetCap()">↻ Reset to 8</button>
+      </div>
+      <div class="tip-note">💡 <strong>Caps are cheap insurance:</strong> a step cap and a budget cap can't make an agent smarter, but they turn a worst-case runaway from "burned hours and a scary bill" into "stopped after N steps, ready to inspect." Set them a little above what a hard case honestly needs — no more.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: MATCH FAILURE → GUARDRAIL ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Match the failure mode to the guardrail that stops it</h2>
+    <p class="lesson-intro">Every agent failure has a specific guardrail that catches it — knowing the pairing is what turns "I hope it behaves" into "I've covered the ways it could break." Click a failure on the left, then click the guardrail on the right that stops it. A wrong pair shakes; a right pair locks in green.</p>
+
+    <div class="lesson-card">
+      <div class="match-grid">
+        <div>
+          <div class="match-col-title">The failure you're seeing</div>
+          <div class="match-pool" id="matchScenarios"></div>
+        </div>
+        <div>
+          <div class="match-col-title">The guardrail that catches it</div>
+          <div class="match-pool" id="matchTactics"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetActivity3()">↻ Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Shipping-readiness check — is it ready for real users?</h2>
+    <p class="lesson-intro">Five honest questions about trusting and shipping an agent. Pick the right answer for each — every option comes with an explanation, and the wrong ones are the shortcuts that ship trouble. Answer all five to see your score.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">For an agent you'd like to build, name three realistic test tasks you'd put in its mini eval — and how many times you'd run each.</div>
+        <textarea placeholder="I'd test: (1) ..., (2) ..., (3) ... — and I'd run each at least 3 times because..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Why is a wrong answer that looks right more dangerous than a crash? What's one thing you'd do to catch it?</div>
+        <textarea placeholder="A crash is obvious, but a confident wrong answer slips through unnoticed — so I'd..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Week 3 complete — you can build, trust, and ship an agent</h3>
+      <p>What an agent is, how to build one in a tight loop, how to read its trace when it misbehaves, and how to prove it works before you rely on it. The tools will keep changing — this way of thinking won't. Revisit any lesson to sharpen an activity, or start sketching your first real agent.</p>
+      <a href="01-what-is-an-ai-agent.html" class="btn btn-primary">Back to Lesson 1 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Build a mini eval ─── */
+const EVALTASKS = [
+  {task:'T1', pass:3},
+  {task:'T2', pass:3},
+  {task:'T3', pass:2},
+  {task:'T4', pass:3},
+  {task:'T5', pass:0}
+];
+const RUNS = 3;
+function renderEval(){
+  const chart = $('evalChart');
+  chart.innerHTML = EVALTASKS.map(f => {
+    const cls = f.pass === RUNS ? 'p-full' : f.pass === 0 ? 'p-none' : 'p-part';
+    const h = (f.pass / RUNS) * 100 || 6;
+    return `
+    <div class="fc-bar-wrap">
+      <span class="fc-val">${f.pass}/${RUNS}</span>
+      <div class="fc-bar ${cls}" style="height:${h}%"></div>
+      <span class="fc-week">${f.task}</span>
+    </div>`;
+  }).join('');
+}
+const FORECAST_FB = {
+  a:`<strong>Not yet — 73% isn't a green light.</strong> An average hides the shape of the failures. Task 5 fails <em>every single time</em>, and Task 3 is flaky. Shipping now means users hit those exact broken cases. A headline rate is a starting point, not a verdict — read the individual tasks. Try again.`,
+  b:`<strong>One more run won't tell you much.</strong> The number wobbling up or down by chance doesn't fix anything — Task 5 will still fail every time and Task 3 will still be flaky. Re-running is useful <em>after</em> you change something, to see if it helped. Try again.`,
+  c:`<strong>Correct — that's how an eval is meant to drive action.</strong> The rate points you at the two real problems: fix the task that fails 0/3, dig into why Task 3 only passes 2/3, then re-run the whole eval and watch the success rate climb. An eval isn't a grade — it's a to-do list that tells you exactly what to trust and what to fix.`,
+  d:`<strong>Too harsh — don't throw it out.</strong> Three of five tasks pass every run; the agent clearly does real work. 73% with two identifiable problems is a fixable starting point, not a failure. Scrapping at the first imperfect score means never shipping anything. Try again.`
+};
+function checkForecast(){
+  const picked = document.querySelector('input[name="mathQ"]:checked');
+  const fb = $('feedback1');
+  if (!picked) {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Pick one of the four options first</strong>, then hit "Check my answer".`;
+    return;
+  }
+  const val = picked.value;
+  document.querySelectorAll('.math-option').forEach(o => o.classList.remove('reveal-right','reveal-wrong'));
+  if (val === 'c') {
+    document.querySelector('.math-option[data-opt="c"]').classList.add('reveal-right');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = FORECAST_FB.c;
+    $('prog1').classList.add('done');
+  } else {
+    document.querySelector(`.math-option[data-opt="${val}"]`).classList.add('reveal-wrong');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = FORECAST_FB[val];
+  }
+}
+function resetForecast(){
+  document.querySelectorAll('input[name="mathQ"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.math-option').forEach(o => o.classList.remove('reveal-right','reveal-wrong'));
+  $('feedback1').className = 'activity-feedback';
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Set the safety cap ─── */
+function updateCap(){
+  const cap = +$('capSlider').value;
+  $('capDisplay').textContent = cap;
+  const finishEl = $('finishOut');
+  if (cap >= 12) { finishEl.textContent = 'Yes'; finishEl.className = 'readout-value good'; }
+  else if (cap >= 9) { finishEl.textContent = 'Risky'; finishEl.className = 'readout-value'; }
+  else { finishEl.textContent = 'No'; finishEl.className = 'readout-value bad'; }
+  const loopEl = $('loopOut');
+  if (cap <= 20) { loopEl.textContent = 'Yes'; loopEl.className = 'readout-value good'; }
+  else if (cap <= 26) { loopEl.textContent = 'Slowly'; loopEl.className = 'readout-value'; }
+  else { loopEl.textContent = 'Barely'; loopEl.className = 'readout-value bad'; }
+  const zoneEl = $('zoneOut');
+  let zone;
+  if (cap < 12) { zone = 'Too tight'; zoneEl.className = 'readout-value bad'; }
+  else if (cap < 14) { zone = 'Cutting it close'; zoneEl.className = 'readout-value'; }
+  else if (cap <= 20) { zone = 'Safe cap'; zoneEl.className = 'readout-value good'; }
+  else if (cap <= 26) { zone = 'Getting loose'; zoneEl.className = 'readout-value'; }
+  else { zone = 'Too loose'; zoneEl.className = 'readout-value bad'; }
+  zoneEl.textContent = zone;
+  const pct = ((cap - 4) / (30 - 4)) * 100;
+  $('zoneMarker').style.left = pct + '%';
+}
+function checkCap(){
+  const cap = +$('capSlider').value;
+  const fb = $('feedback2');
+  if (cap >= 14 && cap <= 20) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>A cap of ${cap} — that's the safe zone.</strong> A normal run finishes in ~8 steps and a hard case in up to 12, so ${cap} gives real headroom for legitimate work to complete — while still halting a runaway loop long before it wastes time or budget. That's the loop guardrail and the cost guardrail working as one dial.`;
+    $('prog2').classList.add('done');
+  } else if (cap < 14) {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>A cap of ${cap} is too tight.</strong> Hard cases need up to 12 steps, so at ${cap} the agent risks getting cut off mid-task and looking broken when it isn't. Nudge it into the 14–20 zone so real work has room to finish, then check again.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>A cap of ${cap} barely protects you.</strong> If the agent falls into a loop, it'll grind through ${cap} steps before stopping — wasted time and cost. Bring it down toward 14–20: enough to finish a hard case, tight enough to catch a runaway early. Check again.`;
+  }
+}
+function resetCap(){
+  $('capSlider').value = 8;
+  updateCap();
+  $('feedback2').className = 'activity-feedback';
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Match failure → guardrail ─── */
+const PAIRS = [
+  {id:'m1', scenario:'"The agent states a tool result the tool never actually returned — it made the number up."', kpi:'Output check', answer:'Verify the tool really ran and returned a value before the agent is allowed to use it.', note:'An output check catches invented results — the agent can\'t "quote" a tool it never truly called.'},
+  {id:'m2', scenario:'"The agent repeats the same step over and over and never reaches the goal."', kpi:'Step cap', answer:'Stop the run automatically after a set number of steps.', note:'A step cap turns an endless loop into a clean stop you can inspect and fix.'},
+  {id:'m3', scenario:'"The agent keeps calling a paid tool far more times than expected, and cost is climbing."', kpi:'Budget cap', answer:'Set a hard limit on spend or number of tool calls per run.', note:'A budget cap means a runaway costs a little — never a fortune — before it halts.'},
+  {id:'m4', scenario:'"The agent is about to delete records or send money — an action you can\'t undo."', kpi:'Confirmation gate', answer:'Pause for explicit human approval before any irreversible action.', note:'A confirmation gate keeps the risky, can\'t-undo actions under a human\'s thumb.'},
+  {id:'m5', scenario:'"The agent quietly returns a wrong answer that looks completely right — no error, nothing flagged."', kpi:'Independent eval', answer:'Compare outputs against known-correct answers, not just "did it run without crashing."', note:'The silent wrong answer is the most dangerous failure — only a check against known answers catches it.'}
+];
+let matchState = {selectedScenario:null, solved:0, mistakes:0};
+function renderMatch(){
+  matchState = {selectedScenario:null, solved:0, mistakes:0};
+  const sc = [...PAIRS].sort(()=>Math.random()-0.5);
+  const tc = [...PAIRS].sort(()=>Math.random()-0.5);
+  $('matchScenarios').innerHTML = sc.map(p =>
+    `<div class="match-chip" data-role="scenario" data-id="${p.id}" onclick="pickScenario('${p.id}', this)">${p.scenario}</div>`
+  ).join('');
+  $('matchTactics').innerHTML = tc.map(p =>
+    `<div class="match-slot" data-role="kpi" data-id="${p.id}" onclick="pickKpi('${p.id}', this)">
+       <span class="match-scenario"><span class="kpi-name">${p.kpi}</span>${p.answer}</span>
+       <span class="match-answer"></span>
+     </div>`
+  ).join('');
+  $('feedback3').className = 'activity-feedback';
+}
+function pickScenario(id, el){
+  if (el.classList.contains('done')) return;
+  document.querySelectorAll('.match-chip[data-role="scenario"]').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  matchState.selectedScenario = id;
+}
+function pickKpi(id, el){
+  if (el.classList.contains('filled')) return;
+  if (!matchState.selectedScenario) {
+    const fb = $('feedback3');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Pick a failure on the left first</strong>, then click the guardrail that catches it.`;
+    return;
+  }
+  if (matchState.selectedScenario === id) {
+    const pair = PAIRS.find(p => p.id === id);
+    el.classList.add('filled');
+    el.querySelector('.match-answer').textContent = '✓ ' + pair.note;
+    const scEl = document.querySelector(`.match-chip[data-id="${id}"]`);
+    scEl.classList.remove('selected');
+    scEl.classList.add('done');
+    matchState.selectedScenario = null;
+    matchState.solved++;
+    $('feedback3').className = 'activity-feedback';
+    if (matchState.solved === PAIRS.length) finishMatch();
+  } else {
+    matchState.mistakes++;
+    el.classList.remove('shake'); void el.offsetWidth;
+    el.classList.add('shake');
+    const fb = $('feedback3');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Not the right match.</strong> Re-read the failure — what exactly went wrong? Pick the guardrail built to stop precisely that.`;
+    setTimeout(() => el.classList.remove('shake'), 500);
+  }
+}
+function finishMatch(){
+  const fb = $('feedback3');
+  if (matchState.mistakes === 0) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>All five matched — clean run.</strong> Now the failure modes have answers: invented results → an output check, an endless loop → a step cap, runaway cost → a budget cap, an irreversible action → a confirmation gate, and a silent wrong answer → an independent eval against known answers. Guardrails don't make an agent smarter — they make it safe to ship.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>All five matched — with ${matchState.mistakes} wrong attempt${matchState.mistakes > 1 ? 's' : ''}.</strong> That's fine — the pairing is the lesson. Each guardrail targets one failure: output check for invented results, step cap for loops, budget cap for cost, confirmation gate for irreversible actions, independent eval for silent wrong answers. Hit <em>Reset</em> to try for a flawless run.`;
+  }
+  $('prog3').classList.add('done');
+}
+function resetActivity3(){
+  renderMatch();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {
+    q:'Of these agent failures, which is the most dangerous — the one to fear most?',
+    opts:[
+      {t:'It crashes with a clear error message.', ok:false, ex:'A crash is loud and obvious — you notice it immediately and can fix it. Visible failures are the safe kind. The danger is the failure you don\'t see.'},
+      {t:'It returns a wrong answer that looks completely right, with no error at all.', ok:true, ex:'Exactly. A silent wrong answer sails past unnoticed — nothing crashes, nothing flags it — and a person acts on it as if it were true. That\'s why you check outputs against known-correct answers, not just "did it run."'},
+      {t:'It runs a little slower than you\'d like.', ok:false, ex:'Slowness is an annoyance, not a danger. It doesn\'t mislead anyone. Rank failures by the harm they cause when unnoticed, and the silent wrong answer wins.'}
+    ]
+  },
+  {
+    q:'Your trusted agent can write a social post and also publish it to 50,000 followers. What\'s the right default?',
+    opts:[
+      {t:'Let it draft freely, but require your approval before it publishes.', ok:true, ex:'Right. Drafting is reversible and low-risk — let it run. Publishing to 50,000 people can\'t be taken back, so it earns a confirmation gate. Match autonomy to how reversible the action is.'},
+      {t:'Let it publish on its own — it\'s trusted, and approvals slow you down.', ok:false, ex:'"Trusted" doesn\'t mean "never wrong." A single bad post to 50,000 people is public and permanent. High blast-radius, irreversible actions keep a human gate even for a good agent.'},
+      {t:'Block it from writing posts at all — too risky.', ok:false, ex:'Overcorrection. Drafting is harmless and useful; you only need the gate on the irreversible step. Banning the whole task throws away the value to avoid a risk you\'ve already contained.'}
+    ]
+  },
+  {
+    q:'You ran your agent once on a task and it passed. Is that enough to trust it on that task?',
+    opts:[
+      {t:'Yes — a pass is a pass.', ok:false, ex:'Agents vary run to run. A single pass can be luck, and it completely hides a flaky task that fails half the time. One green light is reassuring and nearly meaningless on its own.'},
+      {t:'No — run it several times and look at the success rate; one pass can hide a flaky task.', ok:true, ex:'Right. Trust comes from a rate across multiple runs, not a single result. Running each task several times is exactly what surfaces the flaky ones a lone pass would mask.'},
+      {t:'No — you can never trust an agent, so don\'t bother testing.', ok:false, ex:'Too fatalistic. You can absolutely build justified trust — through repeated evals and guardrails. "Never test" throws away the very thing that earns trust.'}
+    ]
+  },
+  {
+    q:'What\'s the honest sign an agent is actually ready to ship to real users?',
+    opts:[
+      {t:'It worked impressively in a one-off demo.', ok:false, ex:'A demo is a single happy-path run, often cherry-picked. It tells you the agent <em>can</em> succeed, not that it <em>reliably</em> does. Demos sell; evals ship.'},
+      {t:'It passes a small eval of realistic tasks repeatedly, has guardrails for its failure modes, and a human gate on irreversible actions.', ok:true, ex:'That\'s the real checklist: repeatable success on realistic tasks, guardrails (caps, output checks) for the ways it breaks, and approval gates on anything you can\'t undo. Boring, and exactly right.'},
+      {t:'It feels smart when you chat with it.', ok:false, ex:'Feeling smart is not the same as being reliable. An agent can sound impressive and still fail a third of its real tasks silently. Trust the eval, not the vibe.'}
+    ]
+  },
+  {
+    q:'After you ship an agent to real users, what\'s the honest expectation?',
+    opts:[
+      {t:'It\'s done — set it and forget it.', ok:false, ex:'The real world sends inputs your eval never imagined, and models and tools change underneath you. "Set and forget" is how a quietly-degrading agent goes unnoticed until it causes harm.'},
+      {t:'You keep watching it — re-run the eval, monitor real use, and fix what the world throws at it.', ok:true, ex:'Right. Shipping is the start of the relationship, not the finish line. Monitor real runs, re-run your eval as things change, and fold new failures back into it. That\'s how trust stays earned.'},
+      {t:'It will only get better on its own over time.', ok:false, ex:'Nothing improves unattended. Without your monitoring and fixes, an agent is as likely to drift worse — as the world changes around it — as it is to improve. Maintenance is the job.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length) {
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you ship with your eyes open.</strong> You fear the silent wrong answer most, gate irreversible actions behind approval, trust a success rate over a single pass, judge readiness by an eval rather than a demo, and treat shipping as the start of monitoring — not the end. That completes Week 3: build it, prove it, guard it, ship it.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations — the wrong options are the comforting shortcuts ("a pass is a pass", "the demo looked great", "set it and forget it"). The thread: trust is earned with repeated evals and guardrails, and the scariest failure is the one that looks right. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderEval();
+  updateCap();
+  renderMatch();
+  renderQuiz();
+});
+</script>
+</body>
+</html>
