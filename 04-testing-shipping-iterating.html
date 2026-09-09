@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Testing, Shipping &amp; Iterating Your App · Lesson 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · happy path vs sad paths ============ */
+.plaw{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 22px 20px}
+.plaw-chart{display:flex;align-items:flex-end;gap:4px;height:230px;padding:0 4px;border-bottom:2px solid var(--line);position:relative}
+.pbar{flex:1;background:var(--tan);border-radius:4px 4px 0 0;height:2%;transition:height .6s cubic-bezier(.3,.8,.3,1),background .3s;min-width:0;position:relative;opacity:.85}
+.pbar.hit{background:var(--orange)}
+.pbar.star{background:linear-gradient(180deg,var(--yellow),var(--orange))}
+.pbar .ptip{
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  background:var(--brown-dark);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:3px 7px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:5;
+}
+.pbar:hover .ptip{opacity:1}
+.plaw-x{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:8px}
+.plaw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.pstat{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-align:center}
+.pstat .pv{font-family:'Fraunces',serif;font-weight:800;font-size:30px;color:var(--orange-dark);line-height:1}
+.pstat .pl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;line-height:1.4}
+.plaw-note{font-size:14px;color:var(--brown-dark);background:var(--cream);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:18px;max-width:none}
+.plaw-note strong{color:var(--orange-dark)}
+@media(max-width:700px){.plaw-chart{height:180px}.pstat .pv{font-size:24px}}
+
+/* ============ Figure 2 · deploy pipeline ============ */
+.trend-wrap{display:grid;grid-template-columns:1fr 250px;gap:26px;align-items:center}
+.trend-chart{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative}
+.trend-chart svg{width:100%;height:auto;display:block;overflow:visible}
+.trend-marker{cursor:pointer}
+.trend-dot{transition:r .2s}
+.trend-side{display:grid;gap:9px}
+.trend-side .ts-lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.tbtn{font-family:'Inter',sans-serif;font-size:13px;text-align:left;background:var(--paper);border:1px solid var(--line);color:var(--ink);padding:11px 14px;border-radius:10px;cursor:pointer;transition:all .2s}
+.tbtn:hover{border-color:var(--orange)}
+.tbtn.on{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.trend-cap{font-size:13.5px;color:var(--brown);background:var(--cream);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:12px 15px;margin-top:16px;max-width:none}
+.trend-cap strong{color:var(--orange-dark)}
+@media(max-width:760px){.trend-wrap{grid-template-columns:1fr}}
+
+/* ============ Figure 3 · app states toggle ============ */
+.cal{display:flex;gap:0;margin-bottom:18px}
+.cnode{
+  flex:1;text-align:center;padding:14px 6px;background:var(--paper);
+  border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:all .25s;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--brown);font-weight:600;
+}
+.cnode .cem{display:block;font-size:22px;margin-bottom:4px;line-height:1}
+.cnode:hover{border-color:var(--orange);transform:translateY(-2px)}
+.cnode.active{background:var(--brown-dark);border-color:var(--brown-dark);color:var(--paper)}
+.clink{width:12px;flex-shrink:0}
+.cpanel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;min-height:210px}
+.cpanel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.cpanel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark);margin-bottom:4px}
+.cpanel .ctag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:14px}
+.cpanel ul{list-style:none;display:grid;gap:9px;margin-bottom:16px}
+.cpanel li{font-size:14.5px;color:var(--ink);padding-left:24px;position:relative;line-height:1.5}
+.cpanel li::before{content:"✦";position:absolute;left:0;color:var(--orange);font-size:13px}
+.c-lead{background:var(--cream);border-left:3px solid var(--brown);border-radius:0 10px 10px 0;padding:12px 15px;font-size:13.5px;color:var(--brown);line-height:1.5;max-width:none}
+.c-lead strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:700px){.cal{flex-wrap:wrap;gap:8px}.cnode{flex:1 1 28%}.clink{display:none}}
+
+/* ============ Figure 4 · iteration decision cards ============ */
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hcard{height:230px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.hgrid.show .hcard{animation:hIn .5s forwards}
+.hgrid.show .hcard:nth-child(1){animation-delay:.05s}
+.hgrid.show .hcard:nth-child(2){animation-delay:.2s}
+.hgrid.show .hcard:nth-child(3){animation-delay:.35s}
+.hgrid.show .hcard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.hinner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.hcard.flipped .hinner{transform:rotateY(180deg)}
+.hface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center}
+.hfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.hfront .hmetric{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;background:rgba(0,0,0,0.18);padding:3px 10px;border-radius:999px;margin-bottom:12px}
+.hfront .hclaim{font-family:'Fraunces',serif;font-weight:800;font-size:23px;line-height:1.14;margin-bottom:8px}
+.hfront .hsub{font-size:12.5px;opacity:.92;max-width:260px}
+.hfront .hhint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.hback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.hback .hlab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.hback p{font-size:13px;line-height:1.5;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){.hgrid{grid-template-columns:1fr}.hcard{height:225px}.hfront .hclaim{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 04 · AI App Development</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M10 31V14.5l6 8.5 6-8.5 6 8.5 6-8.5V31" stroke="#EF7F1A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="10.5" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 2 · Lesson 04 · AI App Development</div>
+  <h1>Building it is half the job. <em>Shipping</em> it is the other half.</h1>
+  <p class="lede">You have an app that runs on your machine. That's a real achievement — and it's not the finish line. The gap between "works when I click it" and "works for a stranger on the internet" is where most first apps quietly die. This lesson closes that gap: you'll test the whole flow the way a real user would, design the states an app must handle, ship it to a live URL anyone can open, and set up the loop that lets it get better after launch.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Test the flow, not just the happy path</h2>
+  <p class="lead">When you build something, you naturally test it the one way you meant it to be used — type a task, click Add, see it appear. That's the <strong>happy path</strong>. But real users wander off it constantly, and every one of those detours is a <strong>sad path</strong> you also have to handle. The app that survives contact with real people is the one whose sad paths don't crash.</p>
+
+  <p>Think of your app as a set of routes a person can walk through it. There's one golden route where everything goes right — and dozens of little side-routes where something goes wrong: an empty field, a double-click, a lost connection, a weird character pasted in. Beginners test the golden route once, see it work, and ship. Then a real user takes a side-route and the whole thing falls over. The fix isn't more talent — it's the discipline to deliberately walk the sad paths too. Watch the map of routes build below.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · The paths a real user actually takes</span>
+      <div class="controls">
+        <button id="plawBtn" class="active" onclick="growPortfolio()">▶ Trace every path</button>
+        <button onclick="resetPortfolio()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="plaw">
+      <div class="plaw-chart" id="plawChart"></div>
+      <div class="plaw-x"><span>The happy path →</span><span>← the sad paths</span></div>
+      <div class="plaw-stats">
+        <div class="pstat"><div class="pv" id="pvDesigns">0</div><div class="pl">paths through the app</div></div>
+        <div class="pstat"><div class="pv" id="pvWinners">0</div><div class="pl">happy path (the one you meant)</div></div>
+        <div class="pstat"><div class="pv" id="pvShare">0%</div><div class="pl">of paths are "sad" ones</div></div>
+      </div>
+      <div class="plaw-note" id="plawNote"><strong>Press trace —</strong> and watch the routes appear. One tall bar is the happy path you tested. All the short bars are the sad paths a real user will find for you — and each one is a way your app can break if you never walked it.</div>
+    </div>
+  </div>
+
+  <h3>How to walk your sad paths on purpose</h3>
+  <p>You don't need a testing degree — you need a suspicious mind and a short checklist. For every feature, deliberately try: <strong>the empty case</strong> (click Add with nothing typed), <strong>the wrong input</strong> (paste something strange), <strong>the double action</strong> (click twice fast), and <strong>the interruption</strong> (what if it's slow or offline?). Ask AI to "list the ways a user could break this feature," walk each one, and fix what falls over. The happy path proves the app <em>can</em> work; the sad paths prove it <em>won't embarrass you</em> when it meets the public.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Design the four states every screen must have</h2>
+  <p class="lead">A screen is never in just one condition. The same list screen looks completely different when it's empty, when it's loading, when something went wrong, and when it's full of happy results. These are the <strong>four states</strong> — empty, loading, error, success — and a screen that only designs the last one feels broken the moment reality gets messy.</p>
+
+  <p>Here's the beginner trap: you build the screen with three tasks already in it, it looks great, you ship. But the very first thing a new user sees is the <em>empty</em> state — and you never designed it, so they get a blank void and leave. Then the network hiccups and they get a frozen screen with no explanation — because you never designed the <em>loading</em> and <em>error</em> states either. Every state you skip is a moment where your app silently fails a real person. Toggle through the four states below to see what each one needs.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · The four states of every screen</span>
+      <div class="controls">
+        <button onclick="calStep(-1)">◀ Prev</button>
+        <button onclick="calStep(1)">Next ▶</button>
+      </div>
+    </div>
+    <div class="cal" id="cal">
+      <div class="cnode" data-k="empty" onclick="pickCal('empty')"><span class="cem">📭</span>Empty</div>
+      <div class="clink"></div>
+      <div class="cnode" data-k="loading" onclick="pickCal('loading')"><span class="cem">⏳</span>Loading</div>
+      <div class="clink"></div>
+      <div class="cnode" data-k="error" onclick="pickCal('error')"><span class="cem">⚠️</span>Error</div>
+      <div class="clink"></div>
+      <div class="cnode" data-k="success" onclick="pickCal('success')"><span class="cem">✅</span>Success</div>
+    </div>
+    <div class="cpanel" id="calPanel"></div>
+  </div>
+
+  <h3>Ask for all four states, every time</h3>
+  <p>This is a place where a single sentence saves you a dozen bugs. When you ask AI to build a screen, don't ask for "a task list" — ask for "a task list with an empty state, a loading state, an error state, and the normal filled state." AI will happily design all four if you name them, and quietly skip three of them if you don't. Then walk each state yourself: force it empty, watch it load, trigger an error, and fill it up. Designing states is not extra polish — it's the difference between an app that only works in the demo and one that works in the wild.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Deploy: from your machine to a real URL</h2>
+  <p class="lead">Right now your app lives on your computer — nobody else can reach it. <strong>Deploying</strong> is the act of moving it from your machine to a hosted address on the internet, so anyone with the link can open it. It sounds like the scary technical part, but modern tools have turned it into a short, mostly-automatic pipeline. Understanding the stages is what makes it feel routine instead of magic.</p>
+
+  <p>Deploying isn't one button that mysteriously does everything — it's a small assembly line, and knowing the stations helps you spot where things go wrong. Your app leaves your <strong>local machine</strong>, gets <strong>packaged</strong> into a shippable bundle, is <strong>uploaded to a host</strong> that runs it, and finally appears at a <strong>live URL</strong> anyone can visit. AI and hosting tools handle most of the mechanics, but you're the one who checks the live version actually works. Step through the pipeline below.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The deploy pipeline — local to live</span>
+      <div class="controls">
+        <button onclick="trendStep()">▶ Next stage</button>
+      </div>
+    </div>
+    <div class="trend-wrap">
+      <div class="trend-chart">
+        <svg viewBox="0 0 400 200" id="trendSvg">
+          <line x1="30" y1="140" x2="390" y2="140" stroke="#E8DCC8" stroke-width="2"/>
+          <path d="M40 128 L140 100 L250 72 L360 44" fill="none" stroke="#EF7F1A" stroke-width="3"/>
+          <g class="trend-marker" onclick="pickTrend('local')"><circle class="trend-dot" id="td-local" cx="40" cy="128" r="7" fill="#A34E1C" stroke="#fff" stroke-width="2.5"/></g>
+          <g class="trend-marker" onclick="pickTrend('package')"><circle class="trend-dot" id="td-package" cx="140" cy="100" r="7" fill="#A34E1C" stroke="#fff" stroke-width="2.5"/></g>
+          <g class="trend-marker" onclick="pickTrend('host')"><circle class="trend-dot" id="td-host" cx="250" cy="72" r="7" fill="#A34E1C" stroke="#fff" stroke-width="2.5"/></g>
+          <g class="trend-marker" onclick="pickTrend('live')"><circle class="trend-dot" id="td-live" cx="360" cy="44" r="7" fill="#A34E1C" stroke="#fff" stroke-width="2.5"/></g>
+          <text x="42" y="160" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6E5C50" text-anchor="middle" letter-spacing="1">YOUR MACHINE</text>
+          <text x="360" y="160" font-family="'JetBrains Mono',monospace" font-size="9" fill="#6E5C50" text-anchor="middle" letter-spacing="1">THE INTERNET</text>
+        </svg>
+      </div>
+      <div class="trend-side">
+        <div class="ts-lab">Jump to a stage</div>
+        <button class="tbtn on" id="tb-local" onclick="pickTrend('local')">① On your machine</button>
+        <button class="tbtn" id="tb-package" onclick="pickTrend('package')">② Packaged up</button>
+        <button class="tbtn" id="tb-host" onclick="pickTrend('host')">③ Uploaded to a host</button>
+        <button class="tbtn" id="tb-live" onclick="pickTrend('live')">④ Live at a URL</button>
+      </div>
+    </div>
+    <div class="trend-cap" id="trendCap"></div>
+  </div>
+
+  <h3>The one habit that saves deploy day</h3>
+  <p>The classic deploy heartbreak is "it worked on my machine but the live version is broken." The cause is almost always a difference between your computer and the host — a setting, a file, a piece of data that existed locally but never made it up the pipeline. The habit that prevents it: after every deploy, <strong>open the live URL yourself as if you were a stranger</strong> — ideally in a fresh browser or on your phone — and walk the happy path plus one sad path. Deploying isn't done when the tool says "success"; it's done when <em>you've</em> confirmed the public version works.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Iterate: release, observe, improve, repeat</h2>
+  <p class="lead">Shipping isn't the end of building — it's the start of a new, better loop. Once real people use your app, they generate the most valuable thing you can get: honest signals about what actually works and what doesn't. The job now is to <strong>release, observe how it's really used, improve the weak spot, and release again</strong>. Version one is never the good version; it's the version that lets you find the good version.</p>
+
+  <p>The trap after launch is guessing. You imagine what users want, build it, and discover they never needed it. The discipline is to let the real usage tell you where to spend your effort — the same "read the signal, make the call" habit from Week 1, now pointed at a live app. Below are four signals a shipped app sends you, and the move each one demands. Flip each card to see the signal and the decision.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Four signals a live app sends — and the move each demands</span>
+      <div class="controls">
+        <button onclick="allReal()">Show all decisions</button>
+        <button onclick="allHype()">↺ Back to the signals</button>
+      </div>
+    </div>
+    <div class="hgrid" id="hgrid">
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hmetric">The signal</div>
+            <div class="hclaim">Users quit on one screen</div>
+            <div class="hsub">People open it, then leave at the same step.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">The decision</div>
+            <p>That screen has a problem you can't see from the inside — a confusing state, a missing empty message, or a step that feels like work. This is your highest-value fix: watch someone use it, name what tripped them, and ask AI to redesign that one screen. Don't add features; fix the wall people hit.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hmetric">The signal</div>
+            <div class="hclaim">The same bug report twice</div>
+            <div class="hsub">Two different people hit the identical error.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">The decision</div>
+            <p>A repeated report is a real sad path you missed, not a fluke. Reproduce it yourself, name the broken layer to AI — "the app errors when the field is empty" — and fix it. Then add that exact case to your test walk-through so it can never come back. One fix, permanently closed.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hmetric">The signal</div>
+            <div class="hclaim">One feature is loved</div>
+            <div class="hsub">People use one part far more than the rest.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">The decision</div>
+            <p>This is your app's real reason to exist — the thing people actually came for. Pour your effort here: make it faster, smoother, more obvious. Most of your app's value is hiding in polishing this one loved feature, not in the ten ideas you imagined nobody asked for.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hmetric">The signal</div>
+            <div class="hclaim">A feature nobody touches</div>
+            <div class="hsub">You built it; the data says it's ignored.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">The decision</div>
+            <p>Let it go — without ego. An unused feature isn't just wasted work; it's ongoing clutter that confuses users and costs you attention to maintain. Consider removing it. A smaller app that does one thing well beats a bloated one full of features nobody wanted. Cut, don't hoard.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Your post-launch loop, in plain steps</h3>
+  <p>Iterating can sound abstract, so here is the concrete loop a solo builder runs after shipping. <strong>Release —</strong> push a small, tested change to the live URL, never a giant untested pile. <strong>Observe —</strong> watch how real people actually use it: where they quit, what they repeat, what they ignore. <strong>Improve —</strong> pick the single highest-value signal from the cards above and fix or polish just that, with AI writing the change and you verifying it on the live version. <strong>Repeat —</strong> and commit a checkpoint each time so every release is safe to build on. Small releases, observed honestly, improved one signal at a time — that's how a rough version one becomes something people rely on.</p>
+
+  <h3>The one-sentence version of iterating</h3>
+  <p>Iterating an app is a loop: ship a small tested change, watch how real people use it, improve the one thing the usage is begging you to fix, and go around again — trusting the signal over your own guesses. AI makes every fix faster, but the discipline to verify before you trust, and to follow real usage instead of your assumptions, is the human skill that decides whether your app gets better or just gets bigger.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>You now have the full arc from "runs on my machine" to "works for the world." Test the whole flow — the happy path proves it can work, the sad paths prove it won't embarrass you. Design all four states — empty, loading, error, success — because reality is never just the success screen. Deploy through a simple pipeline from your machine to a live URL, and always confirm the public version yourself. Then run the release-observe-improve loop, trusting real usage over guesses. Across all of Week 2, the pattern held: AI supplies speed and volume, and you supply the testing, the judgment, and the discipline to ship something honest. That partnership is what turns an idea into a working app.</p>
+  <ul>
+    <li>Test the flow, not just the happy path — deliberately walk the sad paths too</li>
+    <li>Design all four states: empty, loading, error, success — never just success</li>
+    <li>Deploy is a pipeline: local machine → packaged → hosted → live URL</li>
+    <li>Always open the live URL yourself; "success" from a tool isn't confirmation</li>
+    <li>Iterate in a loop: release small, observe real use, improve one signal, repeat</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 04 of 04 · Week 2 complete — you can now build, test and ship an AI app →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · happy path vs sad paths ===== */
+const BARN=32;
+const HEIGHTS=[100,40,34,30,26,23,20,18,16,15,13,12,11,10,9,9,8,7,7,6,6,5,5,4,4,4,3,3,3,2,2,2];
+const PATHNAMES=['Type task, click Add (happy path)','Click Add with empty field','Double-click Add fast','Paste a very long task','Add then delete immediately','Check a box, then uncheck','Refresh mid-typing','Add task while offline','Paste odd characters','Add many tasks quickly','Tap the same task twice','Open on a tiny phone screen','Leave and come back later','Add only spaces','Check every box at once','Add a duplicate task','Rotate the phone sideways','Slow connection while loading','Undo right after adding','Clear all tasks at once','Add an emoji-only task','Open in an old browser','Tab away and back','Trigger it before it loads','Very long single word','Zoom the page in far','Rapid-fire many clicks','Empty then fill then empty','Add during a save','Weird keyboard shortcut','Copy-paste the whole list','Interrupt a network call'];
+const chart=el('plawChart');
+let plawTimers=[];
+function initBars(){
+  chart.innerHTML='';
+  for(let i=0;i<BARN;i++){
+    const b=document.createElement('div');
+    b.className='pbar';
+    if(i===0)b.classList.add('star');
+    else if(i<5)b.classList.add('hit');
+    b.innerHTML='<span class="ptip">'+PATHNAMES[i]+'</span>';
+    chart.appendChild(b);
+  }
+}
+function growPortfolio(){
+  resetPortfolio(false);
+  el('plawBtn').classList.add('active');
+  const bars=chart.querySelectorAll('.pbar');
+  let listed=0;
+  bars.forEach((b,i)=>{
+    plawTimers.push(setTimeout(()=>{
+      b.style.height=Math.max(2,HEIGHTS[i])+'%';
+      listed++;
+      el('pvDesigns').textContent=listed;
+      el('pvWinners').textContent='1';
+      const sad=Math.max(0,listed-1);
+      const share=Math.round((sad/Math.max(listed,1))*100);
+      el('pvShare').textContent=share+'%';
+      if(i===BARN-1){
+        el('pvWinners').textContent='1';
+        el('pvShare').textContent=Math.round(((BARN-1)/BARN)*100)+'%';
+        el('plawNote').innerHTML='<strong>There it is —</strong> 32 paths through one small app: a single happy path you meant, and 31 sad paths a real user can wander into. You tested the tall bar. The short bars are where your app breaks in public — unless you deliberately walk them too.';
+      }
+    },200+i*90));
+  });
+}
+function resetPortfolio(full){
+  plawTimers.forEach(t=>clearTimeout(t));plawTimers=[];
+  chart.querySelectorAll('.pbar').forEach(b=>b.style.height='2%');
+  el('pvDesigns').textContent='0';el('pvWinners').textContent='0';el('pvShare').textContent='0%';
+  if(full!==false){
+    el('plawNote').innerHTML='<strong>Press trace —</strong> and watch the routes appear. One tall bar is the happy path you tested. All the short bars are the sad paths a real user will find for you — and each one is a way your app can break if you never walked it.';
+  }
+}
+initBars();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){growPortfolio();o.unobserve(e.target)}}),{threshold:0.35}).observe(chart);
+
+/* ===== Figure 2 · deploy pipeline ===== */
+const TRENDS={
+  local:{cap:'<strong>① On your machine — where you built it.</strong> Right now the app only runs on your own computer. You can click it, but the URL is private to you — no one else on earth can reach it. This is the starting point of every deploy: a working thing that only you can see.'},
+  package:{cap:'<strong>② Packaged up — bundled for shipping.</strong> The tool gathers your app into a clean, self-contained bundle ready to run somewhere that isn\'t your laptop. This is where "works on my machine" problems get caught — anything that only existed locally has to be included now, or the live version will be missing it.'},
+  host:{cap:'<strong>③ Uploaded to a host — a computer that stays on.</strong> Your bundle is sent to a hosting service: a machine on the internet that runs your app around the clock so it\'s always available, even when your laptop is closed. AI and modern tools make this a near-automatic step — often a single command or click.'},
+  live:{cap:'<strong>④ Live at a URL — anyone can open it.</strong> The host gives your app a public web address. Now a friend, a customer, or a stranger can visit that link and use what you built. Your job isn\'t done at "deployed" — open that URL yourself, as a stranger would, and confirm it actually works.'}
+};
+const TORDER=['local','package','host','live'];
+let tCur='local';
+function pickTrend(k){
+  tCur=k;
+  TORDER.forEach(id=>{
+    el('td-'+id).setAttribute('r','7');el('td-'+id).setAttribute('fill','#A34E1C');
+    el('tb-'+id).classList.remove('on');
+  });
+  el('td-'+k).setAttribute('r','10');el('td-'+k).setAttribute('fill','#EF7F1A');
+  el('tb-'+k).classList.add('on');
+  el('trendCap').innerHTML=TRENDS[k].cap;
+}
+function trendStep(){
+  let i=TORDER.indexOf(tCur)+1;if(i>=TORDER.length)i=0;
+  pickTrend(TORDER[i]);
+}
+pickTrend('local');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickTrend('local');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('trendSvg'));
+
+/* ===== Figure 3 · app states toggle ===== */
+const CAL={
+  empty:{t:'The Empty State',tag:'When there\'s no data yet',ideas:[
+    'The very first thing a brand-new user sees',
+    'A friendly nudge, not a blank void: "Add your first task"',
+    'Often includes the one action that fills it',
+    'Skipping this makes a fresh app feel broken'
+  ],lead:'Force your app empty and look at it. If it\'s a blank screen with no guidance, a new user will assume it\'s broken and leave before they ever start.'},
+  loading:{t:'The Loading State',tag:'While the app is fetching or saving',ideas:[
+    'Shown in the moment between an action and its result',
+    'A spinner or skeleton so the user knows it\'s working',
+    'Prevents the "is it frozen?" panic on slow connections',
+    'Easy to forget because it\'s instant on your fast machine'
+  ],lead:'Test on a slow connection or add an artificial delay. Without a loading state, a slow moment looks exactly like a crash — and users treat it as one.'},
+  error:{t:'The Error State',tag:'When something goes wrong',ideas:[
+    'Shown when a save fails, the network drops, or input is bad',
+    'A calm, human message — not a scary technical dump',
+    'Tells the user what happened and what to do next',
+    'The state beginners skip most, and users hit most'
+  ],lead:'Deliberately break it: go offline, submit nothing, paste garbage. A good error state turns a crash into a small, recoverable bump the user can get past.'},
+  success:{t:'The Success State',tag:'When it all works',ideas:[
+    'The normal, filled, everything-worked screen',
+    'The one state beginners actually design',
+    'Should confirm the action clearly — "task added"',
+    'Only meaningful once the other three exist too'
+  ],lead:'This is the state you naturally build. The lesson isn\'t to build it better — it\'s to remember it\'s only one of four, and the other three decide whether real people trust your app.'}
+};
+const CORDER=['empty','loading','error','success'];
+let cCur='empty';
+function pickCal(k){
+  cCur=k;
+  document.querySelectorAll('#cal .cnode').forEach(n=>n.classList.toggle('active',n.dataset.k===k));
+  const d=CAL[k],panel=el('calPanel');
+  let html='<span class="ctag">'+d.tag+'</span><h4>'+d.t+'</h4><ul>';
+  d.ideas.forEach(t=>{html+='<li>'+t+'</li>'});
+  html+='</ul><div class="c-lead"><strong>How to test it</strong>'+d.lead+'</div>';
+  panel.innerHTML=html;
+  panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function calStep(dir){
+  let i=CORDER.indexOf(cCur)+dir;
+  if(i<0)i=CORDER.length-1;if(i>=CORDER.length)i=0;
+  pickCal(CORDER[i]);
+}
+pickCal('empty');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickCal('empty');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('cal'));
+
+/* ===== Figure 4 · iteration decision cards ===== */
+const hgrid=el('hgrid');
+function allReal(){document.querySelectorAll('.hcard').forEach(c=>c.classList.add('flipped'))}
+function allHype(){document.querySelectorAll('.hcard').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){hgrid.classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(hgrid);
+
+</script>
+</body>
+</html>

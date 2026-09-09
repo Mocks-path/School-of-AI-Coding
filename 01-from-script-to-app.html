@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>From Script to App · Lesson 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · request flow ============ */
+.flow{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:30px 22px 22px;position:relative}
+.flow-row{display:flex;align-items:stretch;gap:0}
+.fnode{
+  flex:0 0 auto;width:150px;text-align:center;padding:16px 10px 13px;
+  background:var(--cream);border:2px solid var(--line);border-radius:12px;
+  transition:border-color .3s,background .3s,transform .3s,box-shadow .3s;
+}
+.fnode h5{font-family:'Fraunces',serif;font-size:16px;color:var(--brown-dark);line-height:1.15;margin-bottom:4px}
+.fnode .fsub{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);line-height:1.4;display:block}
+.fnode .fmark{width:34px;height:34px;border-radius:50%;background:var(--brown-dark);color:var(--paper);font-family:'Fraunces',serif;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:background .3s}
+.fnode.on{border-color:var(--orange);background:#FDEBD7;transform:translateY(-4px);box-shadow:0 8px 18px rgba(239,127,26,0.22)}
+.fnode.on .fmark{background:var(--orange)}
+.fconn{flex:1;min-width:22px;align-self:center;height:3px;background:var(--line);position:relative;border-radius:2px}
+.fdot{
+  position:absolute;top:50%;left:0;width:15px;height:15px;border-radius:50%;
+  transform:translate(-50%,-50%);opacity:0;z-index:2;
+}
+.fdot.money{background:var(--yellow);border:2px solid var(--tan);box-shadow:0 0 0 4px rgba(254,204,0,0.25)}
+.fdot.pkg{background:var(--brown);border:2px solid var(--brown-dark);box-shadow:0 0 0 4px rgba(65,44,35,0.15)}
+.fdot.data{background:var(--accent);border:2px solid #005f8f;box-shadow:0 0 0 4px rgba(0,141,210,0.2)}
+.fconn.go .fdot{animation:dotR 1.35s ease-in-out forwards}
+.fconn.go.rev .fdot{animation:dotL 1.35s ease-in-out forwards}
+@keyframes dotR{0%{left:0%;opacity:0}14%{opacity:1}86%{opacity:1}100%{left:100%;opacity:0}}
+@keyframes dotL{0%{left:100%;opacity:0}14%{opacity:1}86%{opacity:1}100%{left:0%;opacity:0}}
+.fcap-wrap{display:flex;gap:14px;align-items:flex-start;margin-top:20px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-height:74px}
+.fstep{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.08em;color:#fff;background:var(--orange);border-radius:6px;padding:4px 9px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.fcap{font-size:14.5px;color:var(--brown-dark);line-height:1.5}
+.fkey{display:flex;gap:22px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);flex-wrap:wrap}
+.fkey span{display:inline-flex;align-items:center;gap:7px}
+.fkey i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.fkey .km{background:var(--yellow);border:2px solid var(--tan)}
+.fkey .kp{background:var(--brown);border:2px solid var(--brown-dark)}
+.fkey .kd{background:var(--accent);border:2px solid #005f8f}
+@media(max-width:700px){
+  .flow{padding:18px 10px 14px}
+  .fnode{width:90px;padding:10px 5px 9px}
+  .fnode h5{font-size:12px}
+  .fnode .fsub{font-size:7.5px}
+  .fnode .fmark{width:24px;height:24px;font-size:12px}
+}
+
+/* ============ Figure 2 · anatomy parts ============ */
+.mcalc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+.anat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.apart{
+  border:2px solid var(--line);border-radius:12px;padding:18px 16px;cursor:pointer;
+  background:var(--cream);transition:all .25s;text-align:left;
+}
+.apart:hover{border-color:var(--orange);transform:translateY(-2px)}
+.apart.on{border-color:var(--orange);background:#FDEBD7;box-shadow:0 8px 18px rgba(239,127,26,0.18)}
+.apart .aname{font-family:'Fraunces',serif;font-size:20px;color:var(--brown-dark);margin-bottom:3px}
+.apart .arole{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.apart .aico{font-size:26px;line-height:1;margin-bottom:8px;display:block}
+.adetail{background:var(--cream);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:16px 18px;min-height:96px}
+.adetail.swap{animation:panelIn .4s ease}
+.adetail .adt{font-family:'Fraunces',serif;font-size:19px;color:var(--brown-dark);margin-bottom:6px}
+.adetail .adp{font-size:14px;color:var(--ink);line-height:1.55;max-width:none;margin:0}
+.adetail .adp em{color:var(--orange-dark);font-style:normal;font-weight:600}
+@media(max-width:700px){
+  .anat{grid-template-columns:1fr}
+}
+
+/* ============ Figure 3 · front-end vs back-end ============ */
+.plat-tabs{display:flex;gap:0;margin-bottom:20px}
+.pnode{
+  flex:1;text-align:center;padding:16px 8px;background:var(--paper);
+  border:2px solid var(--line);border-radius:12px;cursor:pointer;
+  transition:all .25s;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--brown);font-weight:600;
+}
+.pnode .pdx{display:block;font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:var(--line);margin-bottom:4px;transition:color .25s;text-transform:none;letter-spacing:0}
+.pnode:hover{border-color:var(--orange);transform:translateY(-2px)}
+.pnode.active{background:var(--brown-dark);border-color:var(--brown-dark);color:var(--paper)}
+.pnode.active .pdx{color:var(--orange)}
+.plink{width:22px;height:3px;background:var(--line);flex-shrink:0;position:relative;align-self:center}
+.ppanel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px;min-height:250px}
+.ppanel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ppanel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark);margin-bottom:4px}
+.ppanel .ptag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:14px}
+.ppanel ul{list-style:none;display:grid;gap:9px;margin-bottom:18px}
+.ppanel li{font-size:14.5px;color:var(--ink);padding-left:24px;position:relative;line-height:1.5}
+.ppanel li::before{content:"✦";position:absolute;left:0;color:var(--orange);font-size:13px}
+.p-human{
+  background:var(--cream);border-left:3px solid var(--brown);border-radius:0 10px 10px 0;
+  padding:13px 16px;font-size:13.5px;color:var(--brown);line-height:1.5;
+}
+.p-human strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:700px){
+  .plat-tabs{flex-wrap:wrap;gap:8px}
+  .pnode{flex:1 1 42%}
+  .plink{display:none}
+}
+
+/* ============ Figure 4 · decision flip cards ============ */
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hcard{height:225px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.hgrid.show .hcard{animation:hIn .5s forwards}
+.hgrid.show .hcard:nth-child(1){animation-delay:.05s}
+.hgrid.show .hcard:nth-child(2){animation-delay:.2s}
+.hgrid.show .hcard:nth-child(3){animation-delay:.35s}
+.hgrid.show .hcard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.hinner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.hcard.flipped .hinner{transform:rotateY(180deg)}
+.hface{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center;
+}
+.hfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.hfront .hbadge{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;background:rgba(0,0,0,0.18);padding:3px 10px;border-radius:999px;margin-bottom:12px}
+.hfront .hclaim{font-family:'Fraunces',serif;font-weight:800;font-size:26px;line-height:1.1;margin-bottom:8px}
+.hfront .hsub{font-size:13px;opacity:.92;max-width:260px}
+.hfront .hhint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.hback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.hback .hlab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.hback p{font-size:13px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){
+  .hgrid{grid-template-columns:1fr}
+  .hcard{height:220px}
+  .hfront .hclaim{font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 01 · AI App Development</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="13" width="36" height="27" rx="6" fill="#412C23"/>
+      <path d="M14 13 C14 4.5 30 4.5 30 13" stroke="#EF7F1A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M12 32 L12 22 L17 28 L22 21 L27 28 L32 22 L32 32" stroke="#FECC00" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="9" r="4.5" fill="#EF7F1A"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 2 · Lesson 01 · AI App Development</div>
+  <h1>From a script to a <em>real app</em>.</h1>
+  <p class="lede">In Week 1 you wrote scripts — little programs that run once, on your machine, for you. An app is different. It keeps running, other people use it, and it remembers things between visits. That jump feels enormous, but it comes down to understanding a few durable parts and how they fit together. This lesson gives you the honest map of what an app actually is, before you build one.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>A script runs once. An app keeps running.</h2>
+  <p class="lead">A script is a task you run and walk away from — clean up a file, crunch some numbers, print an answer. An app is something <strong>other people</strong> open, again and again, that <strong>remembers</strong> what happened last time. Same language, same logic — but a completely different shape of work.</p>
+
+  <p>Picture the scripts from last week: you double-click, it does its job in your terminal, it ends. Only you ever see it, and the moment it finishes it forgets everything. That's perfect for a one-off chore, and most useful programs start life exactly there. The gap opens when you want a <em>second person</em> to use it, from their own device, and to still see their data tomorrow.</p>
+  <p>An app closes that gap. It waits for a request, does the work, sends back a result, and stores anything worth keeping — then waits for the next person. Nothing about the logic got harder; what got added is an <strong>interface</strong> so others can reach it and a place to <strong>remember</strong>. Press the buttons below and watch a single request travel through a running app — the click, the work, then the answer coming back.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · How one request travels through a running app</span>
+      <div class="controls">
+        <button id="btnRun" class="active" onclick="runFlow()">▶ Run a request</button>
+        <button onclick="resetFlow(true)">↺ Reset</button>
+      </div>
+    </div>
+    <div class="flow" id="flow">
+      <div class="flow-row">
+        <div class="fnode" id="fnCust">
+          <div class="fmark">U</div>
+          <h5>User</h5>
+          <span class="fsub">Clicks a button</span>
+        </div>
+        <div class="fconn" id="fc1"><div class="fdot data"></div></div>
+        <div class="fnode" id="fnStore">
+          <div class="fmark">I</div>
+          <h5>Interface</h5>
+          <span class="fsub">The screen they see</span>
+        </div>
+        <div class="fconn" id="fc2"><div class="fdot data"></div></div>
+        <div class="fnode" id="fnPlat">
+          <div class="fmark">L</div>
+          <h5>Logic</h5>
+          <span class="fsub">Does the work</span>
+        </div>
+        <div class="fconn" id="fc3"><div class="fdot data"></div></div>
+        <div class="fnode" id="fnPrint">
+          <div class="fmark">D</div>
+          <h5>Data Store</h5>
+          <span class="fsub">Remembers it</span>
+        </div>
+      </div>
+      <div class="fcap-wrap">
+        <div class="fstep" id="fstep">— / —</div>
+        <div class="fcap" id="fcap">Press ▶ Run a request to watch a single click move from the user all the way to stored data and back.</div>
+      </div>
+      <div class="fkey">
+        <span><i class="kd"></i> a request / instruction</span>
+        <span><i class="km"></i> a saved record</span>
+        <span><i class="kp"></i> the answer sent back</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>What "an app" really adds</h3>
+  <p>Notice what appeared that a script never had: a screen the user actually touches, and a place that <em>remembers</em> after the program stops. A script is logic alone. An app wraps that same logic in a way to reach it and a way to keep results — so a stranger on the other side of the world can use it tomorrow and still find their work. That's the whole difference: <strong>runs-once-for-you</strong> becomes <strong>keeps-running-for-everyone</strong>. And, reassuringly, the logic in the middle is the same skill you already started building.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>The anatomy of an app: four connected parts</h2>
+  <p class="lead">Every app you'll ever build — a to-do list, a booking tool, a whole social network — is made of the same four parts working together: an <strong>interface</strong>, some <strong>logic</strong>, a place for <strong>data</strong>, and a sense of <strong>state</strong>. Learn these four once and every app stops looking mysterious.</p>
+
+  <p>People imagine an app is one big magical thing. It isn't. It's four cooperating pieces, and you can point to each of them. The <strong>interface</strong> is what the user sees and taps. The <strong>logic</strong> is the rules that decide what happens when they do. The <strong>data</strong> is the information the app keeps. And <strong>state</strong> is the app's short-term memory of "what's going on right now" — which screen you're on, whether you're logged in, what's in your cart. Click each part below to see what it does, and how the four hand off to one another.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The four parts of every app</span>
+      <div class="controls" id="anatBtns">
+        <button onclick="tourAnat()">▶ Tour all four</button>
+        <button onclick="resetAnat()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="mcalc">
+      <div class="anat" id="anat">
+        <button class="apart on" data-k="ui" onclick="pickPart('ui')">
+          <span class="aico">🖥️</span>
+          <div class="aname">Interface</div>
+          <div class="arole">What the user sees</div>
+        </button>
+        <button class="apart" data-k="logic" onclick="pickPart('logic')">
+          <span class="aico">⚙️</span>
+          <div class="aname">Logic</div>
+          <div class="arole">The rules & decisions</div>
+        </button>
+        <button class="apart" data-k="data" onclick="pickPart('data')">
+          <span class="aico">🗄️</span>
+          <div class="aname">Data</div>
+          <div class="arole">What it remembers</div>
+        </button>
+        <button class="apart" data-k="state" onclick="pickPart('state')">
+          <span class="aico">🔖</span>
+          <div class="aname">State</div>
+          <div class="arole">What's happening now</div>
+        </button>
+      </div>
+      <div class="adetail" id="anatDetail"></div>
+    </div>
+  </div>
+
+  <h3>How the four hand off</h3>
+  <p>Watch the loop and it clicks: the <strong>interface</strong> catches a tap and hands it to the <strong>logic</strong>; the logic decides what to do and may read or write the <strong>data</strong>; then it updates the <strong>state</strong> so the interface can redraw the right screen. Round and round, every time anyone touches the app. You don't need to memorise a hundred concepts — you need to know which of these four parts a given problem belongs to. That single habit is what turns "build an app" from overwhelming into a sorting task.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Front-end and back-end: the storefront and the kitchen</h2>
+  <p class="lead">Those four parts split naturally into two halves. The <strong>front-end</strong> is everything the user sees and touches — the storefront. The <strong>back-end</strong> is everything that happens out of sight — the kitchen. Knowing which half a task lives in tells you where to look when something needs building or fixing.</p>
+
+  <p>Think of a restaurant. The dining room — the menu, the tables, the waiter taking your order — is the <strong>front-end</strong>: polished, friendly, the only part the guest ever sees. The kitchen — the recipes, the pantry, the chefs — is the <strong>back-end</strong>: hidden, but where the real cooking and the ingredient storage happen. An app works exactly the same way. Click each option below to see what lives where, and what stays your job no matter which half you're working in.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Which half does the work?</span>
+      <div class="controls">
+        <button onclick="platStep(-1)">◀ Prev</button>
+        <button onclick="platStep(1)">Next ▶</button>
+      </div>
+    </div>
+    <div class="plat-tabs" id="platTabs">
+      <div class="pnode" data-k="front" onclick="pickPlat('front')"><span class="pdx">A</span>Front-end</div>
+      <div class="plink"></div>
+      <div class="pnode" data-k="back" onclick="pickPlat('back')"><span class="pdx">B</span>Back-end</div>
+      <div class="plink"></div>
+      <div class="pnode" data-k="bridge" onclick="pickPlat('bridge')"><span class="pdx">C</span>The Bridge</div>
+    </div>
+    <div class="ppanel" id="platPanel"></div>
+  </div>
+
+  <h3>Why the split matters to a beginner</h3>
+  <p>You don't have to master both halves at once. Many first apps are almost entirely front-end — a page that reacts to clicks with a bit of logic — and store their data in the browser itself. Others are a thin front-end sitting on a busy back-end. The value of the storefront/kitchen picture is that when you describe what you want to an AI assistant, you can say <em>where</em> the change belongs: "add a button" is dining-room work; "remember this after I close the tab" is kitchen work. That vocabulary alone makes you far easier to help.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Script, spreadsheet, automation, or app?</h2>
+  <p class="lead">Not every problem deserves an app. Sometimes a spreadsheet is the honest answer; sometimes a one-line automation beats a week of building. The skill that saves the most time isn't coding — it's <strong>choosing the right shape of tool</strong> before you build anything. Flip each card to match a situation to its best tool.</p>
+
+  <p>The eager beginner reaches for "build an app" every time, and quietly wastes weeks. A seasoned builder asks first: how many people use this, does it need to remember things, and how often does it run? Those three questions usually reveal that a script, a spreadsheet, or a ready-made automation would solve the problem in an afternoon. An app is the heaviest tool in the box — reach for it only when the lighter ones genuinely can't do the job. Flip the four situations below to see which tool actually fits.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Match the problem to the tool</span>
+      <div class="controls">
+        <button onclick="allReal()">Show all answers</button>
+        <button onclick="allHype()">↺ Back to the question</button>
+      </div>
+    </div>
+    <div class="hgrid" id="hgrid">
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hbadge">The situation</div>
+            <div class="hclaim">"Just me, once a week"</div>
+            <div class="hsub">You reformat a report every Monday, only you touch it.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">Best tool → a script</div>
+            <p>One person, no shared interface, no need to remember state between runs — that's a <em>script</em>, not an app. Run it, get your output, done. Wrapping this in an app would add screens and storage nobody asked for. Save the app for when others need in.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hbadge">The situation</div>
+            <div class="hclaim">"A list of things and sums"</div>
+            <div class="hsub">You track a budget or a small inventory with simple totals.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">Best tool → a spreadsheet</div>
+            <p>Rows, columns, a few formulas, maybe a chart — a <em>spreadsheet</em> already is a tiny app, built and free. Only outgrow it when many people must edit at once, or the rules get too tangled for cells. Don't rebuild in code what a sheet does for nothing.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hbadge">The situation</div>
+            <div class="hclaim">"When X happens, do Y"</div>
+            <div class="hsub">Save every email attachment to a folder automatically.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">Best tool → an automation</div>
+            <p>A trigger-and-action rule that runs itself in the background is an <em>automation</em>. No screen, no user — it just connects two tools you already have. Building a custom app for this is like buying a truck to move one box. Wire up the rule instead.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hcard" onclick="this.classList.toggle('flipped')">
+        <div class="hinner">
+          <div class="hface hfront">
+            <div class="hbadge">The situation</div>
+            <div class="hclaim">"Many people, remembers each"</div>
+            <div class="hsub">A booking tool where clients log in and see their own history.</div>
+            <div class="hhint">tap to flip</div>
+          </div>
+          <div class="hface hback">
+            <div class="hlab">Best tool → an app</div>
+            <p>Multiple users, their own accounts, data that persists per person — <em>now</em> you need an app. Interface, logic, data and state all pull their weight here. This is the situation the heavy tool was made for, and where the rest of this week points.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The one-question decision</h3>
+  <p>Before you build anything, ask the blunt version: <strong>"Do other people need to use this, and does it need to remember things between visits?"</strong> If the answer to both is yes, you're looking at an app. If it's no, a lighter tool almost always wins — a script, a sheet, or an automation you can wire up in an afternoon. Choosing the right shape first is the most valuable habit in this whole course; the AI can build any of them, but only you decide which one the problem deserves.</p>
+
+  <h3>The one-sentence version</h3>
+  <p>An app is a script that grew an interface so others can reach it and a memory so it never forgets — built from four parts (interface, logic, data, state) split across a front-end storefront and a back-end kitchen — and worth building only when many people need in and things must be remembered.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>You now know what separates an app from a script and the durable parts every app is made of. A script runs once for you; an app keeps running for everyone and remembers. Under the hood, every app is the same four parts — interface, logic, data, state — split into a front-end storefront and a back-end kitchen. And the most valuable move happens before you build: choosing whether the problem even needs an app, or whether a script, sheet or automation wins. Next lesson: designing the app on paper before a single line is written.</p>
+  <ul>
+    <li>Script = runs once for you; app = keeps running for others and remembers</li>
+    <li>Every app = four parts: interface, logic, data, state</li>
+    <li>Front-end is the storefront; back-end is the kitchen</li>
+    <li>Name where a change lives and any AI assistant can help you faster</li>
+    <li>Ask "many users? must remember?" — if no, pick a lighter tool than an app</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 01 of 04 · Next up: Designing the App Before You Build →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · request flow ===== */
+const flowEl=el('flow'),fcap=el('fcap'),fstep=el('fstep');
+let flowTimers=[];
+const STEPS=[
+  {n:['fnCust','fnStore'],c:[['fc1','data',false]],cap:'A user opens the app and clicks a button. Their intent — "add this task", "log me in" — travels in as a request. The app was already running, waiting; the user just arrived.'},
+  {n:['fnStore','fnPlat'],c:[['fc2','data',false]],cap:'The interface hands that request to the logic. It does not decide anything itself — its job is to pass on "the user wants X" cleanly, so the rules can take over.'},
+  {n:['fnPlat','fnPrint'],c:[['fc3','data',false]],cap:'The logic applies the rules and reaches for the data store — reading what already exists or writing something new. This is where "remember it" literally happens.'},
+  {n:['fnPrint'],c:[],cap:'The data store saves the record durably. Unlike a script, this survives after the program stops — so tomorrow, from another device, that user still finds their work waiting.'},
+  {n:['fnPrint','fnCust'],c:[['fc3','pkg',true],['fc2','pkg',true],['fc1','pkg',true]],cap:'The answer flows back out through logic and interface to the user’s screen. One click in, one clear result out — and the app quietly waits for the next person.'}
+];
+function clearFlowState(){
+  ['fnCust','fnStore','fnPlat','fnPrint'].forEach(id=>el(id).classList.remove('on'));
+  ['fc1','fc2','fc3'].forEach(id=>el(id).classList.remove('go','rev'));
+}
+function applyStep(s,i,total){
+  clearFlowState();
+  s.n.forEach(id=>el(id).classList.add('on'));
+  s.c.forEach(pair=>{
+    const c=el(pair[0]),d=c.querySelector('.fdot');
+    d.className='fdot '+pair[1];
+    void c.offsetWidth;
+    if(pair[2])c.classList.add('rev');
+    c.classList.add('go');
+  });
+  fstep.textContent=(i+1)+' / '+total;
+  fcap.textContent=s.cap;
+}
+function runFlow(){
+  resetFlow(false);
+  el('btnRun').classList.add('active');
+  STEPS.forEach((s,i)=>{
+    flowTimers.push(setTimeout(()=>applyStep(s,i,STEPS.length), 300+i*2100));
+  });
+}
+function resetFlow(full){
+  flowTimers.forEach(t=>clearTimeout(t));
+  flowTimers=[];
+  clearFlowState();
+  if(full){
+    fstep.textContent='— / —';
+    fcap.textContent='Press ▶ Run a request to watch a single click move from the user all the way to stored data and back.';
+  }
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runFlow();o.unobserve(e.target)}}),{threshold:0.35}).observe(flowEl);
+
+/* ===== Figure 2 · anatomy parts ===== */
+const PARTS={
+  ui:{t:'Interface — what the user sees',p:'The buttons, text, forms and screens a person actually looks at and taps. It has one job: <em>show the current state clearly</em> and catch what the user does. It decides nothing on its own — it just presents and forwards.'},
+  logic:{t:'Logic — the rules & decisions',p:'The "if this, then that" of your app: check the password, calculate the total, refuse the empty form. This is the same problem-solving thinking from Week 1 — now it sits between the interface and the data, <em>deciding what happens</em>.'},
+  data:{t:'Data — what it remembers',p:'The stored information that outlives any single visit: users, tasks, orders, messages. This is the app’s long-term memory. A script forgets everything when it ends; the data store is precisely what lets an app <em>never forget</em>.'},
+  state:{t:'State — what’s happening now',p:'The app’s short-term memory of this moment: which screen you’re on, whether you’re logged in, what’s half-typed in a box. When state changes, the interface redraws to match. Getting state right is what makes an app <em>feel</em> alive and consistent.'}
+};
+const PARTORDER=['ui','logic','data','state'];
+let anatTour=null,anatIdx=0;
+function pickPart(k){
+  document.querySelectorAll('#anat .apart').forEach(n=>n.classList.toggle('on',n.dataset.k===k));
+  const d=PARTS[k],panel=el('anatDetail');
+  panel.innerHTML='<div class="adt">'+d.t+'</div><p class="adp">'+d.p+'</p>';
+  panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function tourAnat(){
+  stopAnat();el('anatBtns').firstElementChild.classList.add('active');
+  anatIdx=0;pickPart(PARTORDER[0]);
+  anatTour=setInterval(()=>{
+    anatIdx++;
+    if(anatIdx>=PARTORDER.length){stopAnat();return}
+    pickPart(PARTORDER[anatIdx]);
+  },3000);
+}
+function stopAnat(){if(anatTour){clearInterval(anatTour);anatTour=null}el('anatBtns').firstElementChild.classList.remove('active')}
+function resetAnat(){stopAnat();pickPart('ui')}
+pickPart('ui');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){tourAnat();o.unobserve(e.target)}}),{threshold:0.35}).observe(el('anat'));
+
+/* ===== Figure 3 · front-end vs back-end ===== */
+const PLATS={
+  front:{t:'Front-end — the storefront',tag:'What the user sees and touches',tasks:[
+    'The layout, colours, buttons and text on every screen',
+    'Catching clicks, taps and typing, then reacting instantly',
+    'Showing the current state clearly so nothing feels confusing',
+    'Runs in the user’s browser or on their phone — closest to the person'
+  ],h:'The front-end is judged on feel, not cleverness. A slow or ugly storefront loses users no matter how good the kitchen is — so this is where "does it make sense to a human" gets decided.'},
+  back:{t:'Back-end — the kitchen',tag:'What happens out of sight',tasks:[
+    'The heavier logic: checking passwords, running calculations, enforcing rules',
+    'Talking to the data store — reading and writing what must be remembered',
+    'Keeping information safe and consistent for every user at once',
+    'Runs on a server the user never sees — the hidden half of the app'
+  ],h:'The back-end is judged on correctness and safety. Guests never see the kitchen, but a mistake here — lost data, a security hole — is the kind that actually hurts. This is where "is it right" gets decided.'},
+  bridge:{t:'The bridge between them',tag:'How the two halves talk',tasks:[
+    'The front-end sends requests; the back-end sends answers back',
+    'They agree on a simple format for those messages, like a menu and an order pad',
+    'Simple first apps can skip the server and keep data right in the browser',
+    'As an app grows, more work quietly shifts from storefront to kitchen'
+  ],h:'You rarely build both halves perfectly at once. Knowing the bridge exists lets you say exactly where a feature lives — dining-room change or kitchen change — which is the vocabulary that makes an AI assistant genuinely useful to you.'}
+};
+const PLATORDER=['front','back','bridge'];
+let platCurrent='front';
+function pickPlat(k){
+  platCurrent=k;
+  document.querySelectorAll('#platTabs .pnode').forEach(n=>{
+    n.classList.toggle('active',n.dataset.k===k);
+  });
+  const d=PLATS[k],panel=el('platPanel');
+  let html='<span class="ptag">'+d.tag+'</span><h4>'+d.t+'</h4><ul>';
+  d.tasks.forEach(t=>{html+='<li>'+t+'</li>'});
+  html+='</ul><div class="p-human"><strong>What it’s judged on</strong>'+d.h+'</div>';
+  panel.innerHTML=html;
+  panel.classList.remove('swap');
+  void panel.offsetWidth;
+  panel.classList.add('swap');
+}
+function platStep(dir){
+  let i=PLATORDER.indexOf(platCurrent)+dir;
+  if(i<0)i=PLATORDER.length-1;
+  if(i>=PLATORDER.length)i=0;
+  pickPlat(PLATORDER[i]);
+}
+pickPlat('front');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickPlat('front');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('platTabs'));
+
+/* ===== Figure 4 · decision cards ===== */
+const hgrid=el('hgrid');
+function allReal(){document.querySelectorAll('.hcard').forEach(c=>c.classList.add('flipped'))}
+function allHype(){document.querySelectorAll('.hcard').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){hgrid.classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(hgrid);
+
+</script>
+</body>
+</html>
