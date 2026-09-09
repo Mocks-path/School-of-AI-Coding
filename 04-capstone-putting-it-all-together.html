@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Capstone · Putting It All Together · Lesson 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+  --green:#3E8B5A; --red:#C0492F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · request loop ============ */
+.life{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:28px 22px 22px;position:relative}
+.life-loop{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+.lnode2{
+  width:132px;text-align:center;padding:16px 10px;border-radius:14px;
+  border:2px solid var(--line);background:var(--cream);cursor:pointer;transition:all .3s;position:relative;
+}
+.lnode2 .li-ic{width:40px;height:40px;border-radius:50%;background:var(--brown-dark);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;transition:background .3s}
+.lnode2 .li-ic svg{width:22px;height:22px}
+.lnode2 h5{font-family:'Fraunces',serif;font-size:16px;color:var(--brown-dark);line-height:1.1;margin-bottom:3px}
+.lnode2 .li-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
+.lnode2.on{border-color:var(--orange);background:#FDEBD7;transform:translateY(-4px);box-shadow:0 10px 22px rgba(239,127,26,0.2)}
+.lnode2.on .li-ic{background:var(--orange)}
+.life-conn{flex:0 0 40px;height:3px;background:var(--line);position:relative;align-self:center;min-width:26px}
+.life-conn::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border-left:7px solid var(--line);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.life-conn.back{margin-top:16px}
+.life-detail{margin-top:22px;background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:18px 20px;min-height:110px}
+.life-detail .ld-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:6px}
+.life-detail h4{font-family:'Fraunces',serif;font-size:20px;color:var(--brown-dark);margin-bottom:8px}
+.life-detail p{font-size:14px;color:var(--brown-dark);max-width:none;margin-bottom:10px}
+.life-detail .ld-auto{font-size:13px;color:var(--brown);background:var(--paper);border-left:3px solid var(--orange);padding:9px 13px;border-radius:0 8px 8px 0;max-width:none;margin:0}
+.life-detail .ld-auto b{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark)}
+@media(max-width:820px){
+  .life-loop{gap:10px}
+  .lnode2{width:44%}
+  .life-conn{display:none}
+}
+
+/* ============ Figure 2 · build-journey builder ============ */
+.auto{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.auto-flow{display:grid;gap:0}
+.auto-step{display:flex;gap:14px;align-items:stretch}
+.auto-rail{display:flex;flex-direction:column;align-items:center;flex:0 0 34px}
+.auto-bubble{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;color:#fff;transition:transform .3s}
+.auto-line{width:2px;flex:1;background:var(--line);min-height:14px}
+.auto-body{flex:1;padding-bottom:16px}
+.auto-card{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:12px 15px;transition:all .3s;opacity:.5}
+.auto-step.lit .auto-card{opacity:1;border-color:var(--orange);box-shadow:0 6px 16px rgba(239,127,26,0.12)}
+.auto-step.lit .auto-bubble{transform:scale(1.12)}
+.auto-kind{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:3px}
+.auto-card h5{font-family:'Fraunces',serif;font-size:16px;color:var(--brown-dark);margin-bottom:2px;line-height:1.15}
+.auto-card p{font-size:12.5px;color:var(--muted);max-width:none;margin:0}
+.k-trigger{background:var(--brown-dark)} .k-wait{background:#9A8B7C} .k-cond{background:var(--accent)}
+.k-action{background:var(--orange)} .k-check{background:var(--green)}
+.ct-trigger{color:var(--brown-dark)} .ct-wait{color:#7A6B5C} .ct-cond{color:var(--accent)}
+.ct-action{color:var(--orange-dark)} .ct-check{color:var(--green)}
+.auto-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:0.03em;max-width:none}
+.auto-note b{color:var(--orange-dark)}
+
+/* ============ Figure 3 · CAPSTONE layered system ============ */
+.engine{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:28px 22px;position:relative}
+.eng-modules{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+.emod{
+  flex:1;min-width:130px;text-align:center;padding:15px 10px;border-radius:13px;
+  border:2px solid var(--line);background:var(--cream);cursor:pointer;transition:all .3s;position:relative;opacity:0;transform:translateY(14px);
+}
+.engine.in .emod{animation:emUp .5s forwards}
+.engine.in .emod:nth-child(1){animation-delay:.05s}
+.engine.in .emod:nth-child(2){animation-delay:.18s}
+.engine.in .emod:nth-child(3){animation-delay:.31s}
+.engine.in .emod:nth-child(4){animation-delay:.44s}
+.engine.in .emod:nth-child(5){animation-delay:.57s}
+@keyframes emUp{to{opacity:1;transform:translateY(0)}}
+.emod .em-wk{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tan);font-weight:600}
+.emod .em-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:6px auto 8px}
+.emod .em-ic svg{width:24px;height:24px}
+.emod h5{font-family:'Fraunces',serif;font-size:15px;color:var(--brown-dark);line-height:1.1}
+.emod.on{border-color:var(--orange);background:#FDEBD7;transform:translateY(-4px);box-shadow:0 10px 22px rgba(239,127,26,0.2)}
+.em1 .em-ic{background:rgba(239,127,26,0.14)} .em2 .em-ic{background:rgba(163,78,28,0.13)}
+.em3 .em-ic{background:rgba(0,141,210,0.12)} .em4 .em-ic{background:rgba(254,204,0,0.2)} .em5 .em-ic{background:rgba(62,139,90,0.14)}
+.eng-arrows{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.eng-arrows span{color:var(--orange-dark)}
+.eng-crm{
+  background:var(--brown-dark);color:#F3E7D5;border-radius:14px;padding:20px 24px;text-align:center;
+  position:relative;overflow:hidden;box-shadow:0 14px 34px rgba(47,29,25,0.28);
+}
+.eng-crm::after{content:"";position:absolute;top:-30px;right:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:.4}
+.eng-crm .ec-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--yellow);font-weight:600}
+.eng-crm h4{font-family:'Fraunces',serif;font-size:24px;color:#fff;margin:5px 0 6px}
+.eng-crm p{color:#EAD9C2;font-size:13.5px;max-width:520px;margin:0 auto}
+.eng-loopback{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--tan);margin-top:14px}
+.eng-loopback b{color:var(--orange-dark)}
+.eng-detail{margin-top:20px;background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:16px 18px;min-height:78px}
+.eng-detail .ed-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600}
+.eng-detail h4{font-family:'Fraunces',serif;font-size:18px;color:var(--brown-dark);margin:4px 0 6px}
+.eng-detail p{font-size:13.5px;color:var(--brown-dark);max-width:none;margin:0}
+
+/* ============ Figure 4 · production review ============ */
+.cap{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.cap-col{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:14px 12px;text-align:center;opacity:0;transform:translateY(12px)}
+.cap.in .cap-col{animation:emUp .5s forwards}
+.cap.in .cap-col:nth-child(1){animation-delay:.05s}.cap.in .cap-col:nth-child(2){animation-delay:.16s}
+.cap.in .cap-col:nth-child(3){animation-delay:.27s}.cap.in .cap-col:nth-child(4){animation-delay:.38s}
+.cap.in .cap-col:nth-child(5){animation-delay:.49s}
+.cap-wk{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tan);font-weight:600;margin-bottom:8px}
+.cap-badge{width:46px;height:46px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:18px;color:#fff;background:linear-gradient(135deg,var(--orange),var(--orange-dark))}
+.cap-col:nth-child(2) .cap-badge{background:linear-gradient(135deg,var(--tan),#7A3A14)}
+.cap-col:nth-child(3) .cap-badge{background:linear-gradient(135deg,var(--accent),#005E8C)}
+.cap-col:nth-child(4) .cap-badge{background:linear-gradient(135deg,var(--yellow),#C9A227);color:var(--brown-dark)}
+.cap-col:nth-child(5) .cap-badge{background:linear-gradient(135deg,var(--green),#2C6B43)}
+.cap-col h5{font-family:'Fraunces',serif;font-size:14px;color:var(--brown-dark);line-height:1.15;margin-bottom:6px}
+.cap-skill{font-size:11px;color:var(--muted);line-height:1.4}
+@media(max-width:820px){.cap{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.cap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 04 · Capstone</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M22 9a13 13 0 1 1-9 3.6" stroke="#EF7F1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M13 9l0 5 5 0" stroke="#FECC00" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="11" r="3" fill="#EF7F1A"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 5 · Lesson 04 · Course Capstone</div>
+  <h1>Five weeks. One system you can <em>build</em>.</h1>
+  <p class="lede">This is the last lesson of the course. Everything you learned across five weeks — the programming loop and human judgment, building an app with an interface and state, giving an agent a model and tools, wiring automations from triggers to actions, and connecting it all with APIs — was never five separate skills. It's one stack. To prove it, we'll build a single example capstone, an AI intake assistant, and watch all five layers snap together into one working thing. Then we'll walk the honest path from plan to ship — and review the whole system before it goes live.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Meet your capstone: an AI intake assistant</h2>
+  <p class="lead">Picture one small, real project: an assistant that takes a messy request from a person, figures out what they actually need, does the work, and replies. Underneath that simple promise, one request travels a short loop — receive, understand, act, respond — and then comes round again for the next one. Click each stage to see which week's skill powers it.</p>
+
+  <p>Here's the shift that makes everything click: a working system isn't a pile of features, it's a <em>loop</em>. The intake assistant receives an input, uses a model's judgment to understand it, takes an action with real tools, and returns a response — then waits for the next request and does it all again. That loop-with-judgment is the very first thing you learned in Week 1, and it never went away; every week since has just added a richer way to fill one of these stages. Walk the loop below and notice how each stage quietly leans on a different part of the course.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · One request, the runtime loop</span>
+      <div class="controls">
+        <button onclick="lifeStep(-1)">◀ Prev</button>
+        <button onclick="lifeStep(1)">Next ▶</button>
+      </div>
+    </div>
+    <div class="life">
+      <div class="life-loop" id="lifeLoop">
+        <div class="lnode2" data-k="new" onclick="pickLife('new')">
+          <div class="li-ic"><svg viewBox="0 0 22 22" fill="none"><path d="M11 3v16M3 11h16" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+          <h5>Receive</h5><div class="li-sub">input arrives</div>
+        </div>
+        <div class="life-conn"></div>
+        <div class="lnode2" data-k="active" onclick="pickLife('active')">
+          <div class="li-ic"><svg viewBox="0 0 22 22" fill="none"><path d="M3 12l4 4 6-8 6 4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Understand</h5><div class="li-sub">model · judgment</div>
+        </div>
+        <div class="life-conn"></div>
+        <div class="lnode2" data-k="risk" onclick="pickLife('risk')">
+          <div class="li-ic"><svg viewBox="0 0 22 22" fill="none"><path d="M4 18l6-12 4 8 3-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Act</h5><div class="li-sub">tools · APIs</div>
+        </div>
+        <div class="life-conn"></div>
+        <div class="lnode2" data-k="winback" onclick="pickLife('winback')">
+          <div class="li-ic"><svg viewBox="0 0 22 22" fill="none"><path d="M18 11a7 7 0 1 1-2-4.9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M16 3v4h-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Respond</h5><div class="li-sub">reply · then loop</div>
+        </div>
+      </div>
+      <div class="life-detail" id="lifeDetail"></div>
+    </div>
+  </div>
+
+  <h3>The loop, not the pile</h3>
+  <p>Notice it's a <em>loop</em>, not a one-way line. After it responds, the assistant comes right back to "receive" for the next request, carrying anything it learned. That's why one small, well-built loop can handle a thousand requests without you: the shape stays the same, only the input changes. Everything else in this lesson is about filling those four stages well — and reviewing them honestly before you trust them.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>How you actually build it: plan to ship</h2>
+  <p class="lead">"Build a system" sounds huge until you see it as a short, repeatable path: plan what it must do, build the smallest version, test it honestly, ship it small, then document it so future-you (or anyone else) can pick it up. Press play and watch the build journey run, step by step.</p>
+
+  <p>The order matters more than the tools. Beginners jump straight to building and skip the two steps that make the difference: a clear <strong>plan</strong> up front so you're building the right thing, and honest <strong>documentation</strong> at the end so the thing survives contact with tomorrow. In between, <strong>build the smallest version that works</strong>, <strong>test</strong> it against the ways it can fail, and <strong>ship</strong> it to a tiny real audience before you scale. This is the same disciplined loop whether you're writing code, wiring an automation, or assembling an agent. Watch the journey run.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The build journey — plan → ship → document</span>
+      <div class="controls">
+        <button id="btnAuto" class="active" onclick="runAuto()">▶ Run the journey</button>
+        <button onclick="resetAuto()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="auto">
+      <div class="auto-flow" id="autoFlow">
+        <div class="auto-step" data-i="0">
+          <div class="auto-rail"><div class="auto-bubble k-trigger">✎</div><div class="auto-line"></div></div>
+          <div class="auto-body"><div class="auto-card"><div class="auto-kind ct-trigger">Plan</div><h5>Name the one job it must do</h5><p>Write the single sentence of what it does, its inputs and its outputs. If you can't, you're not ready to build yet.</p></div></div>
+        </div>
+        <div class="auto-step" data-i="1">
+          <div class="auto-rail"><div class="auto-bubble k-action">‹›</div><div class="auto-line"></div></div>
+          <div class="auto-body"><div class="auto-card"><div class="auto-kind ct-action">Build</div><h5>Make the smallest version that runs</h5><p>One thin path end to end — receive, understand, act, respond — before you add a single nice-to-have.</p></div></div>
+        </div>
+        <div class="auto-step" data-i="2">
+          <div class="auto-rail"><div class="auto-bubble k-cond">✓</div><div class="auto-line"></div></div>
+          <div class="auto-body"><div class="auto-card"><div class="auto-kind ct-cond">Test</div><h5>Try to break it on purpose</h5><p>Feed it messy input, empty input, and the failures from Lesson 3. Fix what breaks before anyone else finds it.</p></div></div>
+        </div>
+        <div class="auto-step" data-i="3">
+          <div class="auto-rail"><div class="auto-bubble k-check">↑</div><div class="auto-line"></div></div>
+          <div class="auto-body"><div class="auto-card"><div class="auto-kind ct-check">Ship</div><h5>Release it small and watch it</h5><p>Put it in front of a few real users, keep a human in the loop for anything sensitive, and learn from what actually happens.</p></div></div>
+        </div>
+        <div class="auto-step" data-i="4">
+          <div class="auto-rail"><div class="auto-bubble k-wait">❏</div></div>
+          <div class="auto-body"><div class="auto-card"><div class="auto-kind ct-wait">Document</div><h5>Write down how and why it works</h5><p>What it does, how to run it, what can go wrong. The step everyone skips — and the reason projects die when you step away.</p></div></div>
+        </div>
+      </div>
+      <p class="auto-note"><b>Plan and document are the bookends beginners skip.</b> Do them, and a weekend project becomes something you — or anyone — can safely pick up months later.</p>
+    </div>
+  </div>
+
+  <h3>Small and shipped beats big and imagined</h3>
+  <p>The discipline is to keep every loop tight: plan a little, build a little, test it, ship it, write it down — then go round again to add the next piece. A tiny thing that runs teaches you more in a day than a grand design teaches you in a month. That's the same "start small, keep a human in the loop" instinct from every week of this course, now aimed at your own finished project.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Capstone: five weeks, now five layers</h2>
+  <p class="lead">Step back and look at the whole assistant at once. The five things you learned that felt separate are actually five layers of one system, stacked from the judgment at its core to the connections at its edge. Click each layer to see the exact job it does inside your intake assistant.</p>
+
+  <p>Here's the picture nobody draws for beginners. At the base is <strong>programming</strong> — the loop and the human judgment that decides what happens. Around it, <strong>apps</strong> give it an interface, logic, data and state to hold onto. <strong>Agents</strong> add a model with tools that can actually take action inside that loop. <strong>Automation</strong> lets it run on its own, triggered by events instead of clicks. And <strong>APIs</strong> are the connective tissue tying every layer to the outside world — the source it reads, the model it calls, the place it sends the answer. Remove any one layer and the assistant still can't stand. Click each layer, then see how they lock together.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Your five-layer capstone system</span>
+      <div class="controls">
+        <button onclick="engineTour()">▶ Tour the layers</button>
+        <button onclick="resetEngine()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="engine" id="engine">
+      <div class="eng-modules">
+        <div class="emod em1" data-k="drop" onclick="pickEng('drop')">
+          <div class="em-wk">Week 1</div>
+          <div class="em-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="#EF7F1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Programming</h5>
+        </div>
+        <div class="emod em2" data-k="pod" onclick="pickEng('pod')">
+          <div class="em-wk">Week 2</div>
+          <div class="em-ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#A34E1C" stroke-width="2"/><path d="M3 9h18" stroke="#A34E1C" stroke-width="2"/></svg></div>
+          <h5>Apps</h5>
+        </div>
+        <div class="emod em3" data-k="ecom" onclick="pickEng('ecom')">
+          <div class="em-wk">Week 3</div>
+          <div class="em-ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="#008DD2" stroke-width="2"/><path d="M20 12a8 8 0 0 1-8 8" stroke="#008DD2" stroke-width="2" stroke-linecap="round"/><path d="M20 8v4h-4" stroke="#008DD2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Agents</h5>
+        </div>
+        <div class="emod em4" data-k="sales" onclick="pickEng('sales')">
+          <div class="em-wk">Week 4</div>
+          <div class="em-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 3L5 13h6l-1 8 8-10h-6l1-8z" stroke="#C9A227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>Automation</h5>
+        </div>
+        <div class="emod em5" data-k="crm" onclick="pickEng('crm')">
+          <div class="em-wk">Week 5</div>
+          <div class="em-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M9 15l6-6" stroke="#3E8B5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h5>APIs</h5>
+        </div>
+      </div>
+      <div class="eng-arrows">judgment at the core <span>↓ every layer wraps the one below ↓</span></div>
+      <div class="eng-crm">
+        <div class="ec-lab">The capstone · one working system</div>
+        <h4>Your AI intake assistant</h4>
+        <p>Receives a messy request, understands it with a model, acts with real tools, and replies — with the five layers stacked so each does one clear job.</p>
+      </div>
+      <div class="eng-loopback">↻ <b>and it runs the loop again for the next request — one operator, one system</b></div>
+      <div class="eng-detail" id="engDetail"></div>
+    </div>
+  </div>
+
+  <h3>Judgment at the core, connection at the edge</h3>
+  <p>The single most important idea of the whole course: <strong>the layers only add up because you own the judgment at the centre and let AI carry the volume around it.</strong> Programming gives you the loop, apps give it a shape, agents give it hands, automation gives it a schedule, and APIs give it reach. None of them is the "smart" part on its own — you are. That arrangement, not any one tool, is what you actually learned to build.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Before you ship: the whole-system review</h2>
+  <p class="lead">A demo that works once is not a system you can trust. Before your capstone meets real people, run it past five honest questions — about cost, security, reliability, privacy, and upkeep. This is the review that separates a toy from something you'd actually stand behind. Reveal each check.</p>
+
+  <p>Every layer you stacked added a little risk, and this is where you pay it down. Each AI call <strong>costs</strong> money, so you cap it before a runaway loop drains your budget. Your keys and inputs are a <strong>security</strong> surface, so you never hard-code a secret or trust raw input. The system <strong>will</strong> fail somewhere, so you make sure it fails gracefully. It handles people's data, so you respect their <strong>privacy</strong> and keep only what you need. And someone has to <strong>maintain</strong> it, so you leave it simple and documented. Reveal the five checks — and treat them as the price of admission for going live.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · The pre-ship review — cost, security, reliability &amp; more</span>
+      <div class="controls">
+        <button onclick="capReveal()">✦ Run the review</button>
+      </div>
+    </div>
+    <div class="cap" id="cap">
+      <div class="cap-col"><div class="cap-wk">Check 01</div><div class="cap-badge">$</div><h5>Cost</h5><div class="cap-skill">Cap calls and tokens; know your worst-case bill before a loop runs away with it.</div></div>
+      <div class="cap-col"><div class="cap-wk">Check 02</div><div class="cap-badge">&#128274;</div><h5>Security</h5><div class="cap-skill">Keep keys in secrets, never in code; never trust raw input without checking it.</div></div>
+      <div class="cap-col"><div class="cap-wk">Check 03</div><div class="cap-badge">&#9873;</div><h5>Reliability</h5><div class="cap-skill">Retries, fallbacks and fail-safes so a bad call degrades gracefully, never crashes.</div></div>
+      <div class="cap-col"><div class="cap-wk">Check 04</div><div class="cap-badge">&#128100;</div><h5>Privacy</h5><div class="cap-skill">Send only the data you must, keep only what you need, and tell people what you hold.</div></div>
+      <div class="cap-col"><div class="cap-wk">Check 05</div><div class="cap-badge">&#8734;</div><h5>Upkeep</h5><div class="cap-skill">Keep it small and documented so future-you can fix it when a tool inevitably changes.</div></div>
+    </div>
+  </div>
+
+  <h3>The one sentence to leave with</h3>
+  <p>AI didn't replace the builder — it gave one careful person the reach of a whole team, from the first line of the loop to the last check before launch. You've learned to plan and build, to test and ship, to connect five layers into one system and then review it honestly before you trust it. The tools will keep changing. This shape — a system where you own the judgment and AI owns the volume, built small, shipped carefully, reviewed before it goes live — is what lasts. Go build yours.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward — and the whole course in five lines</h2>
+  <p>A real system is a loop with judgment at its core, not a pile of features. You build it the same disciplined way every time — plan, build small, test, ship, document — and the five weeks you thought were separate turn out to be five layers of one stack: programming, apps, agents, automation, and APIs. Before it meets real people, you run it past cost, security, reliability, privacy and upkeep. That's the whole course, and it's now in your hands.</p>
+  <ul>
+    <li>A system is a loop: receive → understand → act → respond → round again</li>
+    <li>Build it in one path: plan → build small → test → ship → document</li>
+    <li>Five weeks = five layers: programming, apps, agents, automation, APIs</li>
+    <li>You own the judgment at the core; AI carries the volume around it</li>
+    <li>Never ship without the review: cost, security, reliability, privacy, upkeep</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 04 of 04 · Course complete — go build your system ✦</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · runtime loop ===== */
+const LIFE={
+  new:{tag:'Stage 1 · input arrives',t:'Receive — take in the messy request',p:'Someone sends a request in whatever form is natural to them — a sentence, a form, an event. The system\'s first job is simply to catch it cleanly and hold onto it.',auto:'This is the app layer at work — an interface to accept input and a place (state) to keep it while the loop runs.'},
+  active:{tag:'Stage 2 · the judgment',t:'Understand — make sense of it',p:'Now a model reads the request and works out what the person actually wants. This is the judgment step — the part you used to have to do by hand, now drafted by AI for you to steer.',auto:'This is programming plus the model: the loop pauses to decide, and your rules decide what the model is even allowed to conclude.'},
+  risk:{tag:'Stage 3 · take action',t:'Act — do the real work',p:'With intent understood, the system does something concrete: look data up, call another service, run a calculation. This is where an agent reaches for its tools.',auto:'This is agents and APIs together — the model chooses a tool, and an API call is how that tool actually touches the outside world.'},
+  winback:{tag:'Stage 4 · reply, then repeat',t:'Respond — return a clear answer',p:'The system replies to the person, ideally in a format they can act on — and, if anything sensitive happened, only after a human sign-off. Then it loops back for the next request.',auto:'This is automation closing the loop: the response goes out on its own, the assistant resets, and the whole cycle runs again for the next input.'}
+};
+const LIFEORDER=['new','active','risk','winback'];
+let lifeCur='new';
+function pickLife(k){
+  lifeCur=k;
+  document.querySelectorAll('#lifeLoop .lnode2').forEach(n=>n.classList.toggle('on',n.dataset.k===k));
+  const d=LIFE[k];
+  el('lifeDetail').innerHTML='<span class="ld-tag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.p+'</p><div class="ld-auto"><b>Layer —</b> '+d.auto+'</div>';
+}
+function lifeStep(dir){
+  let i=LIFEORDER.indexOf(lifeCur)+dir;
+  if(i<0)i=LIFEORDER.length-1;if(i>=LIFEORDER.length)i=0;
+  pickLife(LIFEORDER[i]);
+}
+pickLife('new');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickLife('new');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('lifeLoop'));
+
+/* ===== Figure 2 · build journey ===== */
+let autoTimers=[];
+function runAuto(){
+  resetAuto();
+  el('btnAuto').classList.add('active');
+  const steps=document.querySelectorAll('#autoFlow .auto-step');
+  steps.forEach((s,i)=>{autoTimers.push(setTimeout(()=>s.classList.add('lit'),300+i*750))});
+}
+function resetAuto(){
+  autoTimers.forEach(t=>clearTimeout(t));autoTimers=[];
+  document.querySelectorAll('#autoFlow .auto-step').forEach(s=>s.classList.remove('lit'));
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runAuto();o.unobserve(e.target)}}),{threshold:0.3}).observe(el('autoFlow'));
+
+/* ===== Figure 3 · layered system ===== */
+const ENG={
+  drop:{tag:'Week 1 · Programming',t:'The loop and the judgment',p:'The base layer. A program is a loop that repeats and a set of decisions you control. Everything above is just a richer way to fill one turn of this loop — and you still own the calls that matter.'},
+  pod:{tag:'Week 2 · Apps',t:'Interface, logic, data and state',p:'Gives the loop a body: a way to take input, rules to follow, data to read, and state to remember between turns. This is what turns a script into something a person can actually use.'},
+  ecom:{tag:'Week 3 · Agents',t:'A model with tools, in the loop',p:'Adds a model that can reason and a set of tools it can reach for. Now the "understand" and "act" stages have real intelligence and real hands — bounded by the rules you set.'},
+  sales:{tag:'Week 4 · Automation',t:'Triggers turn into actions',p:'Lets the system run without you clicking. An event fires the loop, the work happens on its own, and a human checkpoint guards anything sensitive. Your judgment, encoded once, applied every time.'},
+  crm:{tag:'Week 5 · APIs · the connective tissue',t:'Every layer, wired to the world',p:'The edge of the system. APIs are how each layer reaches outside itself — the source it reads, the model it calls, the place it delivers the answer. Without them the stack is sealed in a box; with them it does real work.'}
+};
+const ENGORDER=['drop','pod','ecom','sales','crm'];
+let engTour=null;
+function pickEng(k){
+  document.querySelectorAll('#engine .emod').forEach(m=>m.classList.toggle('on',m.dataset.k===k));
+  const d=ENG[k];
+  el('engDetail').innerHTML='<span class="ed-tag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.p+'</p>';
+}
+function engineTour(){
+  if(engTour){clearInterval(engTour);engTour=null}
+  let i=0;pickEng(ENGORDER[0]);
+  engTour=setInterval(()=>{i++;if(i>=ENGORDER.length){clearInterval(engTour);engTour=null;return}pickEng(ENGORDER[i])},1600);
+}
+function resetEngine(){
+  if(engTour){clearInterval(engTour);engTour=null}
+  document.querySelectorAll('#engine .emod').forEach(m=>m.classList.remove('on'));
+  pickEng('crm');
+}
+pickEng('crm');
+const engineEl=el('engine');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){engineEl.classList.add('in');setTimeout(engineTour,700);o.unobserve(e.target)}}),{threshold:0.25}).observe(engineEl);
+
+/* ===== Figure 4 · pre-ship review ===== */
+const capEl=el('cap');
+function capReveal(){capEl.classList.add('in')}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){capEl.classList.add('in');o.unobserve(e.target)}}),{threshold:0.25}).observe(capEl);
+
+</script>
+</body>
+</html>

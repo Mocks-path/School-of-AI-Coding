@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Building With AI APIs · Lesson 03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+  --green:#3E8B5A; --red:#C0492F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · approaches scatter ============ */
+.seg{display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:start}
+.seg-plot{
+  position:relative;background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  height:340px;overflow:hidden;
+}
+.seg-axis{position:absolute;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.seg-axis.x{bottom:8px;right:14px} .seg-axis.y{top:12px;left:12px;writing-mode:vertical-rl;transform:rotate(180deg)}
+.dot{
+  position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+  transition:transform .5s cubic-bezier(.3,.8,.3,1),background .4s,opacity .3s;cursor:pointer;
+  border:2px solid var(--paper);box-shadow:0 2px 5px rgba(65,44,35,0.2);
+}
+.seg-plot.in .dot{transform:translate(-50%,-50%) scale(1)}
+.dot.g-champ{background:var(--green)} .dot.g-loyal{background:var(--orange)}
+.dot.g-new{background:var(--accent)} .dot.g-risk{background:var(--red)} .dot.g-lost{background:#9A8B7C}
+.dot.dim{opacity:0.16}
+.seg-side{display:flex;flex-direction:column;gap:9px}
+.seg-btn{
+  text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:11px;
+  padding:11px 13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;
+}
+.seg-btn:hover{border-color:var(--orange)}
+.seg-btn.active{background:var(--brown-dark);border-color:var(--brown-dark)}
+.seg-btn.active .sb-name,.seg-btn.active .sb-desc{color:#fff}
+.sb-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+.sb-name{font-family:'Fraunces',serif;font-size:15px;font-weight:700;color:var(--brown-dark);line-height:1.1}
+.sb-desc{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.05em;color:var(--muted);display:block;margin-top:2px}
+.seg-readout{margin-top:20px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--brown-dark);line-height:1.5;min-height:56px}
+.seg-readout b{color:var(--orange-dark)}
+@media(max-width:820px){.seg{grid-template-columns:1fr}}
+
+/* ============ Figure 2 · resilience gauge ============ */
+.gauge-wrap{display:grid;grid-template-columns:300px 1fr;gap:30px;align-items:center}
+.gauge-box{text-align:center}
+.gauge-svg{width:260px;height:150px;margin:0 auto;display:block}
+.gauge-num{font-family:'Fraunces',serif;font-weight:800;font-size:52px;line-height:1;color:var(--brown-dark);margin-top:-6px;transition:color .3s}
+.gauge-lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.gauge-verdict{display:inline-block;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;padding:5px 13px;border-radius:999px}
+.gv-low{background:#DDEFE2;color:var(--green)} .gv-mid{background:#FDECD2;color:var(--tan)} .gv-high{background:#F7E0D8;color:var(--red)}
+.gauge-signals{display:grid;gap:11px}
+.gsig{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 14px;cursor:pointer;transition:all .2s;user-select:none}
+.gsig:hover{border-color:var(--orange)}
+.gsig.on{background:#FBEEE0;border-color:var(--orange)}
+.gsig .gs-label{font-size:13.5px;color:var(--brown-dark);font-weight:500}
+.gsig .gs-label span{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.gsig .gs-toggle{width:40px;height:22px;border-radius:999px;background:var(--line);position:relative;transition:background .25s;flex-shrink:0}
+.gsig.on .gs-toggle{background:var(--orange)}
+.gsig .gs-toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s}
+.gsig.on .gs-toggle::after{transform:translateX(18px)}
+.gsig .gs-wt{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tan);margin-top:2px;display:block}
+.gauge-action{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:13px 16px;font-size:14px;color:var(--brown-dark);max-width:none;min-height:24px}
+@media(max-width:760px){.gauge-wrap{grid-template-columns:1fr}}
+
+/* ============ Figure 3 · structured-output panel ============ */
+.ltv-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ltv-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.ltv-card:hover{border-color:var(--orange);transform:translateY(-3px);box-shadow:0 12px 26px rgba(65,44,35,0.1)}
+.ltv-card.active{border-color:var(--orange);box-shadow:0 0 0 2px rgba(239,127,26,0.3)}
+.ltv-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ltv-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:17px;color:#fff;flex-shrink:0}
+.ltv-name{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--brown-dark);line-height:1.1}
+.ltv-name span{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--muted);margin-top:2px}
+.ltv-score{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.ltv-score b{font-family:'Fraunces',serif;font-weight:800;font-size:34px;line-height:1;color:var(--orange-dark)}
+.ltv-score .of{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.ltv-metric{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;color:var(--muted);margin-bottom:3px}
+.ltv-metric b{color:var(--brown-dark)}
+.ltv-tier{position:absolute;top:16px;right:16px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:5px;font-weight:600}
+.tier-a{background:#DDEFE2;color:var(--green)} .tier-b{background:#FDECD2;color:var(--tan)} .tier-c{background:#F0E9E0;color:var(--muted)}
+.ltv-panel{margin-top:16px;background:var(--brown-dark);color:#F3E7D5;border-radius:14px;padding:22px 24px;min-height:120px}
+.ltv-panel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ltv-panel .lp-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--yellow);font-weight:600}
+.ltv-panel h4{font-family:'Fraunces',serif;font-size:22px;color:#fff;margin:5px 0 10px}
+.ltv-panel p{color:#EAD9C2;font-size:14px;max-width:none;margin-bottom:10px}
+.ltv-panel .lp-do{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--yellow);letter-spacing:0.03em}
+@media(max-width:700px){.ltv-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 03 · AI APIs</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M10 30l6-8 5 4 6-10 5 6" stroke="#EF7F1A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="11" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 5 · Lesson 03 · AI APIs</div>
+  <h1>Your code just asked another program for <em>help</em>.</h1>
+  <p class="lede">An API call is one program asking another to do something and hand back the result — fetch some data, run a model, send a message. Making a single call is the easy part. The real skill is orchestrating many of them: choosing the right approach for the job, chaining one call's output into the next call's input, insisting on structured results you can actually trust, and staying standing when a call inevitably fails. This lesson turns "I can make an API call" into "I can build a small, reliable system out of them."</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Chaining: one call's output feeds the next</h2>
+  <p class="lead">Real work is almost never a single request. You fetch something, hand it to an AI model, reshape the result, then send it somewhere. Each call takes the previous call's output as its input — that hand-off is the whole idea. Press play and watch a four-step chain execute, step by step.</p>
+
+  <p>A chain is just plumbing you can reason about. The trick is that the pieces only fit if each step produces exactly what the next step expects. If the fetch returns messy text, the summarize step chokes; if the summary isn't structured, the formatter can't lay it out. So you design the chain backwards from the delivery: what does the final step need, and what must each earlier step hand it? Build it that way and a complicated task becomes four small, testable calls instead of one tangled mess. Watch this chain run — raw data in, a finished message out.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · A four-call chain, step by step</span>
+      <div class="controls">
+        <button id="btnQueue" class="active" onclick="buildQueue()">▶ Run the chain</button>
+        <button onclick="resetQueue()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="ltv-panel" id="queueBox" style="min-height:180px;margin-top:0">
+      <span class="lp-tag">The call chain</span>
+      <h4 style="margin-bottom:14px">Each output becomes the next input</h4>
+      <div id="queueList" style="display:grid;gap:10px"></div>
+    </div>
+  </div>
+
+  <h3>Design backwards, build forwards</h3>
+  <p>Notice each step does one job and hands off cleanly. That is what makes a chain debuggable: when the final message looks wrong, you can inspect the output of each call and find exactly where it broke, instead of staring at one giant black box. Keep the steps small, name what each one returns, and a chain becomes something you can grow — add a translate step, swap the source, insert a check — without rewriting the whole thing.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Ask for structure — then check it</h2>
+  <p class="lead">If a call returns a wall of free text, your next step has to guess where the useful bits are. So don't accept prose you have to untangle by hand — ask the model for named fields in a known shape, then validate that shape before you trust it. Click each response to see what passed, what failed, and what to do about it.</p>
+
+  <p>Asking for structured output means telling the model up front: "return an object with these exact fields and these types." Most modern APIs can even enforce that shape for you. But asking is a promise, not a guarantee — a model can still drop a field, put text where you wanted a number, or ignore the format entirely on a bad day. That's why the second half matters as much as the first: <strong>validate</strong> the response against what you expected, and decide in advance what happens when it doesn't match. A pipeline that assumes the shape is always perfect is a pipeline that breaks silently. Click each of the four responses below.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · Structured output &amp; validation</span>
+      <div class="controls">
+        <button onclick="rankLtv()">▶ Show a clean pass</button>
+      </div>
+    </div>
+    <div class="ltv-grid" id="ltvGrid">
+      <div class="ltv-card active" data-k="priya" onclick="pickLtv('priya')">
+        <div class="ltv-tier tier-a">Valid · passes</div>
+        <div class="ltv-head"><div class="ltv-av" style="background:linear-gradient(135deg,var(--green),#2C6B43)">V</div><div class="ltv-name">Clean JSON<span>all fields · right types</span></div></div>
+        <div class="ltv-score"><b>98</b><span class="of">/ 100 validation</span></div>
+        <div class="ltv-metric">Shape: <b>matches the schema</b> · nothing missing</div>
+        <div class="ltv-metric">Check: <b>safe to pass downstream</b></div>
+      </div>
+      <div class="ltv-card" data-k="daniel" onclick="pickLtv('daniel')">
+        <div class="ltv-tier tier-b">Warn · missing field</div>
+        <div class="ltv-head"><div class="ltv-av" style="background:linear-gradient(135deg,var(--orange),var(--orange-dark))">M</div><div class="ltv-name">Missing a field<span>a required key is absent</span></div></div>
+        <div class="ltv-score"><b>58</b><span class="of">/ 100 validation</span></div>
+        <div class="ltv-metric">Shape: <b>"priority" was not returned</b></div>
+        <div class="ltv-metric">Check: <b>fill a default or re-ask</b></div>
+      </div>
+      <div class="ltv-card" data-k="arjun" onclick="pickLtv('arjun')">
+        <div class="ltv-tier tier-b">Warn · wrong type</div>
+        <div class="ltv-head"><div class="ltv-av" style="background:linear-gradient(135deg,var(--accent),#005E8C)">T</div><div class="ltv-name">Wrong type / value<span>outside what you allow</span></div></div>
+        <div class="ltv-score"><b>44</b><span class="of">/ 100 validation</span></div>
+        <div class="ltv-metric">Shape: <b>"score" came back as text</b>, not a number</div>
+        <div class="ltv-metric">Check: <b>coerce it or reject it</b></div>
+      </div>
+      <div class="ltv-card" data-k="sam" onclick="pickLtv('sam')">
+        <div class="ltv-tier tier-c">Fail · not JSON</div>
+        <div class="ltv-head"><div class="ltv-av" style="background:linear-gradient(135deg,#9A8B7C,#6E5C50)">P</div><div class="ltv-name">Prose, not data<span>the format was ignored</span></div></div>
+        <div class="ltv-score"><b>12</b><span class="of">/ 100 validation</span></div>
+        <div class="ltv-metric">Shape: <b>a paragraph, no structure</b></div>
+        <div class="ltv-metric">Check: <b>reject &amp; retry with a stricter prompt</b></div>
+      </div>
+    </div>
+    <div class="ltv-panel" id="ltvPanel"></div>
+  </div>
+
+  <h3>Structure is a promise you still verify</h3>
+  <p>The habit to build: never let an AI response flow into the next step unchecked. A tiny validation — "are all the fields here, are the types right, are the values in range?" — turns a fragile pipeline into a sturdy one. When the check fails, you already know the move: supply a default, coerce the value, or reject and retry. That single guard is the difference between a demo that works once and a system you can leave running.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Every call can fail — plan for it</h2>
+  <p class="lead">Networks time out. Providers get overloaded and push back with a rate limit. Models occasionally return junk. None of this is exotic — it's the normal weather of calling other people's servers. The question is never "will a call fail?" but "what happens when it does?" Toggle the failure modes and watch the exposure climb, and the recommended handling change.</p>
+
+  <p>There's a simple ladder of defence, and you climb it as the risk rises. For a rare, transient glitch, you <strong>retry with backoff</strong> — wait a moment and try again, doubling the wait each time so you don't hammer a struggling server. When retries aren't enough, you add a <strong>fallback</strong> — a smaller model, a cached answer, or a simpler path that still gets the user something. And underneath it all sits a <strong>fail-safe</strong>: a graceful default so that even when everything goes wrong, the user sees a calm message instead of a broken screen. Toggle the failures below and watch the recommended defence move up the ladder.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · When calls fail — the resilience ladder</span>
+      <div class="controls">
+        <button onclick="setSignals(true)">All failures at once</button>
+        <button onclick="setSignals(false)">↺ All healthy</button>
+      </div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge-box">
+        <svg class="gauge-svg" viewBox="0 0 260 150">
+          <path d="M20 140 A110 110 0 0 1 240 140" fill="none" stroke="#E8DCC8" stroke-width="20" stroke-linecap="round"/>
+          <path id="gaugeArc" d="M20 140 A110 110 0 0 1 240 140" fill="none" stroke="#3E8B5A" stroke-width="20" stroke-linecap="round" stroke-dasharray="345" stroke-dashoffset="345" style="transition:stroke-dashoffset .6s ease,stroke .4s"/>
+          <g id="gaugeNeedle" style="transition:transform .6s cubic-bezier(.3,.8,.4,1);transform-origin:130px 140px">
+            <line x1="130" y1="140" x2="130" y2="46" stroke="#2F1D19" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="130" cy="140" r="8" fill="#2F1D19"/>
+          </g>
+        </svg>
+        <div class="gauge-num" id="gaugeNum">6%</div>
+        <div class="gauge-lab">Failure exposure · one call</div>
+        <div><span class="gauge-verdict gv-low" id="gaugeVerdict">Solid</span></div>
+      </div>
+      <div>
+        <div class="gauge-signals" id="gaugeSignals">
+          <div class="gsig" data-w="22" onclick="toggleSig(this)"><div class="gs-label">429 — rate limit hit<span>too many calls too fast</span></div><div class="gs-toggle"></div></div>
+          <div class="gsig" data-w="20" onclick="toggleSig(this)"><div class="gs-label">Request timed out<span>no response before the deadline</span></div><div class="gs-toggle"></div></div>
+          <div class="gsig" data-w="18" onclick="toggleSig(this)"><div class="gs-label">500 — server error<span>the provider hiccuped</span></div><div class="gs-toggle"></div></div>
+          <div class="gsig" data-w="16" onclick="toggleSig(this)"><div class="gs-label">Response wasn't valid JSON<span>prose where you expected data</span></div><div class="gs-toggle"></div></div>
+          <div class="gsig" data-w="16" onclick="toggleSig(this)"><div class="gs-label">Network dropped mid-call<span>the connection was lost</span></div><div class="gs-toggle"></div></div>
+        </div>
+        <div class="gauge-action" id="gaugeAction">One clean call, nothing exotic needed — but never assume it stays that way. Toggle failures to see the recommended defence climb the ladder.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Retry, then fall back, then fail safe</h3>
+  <p>Order matters. Reach for the cheapest fix first — a retry with backoff clears most transient failures on its own. Escalate to a fallback only when retries won't help, and always leave a fail-safe underneath so nothing the user sees is ever just "broken." This isn't defensive paranoia; it's the difference between a script that works on your machine at 2pm and a system that keeps working at 3am when a server you don't control is having a bad night.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Do you even need to write the code?</h2>
+  <p class="lead">Before you write a single line, ask the honest question: what's the cheapest way to solve this that will actually hold up? Sometimes it's a no-code tool. Sometimes it's a raw API call you control completely. Most often it's somewhere in between. Click each approach to see where it sits on the map of control versus effort — and when it's the right call.</p>
+
+  <p>There's no "best" way to put an AI model to work; there's only the right trade-off for <em>this</em> job. A no-code tool gets you running in minutes but boxes you into what it exposes. A direct API call gives you total control but you own every detail, including the failures from the last three sections. Automation platforms and frameworks live in the middle, trading some control for a lot less plumbing. The map below plots each approach by how much control you get and how much effort it takes to build and maintain. Click one to isolate it and read when to reach for it.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Direct API vs no-code — the trade-off map</span>
+      <div class="controls">
+        <button onclick="showAllSeg()">Show all</button>
+      </div>
+    </div>
+    <div class="seg">
+      <div class="seg-plot" id="segPlot">
+        <div class="seg-axis x">control →</div>
+        <div class="seg-axis y">effort →</div>
+      </div>
+      <div class="seg-side">
+        <div class="seg-btn active" data-g="all" onclick="pickSeg('all')"><span class="sb-dot" style="background:linear-gradient(135deg,#3E8B5A,#C0492F)"></span><span><span class="sb-name">Every approach</span><span class="sb-desc">the whole landscape</span></span></div>
+        <div class="seg-btn" data-g="champ" onclick="pickSeg('champ')"><span class="sb-dot" style="background:var(--green)"></span><span><span class="sb-name">No-code tool</span><span class="sb-desc">prompt UI · fastest start</span></span></div>
+        <div class="seg-btn" data-g="lost" onclick="pickSeg('lost')"><span class="sb-dot" style="background:#9A8B7C"></span><span><span class="sb-name">Managed service</span><span class="sb-desc">hosted for you</span></span></div>
+        <div class="seg-btn" data-g="loyal" onclick="pickSeg('loyal')"><span class="sb-dot" style="background:var(--orange)"></span><span><span class="sb-name">Automation platform</span><span class="sb-desc">visual workflow</span></span></div>
+        <div class="seg-btn" data-g="new" onclick="pickSeg('new')"><span class="sb-dot" style="background:var(--accent)"></span><span><span class="sb-name">Direct API call</span><span class="sb-desc">you write the request</span></span></div>
+        <div class="seg-btn" data-g="risk" onclick="pickSeg('risk')"><span class="sb-dot" style="background:var(--red)"></span><span><span class="sb-name">Framework / SDK</span><span class="sb-desc">code + libraries</span></span></div>
+      </div>
+    </div>
+    <div class="seg-readout" id="segReadout">Every way to put an AI model to work, plotted by how much control you get (across) and how much effort it takes to build and maintain (up). Click an approach on the right to isolate it.</div>
+  </div>
+
+  <h3>Buy, wire, or build — pick on purpose</h3>
+  <p>The mistake is defaulting: some people write code for everything, others refuse to ever leave the no-code box. Neither is a strategy. The move is to name the job, ask how much control it truly needs and how long it has to last, and pick the lowest-effort approach that clears that bar. Prototype in no-code, graduate to a direct call when you outgrow it, reach for a framework when it has to grow. Same judgment as everything else in this course: match the tool to the problem, not to the hype.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>An API call is a small thing; a system made of them is where the value is. Chain calls so each output feeds the next, and design the chain backwards from what you need to deliver. Ask for structured output and always validate it before you trust it. Assume every call can fail, and climb the resilience ladder — retry, fall back, fail safe. And before you write anything, choose your approach on purpose: no-code, direct API, or somewhere in between, matched to the job.</p>
+  <ul>
+    <li>Chain calls so one's output is the next one's input — small, testable steps</li>
+    <li>Ask for named fields in a known shape, then validate before you trust</li>
+    <li>When validation fails: supply a default, coerce, or reject and re-ask</li>
+    <li>Every call can fail — retry with backoff, then fallback, then fail safe</li>
+    <li>No-code vs direct API is a trade-off of control against effort — pick on purpose</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 03 of 04 · Next up: Capstone — Putting It All Together →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 4 · approaches map (scatter) ===== */
+const SEGPOINTS=[
+  // {g, x(control 0-100), y(effort 0-100)}
+  {g:'champ',x:14,y:10},{g:'champ',x:22,y:16},{g:'champ',x:18,y:6},{g:'champ',x:26,y:20},
+  {g:'lost',x:34,y:14},{g:'lost',x:40,y:20},{g:'lost',x:30,y:24},{g:'lost',x:44,y:12},
+  {g:'loyal',x:50,y:34},{g:'loyal',x:56,y:40},{g:'loyal',x:46,y:44},{g:'loyal',x:60,y:32},{g:'loyal',x:52,y:50},
+  {g:'new',x:74,y:58},{g:'new',x:80,y:64},{g:'new',x:70,y:52},{g:'new',x:84,y:60},
+  {g:'risk',x:86,y:80},{g:'risk',x:92,y:86},{g:'risk',x:82,y:74},{g:'risk',x:90,y:92},{g:'risk',x:88,y:70}
+];
+const segPlot=el('segPlot');
+SEGPOINTS.forEach(p=>{
+  const d=document.createElement('div');
+  d.className='dot g-'+p.g;d.dataset.g=p.g;
+  d.style.left=(8+p.x*0.84)+'%';
+  d.style.top=(92-p.y*0.82)+'%';
+  segPlot.appendChild(d);
+});
+const SEGINFO={
+  all:'Every way to put an AI model to work, plotted by how much control you get (across) and how much effort it takes to build and maintain (up). Click an approach on the right to isolate it and read when to reach for it.',
+  champ:'<b>No-code tools</b> — a prompt box or builder UI. Fastest to start, nothing to maintain, but you\'re limited to what the tool chooses to expose. Reach for it to prototype an idea or handle a one-off task.',
+  lost:'<b>Managed services</b> — someone else hosts the whole pipeline and you just call their endpoint. Low effort, low control, a bill every month. Reach for it when the problem is solved better by buying than by building.',
+  loyal:'<b>Automation platforms</b> — visual, drag-connect workflows that call the AI as one step. Great for wiring apps together without code. Reach for it when the logic is a clear sequence you want running on a schedule.',
+  new:'<b>Direct API calls</b> — you send the request yourself. Full control over the prompt, the model, the parameters and the output — but you own every detail, including the failures. Reach for it when the no-code box can\'t express your logic.',
+  risk:'<b>Frameworks &amp; SDKs</b> — libraries that wrap the raw API with helpers for chaining, tools, validation and retries. The most control and reuse, the most to learn. Reach for it when you\'re building something real that has to grow.'
+};
+function pickSeg(g){
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.g===g));
+  document.querySelectorAll('#segPlot .dot').forEach(d=>{
+    d.classList.toggle('dim', g!=='all' && d.dataset.g!==g);
+  });
+  el('segReadout').innerHTML=SEGINFO[g];
+}
+function showAllSeg(){pickSeg('all')}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){segPlot.classList.add('in');o.unobserve(e.target)}}),{threshold:0.3}).observe(segPlot);
+
+/* ===== Figure 3 · resilience gauge ===== */
+function updateGauge(){
+  let risk=6;
+  document.querySelectorAll('#gaugeSignals .gsig.on').forEach(s=>risk+=parseInt(s.dataset.w));
+  risk=Math.min(risk,96);
+  el('gaugeNum').textContent=risk+'%';
+  const arc=el('gaugeArc'),needle=el('gaugeNeedle'),num=el('gaugeNum'),vd=el('gaugeVerdict');
+  const total=345;
+  arc.style.strokeDashoffset=total-(total*risk/100);
+  needle.style.transform='rotate('+(-90+risk*1.8)+'deg)';
+  let col,vclass,vtext,action;
+  if(risk<30){col='#3E8B5A';vclass='gv-low';vtext='Solid';action='One clean call, nothing exotic needed — but never assume it stays that way. Wrap even a healthy call in a basic try/catch so a surprise failure can\'t crash everything downstream.';}
+  else if(risk<60){col='#A34E1C';vclass='gv-mid';vtext='Add retries';action='These are transient failures — they usually pass on a second attempt. Retry with backoff: wait a moment, try again, and double the wait each time so you don\'t hammer a struggling server.';}
+  else{col='#C0492F';vclass='gv-high';vtext='Needs a safety net';action='Too fragile to just retry. Add a fallback — a smaller model, a cached answer, or a simpler path — and a fail-safe default, so that when everything fails the user still gets a graceful message, never a broken screen.';}
+  arc.style.stroke=col;num.style.color=col;
+  vd.className='gauge-verdict '+vclass;vd.textContent=vtext;
+  el('gaugeAction').textContent=action;
+}
+function toggleSig(s){s.classList.toggle('on');updateGauge()}
+function setSignals(on){document.querySelectorAll('#gaugeSignals .gsig').forEach(s=>s.classList.toggle('on',on));updateGauge()}
+updateGauge();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){setTimeout(()=>setSignals(true),400);o.unobserve(e.target)}}),{threshold:0.35}).observe(el('gaugeSignals'));
+
+/* ===== Figure 2 · structured-output panel ===== */
+const LTV={
+  priya:{tag:'Valid · passes',t:'Clean JSON — safe to use',p:'Every field the schema asked for is present and the types are right. This is what you want: a response your next step can read without guessing.',do:'DO → validate anyway. Passing today doesn\'t guarantee passing tomorrow — keep the check in place.'},
+  daniel:{tag:'Warn · missing field',t:'A required field is missing',p:'The model returned good data but dropped the "priority" key. Your code shouldn\'t crash on the gap — decide in advance what to do with it.',do:'DO → supply a sensible default, or send one more request asking specifically for the missing field.'},
+  arjun:{tag:'Warn · wrong type',t:'Right field, wrong shape',p:'The "score" came back as the word "high" instead of a number, or landed outside the range you allow. Structurally present, but semantically off.',do:'DO → coerce it to the expected type if you safely can, otherwise reject it and re-ask.'},
+  sam:{tag:'Fail · not JSON',t:'The model answered in prose',p:'It ignored the format entirely and wrote a paragraph. This is the failure that breaks pipelines silently — text where your code expected data.',do:'DO → reject it, then retry with a stricter prompt and, where the tool supports it, a forced JSON / schema mode.'}
+};
+function pickLtv(k){
+  document.querySelectorAll('#ltvGrid .ltv-card').forEach(c=>c.classList.toggle('active',c.dataset.k===k));
+  const d=LTV[k],panel=el('ltvPanel');
+  panel.innerHTML='<span class="lp-tag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.p+'</p><div class="lp-do">'+d.do+'</div>';
+  panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function rankLtv(){pickLtv('priya')}
+pickLtv('priya');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickLtv('priya');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('ltvGrid'));
+
+/* ===== Figure 1 · call chain ===== */
+const QUEUE=[
+  {rank:1,name:'Fetch',tag:'Call a source API (GET)',do:'→ raw data comes back',c:'#008DD2'},
+  {rank:2,name:'Summarize',tag:'Send the raw text to the model',do:'→ a short summary',c:'var(--orange)'},
+  {rank:3,name:'Structure',tag:'Ask the model for named fields',do:'→ a validated JSON object',c:'var(--green)'},
+  {rank:4,name:'Format',tag:'Render the fields into a message',do:'→ human-readable text',c:'var(--yellow)'},
+  {rank:5,name:'Send',tag:'POST to a delivery API',do:'→ delivered ✓',c:'var(--orange-light)'}
+];
+let qTimers=[];
+function buildQueue(){
+  resetQueue();
+  el('btnQueue').classList.add('active');
+  const list=el('queueList');
+  QUEUE.forEach((q,i)=>{
+    qTimers.push(setTimeout(()=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;gap:12px;align-items:center;background:rgba(251,246,238,0.06);border-left:3px solid '+q.c+';border-radius:0 9px 9px 0;padding:10px 14px;opacity:0;transform:translateX(-8px);transition:all .35s';
+      row.innerHTML='<span style="font-family:\'Fraunces\',serif;font-weight:800;font-size:18px;color:'+q.c+';flex:0 0 20px">'+q.rank+'</span>'+
+        '<div style="flex:1"><div style="color:#fff;font-weight:600;font-size:14px">'+q.name+'</div>'+
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9.5px;letter-spacing:0.06em;color:#C9B79E">'+q.tag+'</div></div>'+
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--yellow);text-align:right;max-width:170px">'+q.do+'</div>';
+      list.appendChild(row);
+      void row.offsetWidth;
+      row.style.opacity='1';row.style.transform='translateX(0)';
+    },i*300));
+  });
+}
+function resetQueue(){qTimers.forEach(t=>clearTimeout(t));qTimers=[];el('queueList').innerHTML=''}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){buildQueue();o.unobserve(e.target)}}),{threshold:0.3}).observe(el('queueBox'));
+
+</script>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calling an AI API · Lesson 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+  --green:#3E8B5A; --red:#C0492F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · request builder ============ */
+.pipe{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 22px}
+.pipe-track{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+.stage{
+  flex:1;min-width:120px;background:var(--cream);border:2px solid var(--line);
+  border-radius:11px;padding:12px 12px 14px;transition:all .3s;position:relative;
+}
+.stage.on{border-color:var(--orange);background:#FDEBD7;box-shadow:0 8px 18px rgba(239,127,26,0.18)}
+.stage .snum{width:26px;height:26px;border-radius:50%;background:var(--brown-dark);color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;transition:background .3s}
+.stage.on .snum{background:var(--orange)}
+.stage h5{font-family:'Fraunces',serif;font-size:15px;color:var(--brown-dark);line-height:1.15;margin-bottom:5px}
+.stage .scount{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--muted)}
+.stage .schip{margin-top:8px;display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--paper);border:1px solid var(--line);color:var(--tan)}
+.pipe-detail{margin-top:20px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-height:88px}
+.pipe-detail .pd-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:6px}
+.pipe-detail h4{font-family:'Fraunces',serif;font-size:19px;color:var(--brown-dark);margin-bottom:6px}
+.pipe-detail p{font-size:14px;color:var(--brown-dark);max-width:none;margin:0}
+.pipe-detail .pd-ai{margin-top:10px;font-size:12.5px;color:var(--brown);border-left:3px solid var(--orange);padding-left:12px}
+.pipe-detail .pd-ai b{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange-dark)}
+@media(max-width:700px){.stage{min-width:104px}}
+
+/* ============ Figure 3 · client vs server (before/after) ============ */
+.hyg{display:grid;grid-template-columns:1fr 54px 1fr;gap:14px;align-items:stretch}
+.hyg-col{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:16px 15px;overflow:hidden}
+.hyg-col.before{border-color:#E4C4B8}
+.hyg-col.after{border-color:#BEDBC7}
+.hyg-h{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.hyg-col.before .hyg-h{color:var(--red)}
+.hyg-col.after .hyg-h{color:var(--green)}
+.hyg-h i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.hyg-col.before .hyg-h i{background:var(--red)}
+.hyg-col.after .hyg-h i{background:var(--green)}
+.rec-mini{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:11.5px;line-height:1.4;transition:all .5s;position:relative}
+.rec-mini .rm-name{font-weight:600;color:var(--brown-dark);font-size:12.5px}
+.rec-mini .rm-meta{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:2px}
+.rec-mini .rm-flag{position:absolute;top:8px;right:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;font-weight:600}
+.before .rm-flag{background:#F7E0D8;color:var(--red)}
+.after .rm-flag{background:#DDEFE2;color:var(--green)}
+.rec-mini.dupe{background:#FDF3EF}
+.rec-mini.clean{background:#F5FAF6}
+.rec-mini.gone{opacity:0;height:0;padding:0 11px;margin:0;border-width:0}
+.rec-mini .rm-enrich{margin-top:5px;font-size:10.5px;color:var(--green);opacity:0;transition:opacity .5s .3s}
+.hyg.done .after .rm-enrich{opacity:1}
+.hyg-arrow{display:flex;align-items:center;justify-content:center;color:var(--orange)}
+.hyg-arrow svg{width:32px;height:32px}
+.hyg-stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.05em}
+.hyg-stats b{color:var(--orange-dark);font-size:15px}
+@media(max-width:700px){
+  .hyg{grid-template-columns:1fr;gap:10px}
+  .hyg-arrow{transform:rotate(90deg);height:34px}
+}
+
+/* ============ Figure 2 · response + parse (reveal) ============ */
+.enr{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+.enr-top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.enr-input{flex:1;min-width:200px;background:var(--cream);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brown-dark)}
+.enr-input b{color:var(--orange-dark)}
+.enr-arrow{font-size:22px;color:var(--orange)}
+.enr-card{
+  background:var(--brown-dark);color:#F3E7D5;border-radius:13px;padding:20px 22px;
+  box-shadow:0 14px 32px rgba(47,29,25,0.28);
+}
+.enr-cardhead{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(251,246,238,0.16);margin-bottom:12px}
+.enr-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:19px;color:#fff}
+.enr-name{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#fff}
+.enr-name span{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;color:var(--yellow);margin-top:3px}
+.enr-fields{display:grid;gap:8px}
+.enr-field{display:flex;gap:10px;font-size:12.5px;align-items:baseline;opacity:0;transform:translateY(6px);transition:all .45s}
+.enr-field.show{opacity:1;transform:translateY(0)}
+.enr-field i{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--yellow);flex:0 0 84px;font-style:normal}
+.enr-field b{color:#fff;font-weight:600}
+.enr-field.target b{color:var(--yellow)}
+.enr-field .badge{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.05em;text-transform:uppercase;background:rgba(254,204,0,0.18);color:var(--yellow);padding:1px 6px;border-radius:4px;margin-left:6px}
+.enr-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:16px;letter-spacing:0.03em;max-width:none}
+.enr-note b{color:var(--orange-dark)}
+
+/* ============ Figure 4 · cost / token estimator ============ */
+.chaos{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
+.chaos-row{display:grid;grid-template-columns:200px 1fr 80px;gap:16px;align-items:center;margin-bottom:20px}
+.chaos-row label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);font-weight:600}
+.chaos-row .cval{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange-dark);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--cream);border:1px solid var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+.chaos-result{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-top:8px;padding-top:20px;border-top:1px dashed var(--line)}
+.chaos-num{font-family:'Fraunces',serif;font-weight:800;font-size:46px;line-height:1;color:var(--orange-dark)}
+.chaos-lab{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.chaos-verdict{font-size:14.5px;color:var(--brown);font-weight:500;max-width:340px;line-height:1.45}
+@media(max-width:700px){
+  .chaos-row{grid-template-columns:1fr 70px;gap:8px}
+  .chaos-row label{grid-column:1/-1}
+  .chaos-num{font-size:36px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 02 · AI APIs</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="40" height="40" rx="11" fill="#412C23"/>
+      <path d="M9 30V15l5 6 5-7 5 7 5-6v15" stroke="#EF7F1A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="11" r="3" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 5 · Lesson 02 · AI APIs</div>
+  <h1>Borrow a model's <em>intelligence</em>, one call at a time.</h1>
+  <p class="lede">Last lesson you learned the shape of every API call: a request goes out, a response comes back. Now we point that round trip at the most useful kind of API there is — one that hands you a large language model on demand. You don't run the model, host it, or train it. You send it a prompt and it sends back words. In this lesson you'll build an AI request part by part, pull the generated text out of the JSON that comes back, lock down the one thing that must never leak — your key — and put a real number on what all of this costs.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Four parts and a send button</h2>
+  <p class="lead">An AI API request looks scary in a tutorial and turns out to be four small things plus a send. A key that proves it's you, a model that decides which brain answers, the messages that carry your prompt, and a few parameters that shape the reply. Click each part to see what it does — and what to leave alone.</p>
+
+  <p>Don't overthink this. Every request to a chat-style AI model is the same handful of fields, no matter the provider. Once you can name them, you can read any code sample and swap in your own prompt with confidence. The only field that is truly yours to craft is the <strong>messages</strong> — that's your Week 2 prompt-writing, finally talking to a model over the wire. Everything else is a dial you set once and mostly forget.</p>
+  <p>Click through the parts below. Notice how little of it changes call to call: the key, model and parameters usually stay put, and only the prompt inside <code>messages</code> moves.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Build an AI request</span>
+      <div class="controls">
+        <button onclick="pipeStep(-1)">◀ Prev</button>
+        <button onclick="pipeStep(1)">Next ▶</button>
+      </div>
+    </div>
+    <div class="pipe">
+      <div class="pipe-track" id="pipeTrack">
+        <div class="stage" data-k="key" onclick="pickStage('key')">
+          <div class="snum">1</div><h5>API key</h5>
+          <div class="scount">Authorization header</div>
+          <div class="schip">secret</div>
+        </div>
+        <div class="stage" data-k="model" onclick="pickStage('model')">
+          <div class="snum">2</div><h5>Model</h5>
+          <div class="scount">fast vs deep</div>
+          <div class="schip">which brain</div>
+        </div>
+        <div class="stage" data-k="messages" onclick="pickStage('messages')">
+          <div class="snum">3</div><h5>Messages</h5>
+          <div class="scount">system + user</div>
+          <div class="schip">your prompt</div>
+        </div>
+        <div class="stage" data-k="params" onclick="pickStage('params')">
+          <div class="snum">4</div><h5>Parameters</h5>
+          <div class="scount">temperature · max_tokens</div>
+          <div class="schip">the dials</div>
+        </div>
+        <div class="stage" data-k="send" onclick="pickStage('send')">
+          <div class="snum">5</div><h5>Send</h5>
+          <div class="scount">POST /v1/chat</div>
+          <div class="schip">round trip</div>
+        </div>
+      </div>
+      <div class="pipe-detail" id="pipeDetail"></div>
+    </div>
+  </div>
+
+  <h3>The one part you actually write</h3>
+  <p>Four of the five fields are boilerplate you copy once and reuse forever. The fifth — <code>messages</code> — is the whole game. It's where a vague ask ("write something about dogs") becomes a good one ("write a 40-word friendly intro for a dog-walking service, no emojis"). The model can only be as clear as your prompt. So the skill of calling an AI API is really the skill of writing the messages inside it well.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>The answer is in the JSON — go get it</h2>
+  <p class="lead">You send the request; a response comes back. But it isn't just the text you asked for — it's a JSON envelope with the text tucked inside, wrapped in metadata about the call. Learning to reach in and pull out the one field you want is the second half of every AI API call. Press generate and watch the envelope arrive.</p>
+
+  <p>Here's the thing that trips up every beginner. You ask the model to "write a haiku" and expect a haiku back. What you actually get is an object: an id, the model name, token counts, a finish reason — and, buried a couple of layers down, the haiku. That buried field is almost always at the same address: <code>choices[0].message.content</code>. Learn that one path and you can grab the generated text from any chat-style response. Press generate and watch the response assemble, field by field.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · The response, and the field you want</span>
+      <div class="controls">
+        <button onclick="runEnrich()">▶ Get response</button>
+        <button onclick="resetEnrich()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="enr">
+      <div class="enr-top">
+        <div class="enr-input">You sent: <b>messages</b> + <b>model</b> to the endpoint</div>
+        <div class="enr-arrow">→</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.08em">JSON comes back ↓</div>
+      </div>
+      <div class="enr-card">
+        <div class="enr-cardhead">
+          <div class="enr-av">{ }</div>
+          <div class="enr-name">chat.completion<span>Raw JSON response</span></div>
+        </div>
+        <div class="enr-fields" id="enrFields">
+          <div class="enr-field"><i>id</i><b>"chatcmpl-9f2a…"</b><span class="badge">metadata</span></div>
+          <div class="enr-field"><i>model</i><b>the model you chose</b><span class="badge">echoed back</span></div>
+          <div class="enr-field"><i>role</i><b>"assistant"</b><span class="badge">who's speaking</span></div>
+          <div class="enr-field target"><i>content</i><b>"Rain taps the window…" ← the text</b><span class="badge">the answer</span></div>
+          <div class="enr-field"><i>finish</i><b>"stop" · completed cleanly</b><span class="badge">why it ended</span></div>
+          <div class="enr-field"><i>usage</i><b>prompt + reply token counts</b><span class="badge">for billing</span></div>
+        </div>
+      </div>
+      <p class="enr-note"><b>Parsing is just following the path.</b> The generated text lives at <code>choices[0].message.content</code> — same address every time. Grab that one string, ignore the rest, and you have your answer.</p>
+    </div>
+  </div>
+
+  <h3>Why the envelope matters</h3>
+  <p>The metadata around your text isn't clutter — it's useful. <code>finish</code> tells you whether the reply was cut off (so you can raise <code>max_tokens</code> and retry). <code>usage</code> tells you exactly how many tokens the call cost, which is how you keep the bill honest. But when you just want the words, you reach for <code>content</code>. One path in, one string out. That's parsing.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>The one rule you cannot break: keys stay on the server</h2>
+  <p class="lead">Everything else in this lesson is a preference. This is a law. Your API key is a password to your account and your bill — and if it ever ships inside code that runs in someone's browser, it is already stolen. Watch what "in the browser" really means, and where the key belongs instead.</p>
+
+  <p>Here's the trap beginners fall into. It feels natural to call the AI API straight from your web page — the page needs the answer, so the page makes the request. But anything in a page is readable by anyone who opens it: the key sits right there in the source and the network tab, free for the taking. Within hours a stranger is spending your money and hitting your limits. The fix is simple and non-negotiable: the key lives on <strong>your server</strong>. The browser asks your server; your server, holding the key privately, calls the AI API. Press the button and move the key where it belongs.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Where the key lives</span>
+      <div class="controls">
+        <button id="btnClean" class="active" onclick="runClean()">▶ Move key to the server</button>
+        <button onclick="resetClean()">↺ Show the risk</button>
+      </div>
+    </div>
+    <div class="hyg" id="hyg">
+      <div class="hyg-col before">
+        <div class="hyg-h"><i></i>In the browser · unsafe</div>
+        <div class="rec-mini dupe" data-role="dupe"><span class="rm-flag">exposed</span><div class="rm-name">API key in the page</div><div class="rm-meta">sk-live-…9f2 · sits in the JS</div></div>
+        <div class="rec-mini dupe" data-role="dupe"><span class="rm-flag">exposed</span><div class="rm-name">Visible in View Source</div><div class="rm-meta">anyone can read it</div></div>
+        <div class="rec-mini" data-role="keep"><span class="rm-flag">risk</span><div class="rm-name">Browser calls the API</div><div class="rm-meta">key travels from the page</div></div>
+        <div class="rec-mini" data-role="junk"><span class="rm-flag">leak</span><div class="rm-name">DevTools → Network tab</div><div class="rm-meta">key copied in seconds</div></div>
+        <div class="rec-mini" data-role="keep"><span class="rm-flag">$$$</span><div class="rm-name">A stranger's requests</div><div class="rm-meta">billed to you</div></div>
+      </div>
+      <div class="hyg-arrow">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M4 16h22" stroke="#EF7F1A" stroke-width="2.6" stroke-linecap="round"/><path d="M20 9l8 7-8 7" stroke="#EF7F1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="hyg-col after">
+        <div class="hyg-h"><i></i>On your server · safe</div>
+        <div class="rec-mini clean"><span class="rm-flag">secret</span><div class="rm-name">Key in an env variable</div><div class="rm-meta">never sent to the browser</div><div class="rm-enrich">+ stored as a server-side secret</div></div>
+        <div class="rec-mini clean"><span class="rm-flag">proxy</span><div class="rm-name">Browser → your server</div><div class="rm-meta">the page holds no key</div><div class="rm-enrich">+ your server makes the call</div></div>
+        <div class="rec-mini clean"><span class="rm-flag">safe</span><div class="rm-name">Server → AI API</div><div class="rm-meta">key attached on the backend</div><div class="rm-enrich">+ key never leaves your server</div></div>
+      </div>
+    </div>
+    <div class="hyg-stats" id="hygStats">
+      <span>Golden rule: <b id="hgTotal">key on server</b></span>
+      <span>Exposed to visitors: <b id="hgMerge">yes</b></span>
+      <span>Key in page source: <b id="hgJunk">yes</b></span>
+      <span>Requests still work: <b id="hgUsable">—</b></span>
+    </div>
+  </div>
+
+  <h3>The rule in one sentence</h3>
+  <p>Never put an API key in anything that runs on someone else's device. If you can see the key by opening a browser's developer tools, so can everyone else. Keep it in an environment variable on a server you control, route your app's requests through that server, and rotate the key immediately the moment you suspect it slipped out. This single habit separates a safe project from a surprise bill.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Tokens are the meter — and you control it</h2>
+  <p class="lead">AI APIs don't charge per request — they charge per token, the little chunks of text a model reads and writes (roughly ¾ of a word each). Longer prompt, more tokens. Longer reply, more tokens. More calls, more tokens. Move the sliders and watch a real bill take shape — and where the leaks are.</p>
+
+  <p>This is the number most beginners never look at until it surprises them. Every call is billed on the tokens going in (your prompt) plus the tokens coming out (the reply), and a busy app multiplies that by thousands of calls a day. The good news: you hold every lever. A tighter prompt, a capped <code>max_tokens</code>, a smaller model, and caching repeated answers each cut the meter directly. There's also a second limit that isn't about money — a <strong>rate limit</strong>, the cap on how many requests you may send per minute. The estimator below is illustrative, not a quote, but it makes the shape of the cost real.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Estimate the token bill</span>
+      <div class="controls" id="chaosPresets">
+        <button onclick="chaosPreset(1,this)">Light use</button>
+        <button class="active" onclick="chaosPreset(2,this)">Steady app</button>
+        <button onclick="chaosPreset(3,this)">Heavy app</button>
+      </div>
+    </div>
+    <div class="chaos">
+      <div class="chaos-row">
+        <label for="slCust">Prompt length (words)</label>
+        <input type="range" id="slCust" min="20" max="2000" step="20" value="300" oninput="calcChaos()">
+        <div class="cval" id="vCust">300 w</div>
+      </div>
+      <div class="chaos-row">
+        <label for="slForget">Reply length (words)</label>
+        <input type="range" id="slForget" min="20" max="2000" step="20" value="300" oninput="calcChaos()">
+        <div class="cval" id="vForget">300 w</div>
+      </div>
+      <div class="chaos-row">
+        <label for="slAov">Requests per day</label>
+        <input type="range" id="slAov" min="10" max="5000" step="10" value="200" oninput="calcChaos()">
+        <div class="cval" id="vAov">200/day</div>
+      </div>
+      <div class="chaos-result">
+        <div>
+          <span class="chaos-lab">Estimated monthly cost (illustrative)</span>
+          <div class="chaos-num" id="chaosNum">$0</div>
+        </div>
+        <div class="chaos-verdict" id="chaosVerdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>How to keep the meter low</h3>
+  <p>You just watched cost track length and volume. So the levers are obvious: cut the prompt to what the model truly needs, cap <code>max_tokens</code> so replies can't run away, pick the smallest model that does the job, and cache answers you'd otherwise ask for twice. And when your call volume climbs toward the rate limit, slow down or batch requests rather than hammering the API. Cost and limits aren't traps — they're dials, and now you know where they are. Next lesson, we put a whole AI API call to work inside something you build.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>Calling an AI API is four fields and a send: a secret key, a chosen model, the messages that carry your prompt, and a few parameters. The reply comes back as JSON, and the text you want is a fixed path away — <code>choices[0].message.content</code>. Keep the key on a server you control, never in a browser, and watch the token meter: cost tracks length and volume, and every part of that is a dial you can turn down.</p>
+  <ul>
+    <li>An AI request = key + model + messages + parameters, sent to an endpoint</li>
+    <li>The messages carry your prompt — the one field you actually craft</li>
+    <li>The reply is JSON; pull the text from choices[0].message.content</li>
+    <li>Golden rule: keys live on your server, never in code the browser can read</li>
+    <li>You pay per token — shorter prompts, capped replies and caching cut the bill</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 02 of 04 · Next up: Building With an AI API →</footer>
+<script>
+
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · request builder ===== */
+const PIPE={
+  key:{t:'API key',tag:'Part 1 · proof you\'re allowed to ask',p:'A secret string the provider gave you. It rides along in the Authorization header and ties the request to your account, so usage is billed and rate-limited to you. Treat it exactly like a password.',ai:'It never goes in the prompt or the page — it lives on your server. The whole security section is about this one field.'},
+  model:{t:'Model',tag:'Part 2 · which brain answers',p:'One provider offers many models — small fast ones and large deep ones. You name the exact model you want in a single field. Bigger isn\'t always better: a small model is cheaper and quicker for simple jobs.',ai:'Swapping models is usually a one-word change. Start cheap, upgrade only if the answers aren\'t good enough.'},
+  messages:{t:'Messages',tag:'Part 3 · the actual prompt',p:'A list of turns. A system message sets the behaviour ("You are a concise assistant"); a user message carries the question. For a chat, you send the running back-and-forth so the model has context.',ai:'This is where your Week 2 prompt-writing lives. The clearer the messages, the better the reply — no parameter fixes a vague prompt.'},
+  params:{t:'Parameters',tag:'Part 4 · the dials',p:'Optional settings that shape the answer. temperature controls creativity (low = focused, high = wild). max_tokens caps how long the reply can get — which also caps what it can cost.',ai:'Leave most at their defaults. The two worth knowing on day one are temperature and max_tokens.'},
+  send:{t:'Send',tag:'Part 5 · the round trip',p:'Bundle the four parts and POST them to the model\'s endpoint. A moment later a JSON response comes back with the generated text inside. That is one complete AI API call.',ai:'Same request → response shape as Lesson 1 — just with a language model doing the work in the middle.'}
+};
+const PIPEORDER=['key','model','messages','params','send'];
+let pipeCur='key';
+function pickStage(k){
+  pipeCur=k;
+  document.querySelectorAll('#pipeTrack .stage').forEach(s=>s.classList.toggle('on',s.dataset.k===k));
+  const d=PIPE[k];
+  el('pipeDetail').innerHTML='<span class="pd-tag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.p+'</p><div class="pd-ai"><b>Good to know —</b> '+d.ai+'</div>';
+}
+function pipeStep(dir){
+  let i=PIPEORDER.indexOf(pipeCur)+dir;
+  if(i<0)i=PIPEORDER.length-1;if(i>=PIPEORDER.length)i=0;
+  pickStage(PIPEORDER[i]);
+}
+pickStage('key');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickStage('key');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('pipeTrack'));
+
+/* ===== Figure 3 · client vs server ===== */
+const hyg=el('hyg');let cleanTimers=[];
+function runClean(){
+  resetClean();
+  el('btnClean').classList.add('active');
+  cleanTimers.push(setTimeout(()=>{
+    hyg.querySelectorAll('.before [data-role="dupe"]').forEach(r=>r.classList.add('gone'));
+    hyg.querySelector('.before [data-role="junk"]').classList.add('gone');
+    el('hgMerge').textContent='no';
+    el('hgJunk').textContent='no';
+    el('hgUsable').textContent='yes';
+  },500));
+  cleanTimers.push(setTimeout(()=>{hyg.classList.add('done')},1100));
+}
+function resetClean(){
+  cleanTimers.forEach(t=>clearTimeout(t));cleanTimers=[];
+  hyg.classList.remove('done');
+  hyg.querySelectorAll('.rec-mini').forEach(r=>r.classList.remove('gone'));
+  el('hgMerge').textContent='yes';el('hgJunk').textContent='yes';el('hgUsable').textContent='—';
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runClean();o.unobserve(e.target)}}),{threshold:0.3}).observe(hyg);
+
+/* ===== Figure 2 · response + parse ===== */
+let enrTimers=[];
+function runEnrich(){
+  resetEnrich();
+  const fields=document.querySelectorAll('#enrFields .enr-field');
+  fields.forEach((f,i)=>{enrTimers.push(setTimeout(()=>f.classList.add('show'),250+i*380))});
+}
+function resetEnrich(){
+  enrTimers.forEach(t=>clearTimeout(t));enrTimers=[];
+  document.querySelectorAll('#enrFields .enr-field').forEach(f=>f.classList.remove('show'));
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runEnrich();o.unobserve(e.target)}}),{threshold:0.35}).observe(el('enrFields'));
+
+/* ===== Figure 4 · token / cost estimator ===== */
+function chaosPreset(n,btn){
+  document.querySelectorAll('#chaosPresets button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const P={1:[150,150,50],2:[300,300,200],3:[900,600,2000]}[n];
+  el('slCust').value=P[0];el('slForget').value=P[1];el('slAov').value=P[2];
+  calcChaos();
+}
+function calcChaos(){
+  const promptW=parseInt(el('slCust').value);
+  const replyW=parseInt(el('slForget').value);
+  const reqDay=parseInt(el('slAov').value);
+  el('vCust').textContent=promptW+' w';
+  el('vForget').textContent=replyW+' w';
+  el('vAov').textContent=reqDay+'/day';
+  // ~1.33 tokens per word; illustrative pricing per 1M tokens
+  const tokIn=Math.round(promptW*1.33);
+  const tokOut=Math.round(replyW*1.33);
+  const tokReq=tokIn+tokOut;
+  const inRate=0.15, outRate=0.60; // $ per 1M tokens (illustrative)
+  const costReq=(tokIn/1e6*inRate)+(tokOut/1e6*outRate);
+  const monthly=costReq*reqDay*30;
+  el('chaosNum').textContent='$'+monthly.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  let v;
+  if(monthly<5)        v='Pennies. Note tokens/request: '+tokReq.toLocaleString()+'. Cost scales with tokens, and tokens scale with length.';
+  else if(monthly<50)  v='A small but real bill (~'+tokReq.toLocaleString()+' tokens/request). Shorter prompts and a capped reply keep it here.';
+  else if(monthly<300) v='Now it adds up. Trim the prompt, cap max_tokens, and cache repeated answers before this climbs.';
+  else                 v='Serious spend — and at this volume you\'ll also meet rate limits, the cap on requests per minute. Batch and slow down.';
+  el('chaosVerdict').textContent=v;
+}
+calcChaos();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){calcChaos();o.unobserve(e.target)}}),{threshold:0.35}).observe(el('chaosNum'));
+
+</script>
+</body>
+</html>
