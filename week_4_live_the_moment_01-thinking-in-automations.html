@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1 · Thinking in Automations — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── CONCEPT PRIMER CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.05rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-pros{margin-top:.6rem;font-size:.75rem;line-height:1.6;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-pros .pro{color:#2E6B30;display:block}
+.compare-pros .con{color:#A03A2C;display:block}
+
+/* ── ACTIVITY 1: FLOW ORDER (click sequence) ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.84rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+
+/* ── FLOW VISUAL ── */
+.funnel-vis{max-width:520px;margin:1.4rem auto 0;display:none}
+.funnel-vis.show{display:block;animation:fadeIn .5s ease}
+.funnel-band{margin:0 auto .35rem;color:#fff;text-align:center;padding:.55rem .5rem;border-radius:6px;font-size:.78rem;font-weight:700;line-height:1.3}
+.funnel-band small{display:block;font-weight:400;font-size:.66rem;opacity:.85;margin-top:.1rem}
+
+/* ── ACTIVITY 2: CLASSIFY TASKS (drag & drop) ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.84rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-text b{color:var(--navy)}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:82px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+
+/* ── ACTIVITY 3: TIME-SAVED MATH ── */
+.math-scenario{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1rem 0 1.4rem}
+@media (max-width:760px){.math-scenario{grid-template-columns:1fr 1fr}}
+.math-stat{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem .9rem}
+.math-stat-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.25rem}
+.math-stat-value{font-family:var(--mono);font-size:1.05rem;font-weight:600;color:var(--navy)}
+.math-options{display:grid;gap:.6rem}
+.math-option{display:flex;align-items:flex-start;gap:.7rem;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;cursor:pointer;transition:all .2s;font-size:.86rem;line-height:1.5}
+.math-option:hover{border-color:var(--orange)}
+.math-option input{margin-top:.25rem;accent-color:var(--orange)}
+.math-option .opt-amount{font-family:var(--mono);font-weight:600;color:var(--navy)}
+.math-option.reveal-right{border-color:var(--green);background:var(--green-light)}
+.math-option.reveal-wrong{border-color:var(--red);background:var(--red-light)}
+.breakdown{display:none;margin-top:1.2rem}
+.breakdown.show{display:block;animation:fadeIn .4s ease}
+.breakdown table{width:100%;border-collapse:collapse;font-size:.84rem}
+.breakdown th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:.45rem .6rem;border-bottom:1px solid var(--border)}
+.breakdown td{padding:.5rem .6rem;border-bottom:1px dashed var(--border);color:var(--text-secondary)}
+.breakdown td.num{font-family:var(--mono);text-align:right;color:var(--navy);font-weight:600}
+.breakdown tr.total td{border-bottom:none;font-weight:700;color:var(--navy);border-top:2px solid var(--navy)}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.quiz-q.right{border-color:var(--green)}
+.quiz-q.miss{border-color:var(--red)}
+.quiz-q-head{display:flex;gap:.7rem;align-items:baseline;margin-bottom:.7rem}
+.quiz-q-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;flex-shrink:0}
+.quiz-q-text{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.5}
+.quiz-opt{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .6rem;border-radius:6px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);line-height:1.45;transition:background .15s}
+.quiz-opt:hover{background:var(--bg-light)}
+.quiz-opt input{margin-top:.25rem;accent-color:var(--orange);cursor:pointer}
+.quiz-review{font-size:.76rem;line-height:1.55;margin-top:.6rem;padding:.6rem .8rem;border-radius:6px;display:none}
+.quiz-review.show{display:block;animation:fadeIn .3s ease}
+.quiz-review.good{background:var(--green-light);color:#1F5723}
+.quiz-review.bad{background:#FFF4E5;color:#7A4A0A}
+
+/* ── REFLECT / FOOTER ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 1 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 4 · AI Automation</div>
+  <h1>Thinking in Automations — <em>see the "when this, do that" behind everyday work</em></h1>
+  <p class="hero-sub">Four hands-on activities. Take apart an automation into trigger, condition, and action; put a real "when X → do Y" flow in order; decide what to automate, hand to an agent, or keep by hand; then run an honest time-saved calculation and bust the myths. This is the mindset the rest of the week builds on — learn it once, use it everywhere.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ORDER THE FLOW ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Order the flow — from "something happened" to "it's handled"</h2>
+    <p class="lesson-intro">An automation is just a sentence: <em>"when <strong>X</strong> happens, do <strong>Y</strong>."</em> Every one is built from the same three parts — a <strong>trigger</strong> (the event that starts it), a <strong>condition</strong> (a yes/no check), and one or more <strong>actions</strong> (the work it does). The five steps below are a real automation, shuffled. Click them <strong>in the order they actually run</strong> — a wrong click shakes red and nudges you.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">1</div>
+        <h4>Trigger</h4>
+        <p>The <strong>event that kicks things off</strong> — a form is submitted, a file lands, a time of day arrives. Nothing runs until the trigger fires.</p>
+        <div class="compare-pros">
+          <span class="pro">+ One clear "start" you can point to</span>
+          <span class="con">− Pick a vague trigger and it fires at the wrong times</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">?</div>
+        <h4>Condition</h4>
+        <p>A <strong>yes/no check</strong> that decides whether to keep going — "is this actually a support request?" It's the filter that keeps the automation from acting on the wrong things.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Stops the flow doing work it shouldn't</span>
+          <span class="con">− Skip it and you spam yourself on every event</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">→</div>
+        <h4>Action</h4>
+        <p>The <strong>actual work</strong> — save a file, create a record, send a reply. Most automations chain a few actions in a row after the check passes.</p>
+        <div class="compare-pros">
+          <span class="pro">+ This is the payoff — the task done for you</span>
+          <span class="con">− Order matters; a wrong sequence breaks things</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip-note" style="margin-bottom:.5rem">💡 <strong>Before you build:</strong> read any automation left to right — trigger first, then the check, then the actions in order. In the activity below you'll place five real steps and see the whole "when X → do Y" flow snap together.</div>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Shuffled steps — click the next one</h4>
+          <div class="chain-pool" id="funnelPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The flow, start to finish</h4>
+          <div class="chain-slots" id="funnelSlots"></div>
+        </div>
+      </div>
+      <div class="funnel-vis" id="funnelVis"></div>
+      <div class="chain-hintbox" id="funnelHint"></div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetFunnel()">↻ Reset the flow</button>
+      </div>
+      <div class="tip-note">💡 <strong>Why the order matters:</strong> if you send the "we got your request" reply <em>before</em> checking whether it's even a real request, you reply to spam and duplicates. Naming the trigger, the check, and the ordered actions is how you design an automation on paper before you touch any tool.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: CLASSIFY THE TASK ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Automate it, hand it to an agent, or keep it manual?</h2>
+    <p class="lesson-intro">Not everything should be automated — and knowing the difference is the whole skill. A fixed <strong>automation</strong> shines on repetitive, rule-based, high-volume work. An <strong>agent</strong> earns its keep when the steps vary and need judgment. Some work should stay <strong>manual</strong> — rare, high-stakes, or too consequential to hand off. Drag each task to where it belongs. Guess freely; wrong pills carry a hover hint with the answer.</p>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="toolList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="auto">
+            <div class="bucket-title">Automate it</div>
+            <div class="bucket-sub">Repetitive · rule-based · high-volume</div>
+            <div class="bucket-drop" data-drop="auto"></div>
+          </div>
+          <div class="bucket" data-bucket="agent">
+            <div class="bucket-title">Hand it to an agent</div>
+            <div class="bucket-sub">Varies each time · needs reasoning</div>
+            <div class="bucket-drop" data-drop="agent"></div>
+          </div>
+          <div class="bucket" data-bucket="manual">
+            <div class="bucket-title">Keep it manual</div>
+            <div class="bucket-sub">Rare · high-stakes · human judgment</div>
+            <div class="bucket-drop" data-drop="manual"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetTools()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswersTools()">Show me the answers</button>
+      </div>
+      <div class="tip-note">💡 <strong>The honest truth about automation:</strong> the win isn't automating <em>everything</em> — it's automating the right things. Force a fixed automation onto judgment work and it makes confident mistakes at scale; keep a boring, repetitive task manual and you burn hours you'll never get back. Match the task to the tool first.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: TIME-SAVED MATH ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">The time-saved challenge — what do you <em>really</em> get back?</h2>
+    <p class="lesson-intro">"Automation saves hours" is only half true. The honest number subtracts the time you still spend reviewing the output <em>and</em> the upkeep when things break. Priya automates a task she used to do by hand ten times a week. Below are her real numbers. Which option reads them honestly — and shows when the setup effort pays for itself?</p>
+
+    <div class="lesson-card">
+      <div class="math-scenario">
+        <div class="math-stat"><div class="math-stat-label">Runs per week</div><div class="math-stat-value">10</div></div>
+        <div class="math-stat"><div class="math-stat-label">Manual time per run</div><div class="math-stat-value">12 min</div></div>
+        <div class="math-stat"><div class="math-stat-label">Manual total / week</div><div class="math-stat-value">120 min</div></div>
+        <div class="math-stat"><div class="math-stat-label">Review per run (automated)</div><div class="math-stat-value">2 min</div></div>
+        <div class="math-stat"><div class="math-stat-label">Upkeep / fixes per week</div><div class="math-stat-value">10 min</div></div>
+        <div class="math-stat"><div class="math-stat-label">One-time setup</div><div class="math-stat-value">4 hrs</div></div>
+      </div>
+
+      <div class="math-options" id="mathOptions">
+        <label class="math-option" data-opt="a"><input type="radio" name="mathQ" value="a"><span><span class="opt-amount">She saves the full 2 hours a week</span> — automation removes the task completely, so there's nothing left to do.</span></label>
+        <label class="math-option" data-opt="b"><input type="radio" name="mathQ" value="b"><span><span class="opt-amount">About 1.5 hours a week</span> — after subtracting review time and upkeep — and the 4-hour setup pays for itself in under three weeks.</span></label>
+        <label class="math-option" data-opt="c"><input type="radio" name="mathQ" value="c"><span><span class="opt-amount">She actually loses time</span> — automation always costs more to maintain than it ever saves.</span></label>
+        <label class="math-option" data-opt="d"><input type="radio" name="mathQ" value="d"><span><span class="opt-amount">There's no way to know</span> — you can't put a real number on automation savings.</span></label>
+      </div>
+
+      <div class="activity-feedback" id="feedback3"></div>
+
+      <div class="breakdown" id="mathBreakdown">
+        <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin:.4rem 0 .6rem">Priya's honest weekly math</h4>
+        <table>
+          <tr><th>Line</th><th style="text-align:right">Time</th></tr>
+          <tr><td>Manual: 10 runs × 12 min</td><td class="num">120 min</td></tr>
+          <tr><td>Automated review: 10 × 2 min</td><td class="num">−20 min</td></tr>
+          <tr><td>Weekly upkeep / fixing breakages</td><td class="num">−10 min</td></tr>
+          <tr><td>Net saved each week</td><td class="num">90 min ≈ 1.5 hrs</td></tr>
+          <tr class="total"><td>4-hr setup ÷ 1.5 hrs saved</td><td class="num">pays back in ~2.7 weeks</td></tr>
+        </table>
+        <div class="tip-note">💡 <strong>The caveat beginners skip:</strong> an automation is never truly "free." You still review its output, and you still fix it when an app updates or an odd input shows up. Count that upkeep honestly and the savings are real but smaller than the hype — a genuine 1.5 hours a week here, not the fantasy 2. Real, repeatable, and worth it.</div>
+      </div>
+
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="checkMath()">Check my answer</button>
+        <button class="btn btn-ghost" onclick="resetMath()">↻ Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: MYTH VS REALITY QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Myth vs. reality — the automation quiz</h2>
+    <p class="lesson-intro">Six questions on how automation really behaves. Every option has an explanation, and the wrong ones are the exact myths that trip up beginners — "set it and forget it," "automate everything," "it thinks for me." Answer all six, then submit for a per-question review.</p>
+
+    <div class="lesson-card">
+      <div id="quizWrap"></div>
+      <div class="activity-feedback" id="feedback4"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="submitQuiz()">Submit answers</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">↻ Reset quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it from "seen" to "known". (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of one small task you do over and over. Write it as a "when X → do Y" sentence — what's the trigger, and what's the action?</div>
+        <textarea placeholder="When a new receipt photo lands in my email, save it to the 'Expenses' folder and add the amount to my sheet. Trigger = ..., action = ..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">"Set it and forget it" is a myth. In your own words, why does even a working automation still need you to check in on it?</div>
+        <textarea placeholder="Because the apps it connects to change, and weird inputs show up that it wasn't built for, so if I never look..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 2 · Designing an Automation</h3>
+      <p>You can think in automations now. Next: designing one end to end. You'll break a manual process into ordered steps, map data from one app to the next, decide where an AI step fits, and plan what happens when something goes wrong.</p>
+      <a href="02-designing-an-automation.html" class="btn btn-primary">Continue to Lesson 2 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+
+/* ─── ACTIVITY 1: Order the flow ─── */
+const FUNNEL = [
+  {stage:'TRIGGER', text:'A new response lands in your intake form — this is the event that starts the whole automation.', color:'#5B8FE0', pct:'the event that starts it', hint:'Nothing runs until something happens. The very first step is the TRIGGER — the event the automation waits for.'},
+  {stage:'CONDITION', text:'The flow checks a rule: is this message actually a support request, and not spam or an empty submission?', color:'#7C7BD8', pct:'the yes/no check', hint:'Right after the trigger fires, a good automation asks a yes/no question before doing any work. That is the CONDITION.'},
+  {stage:'ACTION · EXTRACT', text:'It pulls out the sender\'s name, email, and the issue into clean, separate fields.', color:'#E89B2E', pct:'first action', hint:'Once the check passes, the actions begin. The first is to tidy the raw input into usable fields before anything else can use them.'},
+  {stage:'ACTION · CREATE', text:'It creates a ticket in your tracker using those fields, so the request is logged and nothing is lost.', color:'#E87A2E', pct:'second action', hint:'You can only create a clean ticket after you\'ve extracted the fields. Record the request before you reply to it.'},
+  {stage:'ACTION · NOTIFY', text:'It sends the person an automatic "we\'ve got your request" reply — the last step, once everything else is done.', color:'#4CAF50', pct:'final action', hint:'Reply last, only after the request is logged. Confirming receipt is the final action in the flow.'}
+];
+let funnelNext = 0;
+function renderFunnel(){
+  funnelNext = 0;
+  const order = shuffle(FUNNEL.map((_,i)=>i));
+  $('funnelPool').innerHTML = order.map(i=>`<div class="chain-chip" data-step="${i}" onclick="clickFunnel(${i})"><b style="color:var(--orange);font-size:.7rem;letter-spacing:.05em">${FUNNEL[i].stage}</b><br>${FUNNEL[i].text}</div>`).join('');
+  $('funnelSlots').innerHTML = FUNNEL.map((_,i)=>`
+    <div class="chain-slot" id="fslot${i}">
+      <span class="chain-slot-num">${i+1}</span>
+      <span class="chain-slot-text">Step ${i+1}…</span>
+    </div>`).join('');
+  $('funnelVis').className = 'funnel-vis';
+  $('funnelHint').className = 'chain-hintbox';
+  $('feedback1').className = 'activity-feedback';
+}
+function clickFunnel(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('funnelHint');
+  if(!chip || chip.classList.contains('used')) return;
+  if(i !== funnelNext){
+    chip.classList.remove('shake'); void chip.offsetWidth; chip.classList.add('shake');
+    hintBox.className = 'chain-hintbox show';
+    hintBox.innerHTML = `<strong>Not yet.</strong> That step comes later. Think about step ${funnelNext+1}: ${FUNNEL[funnelNext].hint}`;
+    setTimeout(()=>chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('fslot'+i);
+  slot.classList.add('filled');
+  slot.querySelector('.chain-slot-text').innerHTML = `<b style="color:#256B29;font-size:.7rem;letter-spacing:.05em">${FUNNEL[i].stage}</b><br>${FUNNEL[i].text}`;
+  hintBox.className = 'chain-hintbox';
+  funnelNext++;
+  if(funnelNext >= FUNNEL.length){
+    $('funnelVis').className = 'funnel-vis show';
+    $('funnelVis').innerHTML = FUNNEL.map((f,i)=>{
+      return `<div class="funnel-band" style="width:100%;background:${f.color}">${f.stage} <small>${f.pct}</small></div>`;
+    }).join('');
+    const fb = $('feedback1');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>Flow complete — TRIGGER → CONDITION → EXTRACT → CREATE → NOTIFY.</strong> Read it as one sentence: <em>"when a form response arrives, if it's a real request, extract the details, log a ticket, then reply."</em> Every automation you'll ever build is this same shape — one event, an optional check, and actions in a deliberate order. Get the order wrong and you reply before you've even logged the request.`;
+    $('prog1').classList.add('done');
+  }
+}
+function resetFunnel(){
+  renderFunnel();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Classify the task ─── */
+const TOOLS = [
+  {id:'t1', text:'Every time an <b>invoice PDF arrives by email</b>, save it to the right folder and log the amount in a spreadsheet.', bucket:'auto', hint:'Repetitive, rule-based, and happens constantly — the textbook case for a fixed automation.'},
+  {id:'t2', text:'Send every <b>new subscriber</b> the same welcome message and tag them by which page they signed up from.', bucket:'auto', hint:'Same steps every time, high volume, no judgment needed — automate it.'},
+  {id:'t3', text:'Read a <b>messy, free-text request</b>, work out what the person actually needs, and draft a tailored reply that varies each time.', bucket:'agent', hint:'The steps change with every message and need reasoning — that\'s agent work, not a fixed rule.'},
+  {id:'t4', text:'<b>Research ten companies</b> from scratch, summarise each, and decide which three are worth a closer look.', bucket:'agent', hint:'Open-ended, judgment-heavy, and different each run — hand this to an agent, not a rigid script.'},
+  {id:'t5', text:'Give final sign-off on <b>releasing a large payment</b> to a new supplier.', bucket:'manual', hint:'High-stakes and hard to undo — keep a human in charge, even though the surrounding steps could be automated.'},
+  {id:'t6', text:'Choose <b>which candidate to hire</b> after a round of interviews.', bucket:'manual', hint:'Rare, consequential, and deeply human — this is judgment that shouldn\'t be handed off.'}
+];
+const TOOL_BUCKET_NAMES = {auto:'Automate it', agent:'Hand it to an agent', manual:'Keep it manual'};
+let toolsPlaced = {};
+function renderTools(){
+  toolsPlaced = {};
+  const list = $('toolList');
+  list.innerHTML = shuffle(TOOLS).map(s=>`
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+    </div>`).join('');
+  list.querySelectorAll('.scenario-card').forEach(card=>{
+    card.addEventListener('dragstart', e=>{ e.dataTransfer.setData('id', card.dataset.id); card.classList.add('dragging'); });
+    card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('#activity-2 .bucket-drop').forEach(d=>d.innerHTML='');
+  $('feedback2').className = 'activity-feedback';
+}
+function setupToolBuckets(){
+  document.querySelectorAll('#activity-2 .bucket').forEach(b=>{
+    b.addEventListener('dragover', e=>{ e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', ()=>b.classList.remove('drag-over'));
+    b.addEventListener('drop', e=>{
+      e.preventDefault(); b.classList.remove('drag-over');
+      handleToolDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function handleToolDrop(id, bucket){
+  const tool = TOOLS.find(s=>s.id===id);
+  if(!tool || toolsPlaced[id]) return;
+  const correct = tool.bucket === bucket;
+  toolsPlaced[id] = {bucket, correct};
+  const card = document.querySelector(`#activity-2 .scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct?'correct':'wrong');
+  const dropZone = document.querySelector(`#activity-2 [data-drop="${bucket}"]`);
+  const plain = tool.text.replace(/<[^>]+>/g,'');
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct?'correct':'wrong');
+  pill.textContent = (correct?'✓ ':'✗ ') + plain.substring(0,40) + (plain.length>40?'…':'');
+  pill.title = correct ? tool.hint : `Correct bucket: ${TOOL_BUCKET_NAMES[tool.bucket]}. ${tool.hint}`;
+  dropZone.appendChild(pill);
+  checkToolsDone();
+}
+function checkToolsDone(){
+  if(Object.keys(toolsPlaced).length === TOOLS.length){
+    const right = Object.values(toolsPlaced).filter(p=>p.correct).length;
+    const fb = $('feedback2');
+    if(right === TOOLS.length){
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six sorted correctly.</strong> See the test: is the task <em>the same every time</em> (automate it), <em>different and judgment-heavy</em> (agent), or <em>rare and high-stakes</em> (keep it manual)? The most expensive mistakes come from forcing a rigid automation onto judgment work, or leaving obvious, repetitive drudgery on your own plate. Match the task to the tool.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover any red pill for the right bucket and why. Ask three quick questions: are the steps <em>identical every time</em> (automate), do they <em>vary and need reasoning</em> (agent), or is it <em>rare and consequential</em> (manual)? Hit <em>Try again</em> for a fresh shuffle.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetTools(){
+  renderTools();
+  $('prog2').classList.remove('done');
+}
+function showAnswersTools(){
+  TOOLS.forEach(s=>{ if(!toolsPlaced[s.id]) handleToolDrop(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 3: Time-saved math ─── */
+const MATH_FB = {
+  a:`<strong>Too optimistic — that's the hype number.</strong> Yes, the manual task was 120 minutes a week. But automation doesn't make it vanish: you still spend ~2 minutes reviewing each of the 10 runs (20 min) and ~10 minutes a week fixing breakages. The honest saving is 120 − 30 = 90 minutes, about 1.5 hours — real, but not the full two. Try again.`,
+  b:`<strong>Correct — and honest about the caveats.</strong> Manual was 10 × 12 = 120 min/week. Automated, you still spend 10 × 2 = 20 min reviewing plus ~10 min of upkeep = 30 min. Net saving = 90 min ≈ <strong>1.5 hours a week</strong>. The 4-hour setup ÷ 1.5 hours saved ≈ <strong>2.7 weeks</strong> to pay back. Scroll the breakdown below.`,
+  c:`<strong>Too pessimistic.</strong> Upkeep is real — 10 minutes a week here — but it's far less than the 120 minutes the manual task used to cost. After review and fixes she still nets ~90 minutes a week. Automation <em>can</em> cost more than it saves, but only when upkeep is high or the task is rare; that's not the case here. Try again.`,
+  d:`<strong>You absolutely can estimate it.</strong> Saving = manual time − (review time + upkeep). That's 120 − (20 + 10) = 90 min/week. And payback = setup ÷ weekly saving = 4 hrs ÷ 1.5 hrs ≈ 2.7 weeks. Every number you need is on the card. Try again.`
+};
+function checkMath(){
+  const picked = document.querySelector('input[name="mathQ"]:checked');
+  const fb = $('feedback3');
+  if(!picked){
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>Pick one of the four options first</strong>, then hit "Check my answer".`;
+    return;
+  }
+  const val = picked.value;
+  document.querySelectorAll('#activity-3 .math-option').forEach(o=>o.classList.remove('reveal-right','reveal-wrong'));
+  if(val === 'b'){
+    document.querySelector('#activity-3 .math-option[data-opt="b"]').classList.add('reveal-right');
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = MATH_FB.b;
+    $('mathBreakdown').className = 'breakdown show';
+    $('prog3').classList.add('done');
+  } else {
+    document.querySelector(`#activity-3 .math-option[data-opt="${val}"]`).classList.add('reveal-wrong');
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = MATH_FB[val];
+  }
+}
+function resetMath(){
+  document.querySelectorAll('input[name="mathQ"]').forEach(r=>r.checked=false);
+  document.querySelectorAll('#activity-3 .math-option').forEach(o=>o.classList.remove('reveal-right','reveal-wrong'));
+  $('feedback3').className = 'activity-feedback';
+  $('mathBreakdown').className = 'breakdown';
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Myth vs reality quiz ─── */
+const QUIZ = [
+  {q:'"Set it and forget it" — once an automation works, you never have to touch it again. Myth or reality?',
+   opts:['Reality: a good automation runs forever, untouched','Myth: the apps it connects to change and odd inputs appear, so it needs monitoring and upkeep','Reality, but only for paid tools','Myth, because every automation breaks within a day'], ans:1,
+   why:'Automations depend on other apps and on the shape of their inputs. Both drift over time, so working automations still need occasional monitoring and maintenance. "Set it and check on it" is the honest version.'},
+  {q:'What makes a task a good fit for a simple automation?',
+   opts:['It\'s rare, high-stakes, and needs human judgment','It\'s repetitive, rule-based, and happens often','It\'s emotional and sensitive','It looks different every single time'], ans:1,
+   why:'Fixed automations shine when the same steps repeat on clear rules at decent volume. Rare, judgment-heavy, or high-stakes work belongs with a human — or, if the steps vary but can be reasoned through, an agent.'},
+  {q:'"Automate everything you possibly can" is...',
+   opts:['Great advice — more automation is always better','A trap: automating judgment work just makes confident mistakes at scale','The only way to save time','Impossible, so ignore it'], ans:1,
+   why:'Automation amplifies whatever you point it at. Aim it at rule-based drudgery and it saves hours; force it onto work that needs judgment and it repeats the wrong decision quickly and quietly. Automate the right things, not everything.'},
+  {q:'What\'s the honest cost of an automation that people forget to count?',
+   opts:['There is no ongoing cost once it\'s built','The setup time, plus ongoing review and upkeep when things break','Only the monthly software fee','Nothing at all if you use AI'], ans:1,
+   why:'Beyond the one-time setup, you still review outputs and fix the flow when an app updates or a strange input appears. Counting that upkeep is what turns a fantasy saving into a real, trustworthy one.'},
+  {q:'"Automation will do my thinking for me." Myth or reality?',
+   opts:['Reality: you can stop making decisions','Myth: it handles the repetitive steps so you can spend your judgment where it actually matters','Reality: the automation decides everything','Myth: automation can\'t do anything useful'], ans:1,
+   why:'Automation removes the boring, repeatable parts — it doesn\'t replace judgment. Used well, it clears your plate so your attention goes to the decisions that genuinely need a person.'},
+  {q:'A task is repetitive and rule-based, but one mistake would send a large sum to the wrong account. What\'s the wise move?',
+   opts:['Fully automate it — it\'s rule-based, so it\'s safe','Automate the steps but require a human to approve before the money actually moves','Keep it 100% manual forever','Never touch it at all'], ans:1,
+   why:'"Rule-based" makes it automatable, but "hard to undo" means the risky step needs a human checkpoint. Automate the preparation, then pause for approval before the irreversible action. You\'ll design exactly these fallback points in Lesson 2.'}
+];
+function renderQuiz(){
+  $('quizWrap').innerHTML = QUIZ.map((item,i)=>`
+    <div class="quiz-q" id="qq${i}">
+      <div class="quiz-q-head"><span class="quiz-q-num">Q${i+1}</span><span class="quiz-q-text">${item.q}</span></div>
+      ${item.opts.map((o,j)=>`
+        <label class="quiz-opt"><input type="radio" name="quiz${i}" value="${j}"><span>${o}</span></label>`).join('')}
+      <div class="quiz-review" id="qr${i}"></div>
+    </div>`).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function submitQuiz(){
+  const fb = $('feedback4');
+  const answers = QUIZ.map((_,i)=>{
+    const sel = document.querySelector(`input[name="quiz${i}"]:checked`);
+    return sel ? +sel.value : null;
+  });
+  const blank = answers.filter(a=>a===null).length;
+  if(blank>0){
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>${blank} question${blank>1?'s':''} unanswered.</strong> Guessing is allowed, blank is not — answer everything and submit again.`;
+    return;
+  }
+  let score=0;
+  QUIZ.forEach((item,i)=>{
+    const card=$('qq'+i), rev=$('qr'+i);
+    card.classList.remove('right','miss');
+    if(answers[i]===item.ans){
+      score++; card.classList.add('right');
+      rev.className='quiz-review show good'; rev.innerHTML='✓ Correct. '+item.why;
+    } else {
+      card.classList.add('miss');
+      rev.className='quiz-review show bad';
+      rev.innerHTML=`✗ The answer is "<strong>${item.opts[item.ans]}</strong>". ${item.why}`;
+    }
+  });
+  if(score===QUIZ.length){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>'+score+' of '+QUIZ.length+' — you can tell hype from reality.</strong> Automations need upkeep, they fit repetitive rule-based work, they don\'t replace judgment, and high-stakes steps still need a human. That honest mindset is the frame the rest of Week 4 builds on.';
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${score} of ${QUIZ.length} — read the red notes.</strong> These myths repeat all week, so a few minutes here pays off in every lesson that follows. Reset and aim for a clean sweep.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderFunnel();
+  renderTools();
+  setupToolBuckets();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

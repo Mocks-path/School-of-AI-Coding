@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3 · Building Your First Automation — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── CONCEPT PRIMER CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr 1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.6rem;font-size:.9rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card:nth-child(4) .compare-icon{background:linear-gradient(135deg,#8E6BC0,#6D4BA0)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.78rem;color:var(--text-secondary);line-height:1.5}
+
+/* ── ACTIVITY 1: ASSEMBLE AI-STEP INSTRUCTION (drag to slots) ── */
+.email-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.email-wrap{grid-template-columns:1fr}}
+.email-pool{display:flex;flex-direction:column;gap:.6rem}
+.email-part-group{margin-bottom:.4rem}
+.email-part-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.4rem}
+.email-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.8rem;line-height:1.45;cursor:grab;transition:all .2s;user-select:none}
+.email-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.email-chip.dragging{opacity:.4}
+.email-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.email-slots{background:var(--bg-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem}
+.email-slot{border:2px dashed var(--border);border-radius:6px;padding:.65rem .8rem;min-height:52px;margin-bottom:.6rem;font-size:.8rem;color:var(--text-muted);transition:all .25s;background:var(--bg-card)}
+.email-slot.drag-over{border-color:var(--orange);background:var(--orange-glow)}
+.email-slot.filled{border-style:solid;border-color:var(--green);background:#fff;color:var(--text-primary)}
+.email-slot.wrongfill{border-color:var(--red);background:var(--red-light)}
+.email-slot-tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--orange);letter-spacing:.05em;margin-bottom:.3rem}
+.email-slot.filled .email-slot-tag{color:#256B29}
+
+/* ── ACTIVITY 2: BUILD LOOP (click order) ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.82rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 3: BUILD-APPROACH JUDGE ── */
+.judge-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.judge-card.right{border-color:var(--green)}
+.judge-card.miss{border-color:var(--red)}
+.judge-scen{font-size:.88rem;font-weight:600;color:var(--navy);line-height:1.5;margin-bottom:.75rem}
+.judge-scen .qn{font-family:var(--mono);font-size:.7rem;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;margin-right:.5rem}
+.judge-scen .subj{display:block;font-family:var(--mono);font-size:.78rem;font-weight:400;color:var(--text-secondary);background:var(--bg-light);border:1px solid var(--border);border-radius:6px;padding:.5rem .7rem;margin-top:.5rem}
+.judge-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.judge-btn{padding:.45rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--bg-card);font-size:.76rem;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-secondary)}
+.judge-btn:hover{border-color:var(--orange);color:var(--orange)}
+.judge-btn:disabled{cursor:not-allowed;opacity:.6}
+.judge-btn.picked-right{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.judge-btn.picked-wrong{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+.judge-btn.reveal-right{border-color:var(--green);color:#1F5723}
+.judge-explain{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;color:var(--text-secondary);border-top:1px dashed var(--border);padding-top:.6rem}
+.judge-explain.show{display:block;animation:fadeIn .3s ease}
+.judge-verdict{font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+.judge-verdict.v-right{color:#256B29}.judge-verdict.v-miss{color:#A03A2C}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.quiz-q.right{border-color:var(--green)}
+.quiz-q.miss{border-color:var(--red)}
+.quiz-q-head{display:flex;gap:.7rem;align-items:baseline;margin-bottom:.7rem}
+.quiz-q-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;flex-shrink:0}
+.quiz-q-text{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.5}
+.quiz-q-text .flow{display:block;font-family:var(--mono);font-size:.76rem;font-weight:400;color:var(--text-secondary);background:var(--bg-light);border:1px solid var(--border);border-radius:6px;padding:.55rem .75rem;margin-top:.55rem;line-height:1.6}
+.quiz-opt{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .6rem;border-radius:6px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);line-height:1.45;transition:background .15s}
+.quiz-opt:hover{background:var(--bg-light)}
+.quiz-opt input{margin-top:.25rem;accent-color:var(--orange);cursor:pointer}
+.quiz-review{font-size:.76rem;line-height:1.55;margin-top:.6rem;padding:.6rem .8rem;border-radius:6px;display:none}
+.quiz-review.show{display:block;animation:fadeIn .3s ease}
+.quiz-review.good{background:var(--green-light);color:#1F5723}
+.quiz-review.bad{background:#FFF4E5;color:#7A4A0A}
+
+/* ── REFLECT / FOOTER ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 3 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 4 · AI Automation</div>
+  <h1>Building Your First Automation — <em>one step at a time, tested with real data</em></h1>
+  <p class="hero-sub">Four hands-on activities. Write a crisp instruction for an AI step, build a flow the safe way (one step, tested, then the next), pick the simplest tool that fits the job, and trace what a flow really does with a given input. No code required — just clear thinking.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: WRITE A GOOD AI-STEP INSTRUCTION ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Write an AI step the flow can actually rely on</h2>
+    <p class="lesson-intro">Dropping an AI step into an automation is powerful — but the flow around it is dumb machinery that just passes text along. So the AI step needs four things spelled out: the exact <strong>input</strong> it reads, a clear <strong>instruction</strong>, the precise <strong>output format</strong> the next step expects, and a <strong>fallback</strong> for when it's unsure. For each slot, drag in the version that's <em>specific</em> — and skip the vague trap that reads fine to a human but leaves a machine guessing.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">1</div>
+        <h4>Input</h4>
+        <p>Name the <em>exact</em> field the AI should read — not "the whole thing". Point at one piece of data.</p>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">2</div>
+        <h4>Instruction</h4>
+        <p>One clear task with named choices. "Classify as A, B, or C" beats "sort this out somehow".</p>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">3</div>
+        <h4>Output format</h4>
+        <p>The exact shape the next step needs. Pin it down: one word, lowercase, nothing else.</p>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">4</div>
+        <h4>Fallback</h4>
+        <p>What to do when unsure. A safe default beats letting the AI invent something new.</p>
+      </div>
+    </div>
+    <div class="tip-note" style="margin-bottom:.5rem">💡 <strong>The trap is vagueness that sounds friendly:</strong> "just figure out what matters" is a fine thing to say to a colleague and a terrible thing to hand a machine. The next step in the flow can only work with an <em>exact</em> shape of answer. Build the specific version below.</div>
+
+    <div class="lesson-card">
+      <div class="email-wrap">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Pick the specific version of each part</h4>
+          <div class="email-pool" id="emailPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Your AI-step instruction</h4>
+          <div class="email-slots" id="emailSlots"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetEmail()">↻ Start over</button>
+      </div>
+      <div class="tip-note">💡 <strong>Why the format line matters most:</strong> the flow after the AI step usually branches on an exact value ("if it equals <span style="font-family:var(--mono)">billing</span>…"). If the AI answers "This looks like a billing question!" instead of the single word <span style="font-family:var(--mono)">billing</span>, that branch silently never fires. Pin the format and the rest of the flow becomes predictable.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: ORDER THE BUILD LOOP ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Build it the safe way — one step, tested, then the next</h2>
+    <p class="lesson-intro">Beginners build the whole flow, hit "run", and get a wall of errors with no idea which step broke. Pros build in a tight loop: add <em>one</em> step, run it with real sample data, check the output, and only then add the next. The five moves below are shuffled — click them in the order a careful builder actually works. A wrong click nudges you.</p>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Shuffled moves — click the next one</h4>
+          <div class="chain-pool" id="seqPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">The build loop, in order</h4>
+          <div class="chain-slots" id="seqSlots"></div>
+        </div>
+      </div>
+      <div class="chain-hintbox" id="seqHint"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetSeq()">↻ Reset the loop</button>
+      </div>
+      <div class="tip-note">💡 <strong>The loop repeats:</strong> add → run with real data → check → add the next. Each new step is built on an output you've already <em>seen</em> and trust, so when something breaks you know it was the step you just added. Only when the whole chain passes on real data do you turn it on — carefully, and watching the first live runs.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: BUILD-APPROACH JUDGE ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Which tool fits? — simplest that does the job wins</h2>
+    <p class="lesson-intro">Three broad kinds of tool handle almost everything: a <strong>simple connector</strong> (one trigger, one or two actions), a <strong>visual multi-step builder</strong> (branches, filters, several apps, an AI step — no code), and a <strong>code-capable tool</strong> (for logic the builder can't express). The skill isn't picking the fanciest — it's picking the <em>simplest tool that fits</em>. Judge each job.</p>
+
+    <div class="lesson-card">
+      <div id="judgeGrid"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetJudge()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Trace the flow — the quiz</h2>
+    <p class="lesson-intro">Six questions. Most give you a small flow and an input and ask: <em>what actually happens?</em> — because reading a flow like a machine is the core skill. A few test the habits from this lesson. Answer all six, then submit for a per-question review.</p>
+
+    <div class="lesson-card">
+      <div id="quizWrap"></div>
+      <div class="activity-feedback" id="feedback4"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="submitQuiz()">Submit answers</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">↻ Reset quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it from "seen" to "known". (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">In your own words, why does building one step at a time — and running each with real data — beat building the whole flow and testing at the end?</div>
+        <textarea placeholder="Because when something breaks I know it was the step I just added, instead of hunting through a whole flow..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">An AI step needs its output format pinned down. What goes wrong downstream if you leave it vague?</div>
+        <textarea placeholder="The next step branches on an exact value, so if the AI answers in a slightly different shape the branch never fires and..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 4 · Reliability, Monitoring &amp; Scaling</h3>
+      <p>You can build a working flow. The last lesson is about keeping it working when you're not watching: what breaks, how to catch it, when to retry versus call a human, and how to spot the quietest and most dangerous failure of all — the one that fails in silence.</p>
+      <a href="04-reliable-automations-at-scale.html" class="btn btn-primary">Continue to Lesson 4 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+
+/* ─── ACTIVITY 1: Assemble an AI-step instruction (drag specific version into each slot) ─── */
+const EMAIL_PARTS = [
+  {slot:0, tag:'INPUT', good:{id:'p0g', text:'"Read the text in the <b>message</b> field of the contact-form submission."'}, bad:{id:'p0b', text:'"Just look at the whole email and figure out what actually matters here."'}},
+  {slot:1, tag:'INSTRUCTION', good:{id:'p1g', text:'"Classify the message as one of exactly three categories: billing, technical, or general."'}, bad:{id:'p1b', text:'"Read it and sort it out however seems best to you."'}},
+  {slot:2, tag:'OUTPUT FORMAT', good:{id:'p2g', text:'"Reply with exactly one lowercase word — billing, technical, or general — and nothing else."'}, bad:{id:'p2b', text:'"Write back however you like; a friendly sentence or two is totally fine."'}},
+  {slot:3, tag:'FALLBACK', good:{id:'p3g', text:'"If the message does not clearly fit, return general. Never invent a new category."'}, bad:{id:'p3b', text:'"If you are unsure, just take your best guess and make up a label that feels right."'}}
+];
+let emailFilled = {};
+function renderEmail(){
+  emailFilled = {};
+  const chips = [];
+  EMAIL_PARTS.forEach(p=>{
+    chips.push({id:p.good.id, slot:p.slot, correct:true, tag:p.tag, text:p.good.text});
+    chips.push({id:p.bad.id, slot:p.slot, correct:false, tag:p.tag, text:p.bad.text});
+  });
+  $('emailPool').innerHTML = shuffle(chips).map(c=>`
+    <div class="email-chip" draggable="true" data-id="${c.id}" data-slot="${c.slot}" data-correct="${c.correct}">${c.text}</div>`).join('');
+  $('emailPool').querySelectorAll('.email-chip').forEach(chip=>{
+    chip.addEventListener('dragstart', e=>{ e.dataTransfer.setData('id', chip.dataset.id); chip.classList.add('dragging'); });
+    chip.addEventListener('dragend', ()=>chip.classList.remove('dragging'));
+  });
+  $('emailSlots').innerHTML = EMAIL_PARTS.map(p=>`
+    <div class="email-slot" data-slot="${p.slot}">
+      <span class="email-slot-tag">${p.tag}</span>
+      <span class="email-slot-body">Drag the specific version here…</span>
+    </div>`).join('');
+  $('emailSlots').querySelectorAll('.email-slot').forEach(slot=>{
+    slot.addEventListener('dragover', e=>{ e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', ()=>slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', e=>{ e.preventDefault(); slot.classList.remove('drag-over'); dropEmail(e.dataTransfer.getData('id'), slot); });
+  });
+  $('feedback1').className = 'activity-feedback';
+}
+function dropEmail(id, slot){
+  const chip = document.querySelector(`.email-chip[data-id="${id}"]`);
+  if(!chip || chip.classList.contains('used')) return;
+  const chipSlot = +chip.dataset.slot;
+  const targetSlot = +slot.dataset.slot;
+  if(chipSlot !== targetSlot){
+    slot.classList.add('wrongfill');
+    setTimeout(()=>slot.classList.remove('wrongfill'), 500);
+    return; // belongs to a different part
+  }
+  const correct = chip.dataset.correct === 'true';
+  if(!correct){
+    slot.classList.add('wrongfill');
+    const body = slot.querySelector('.email-slot-body');
+    body.innerHTML = '<span style="color:#A03A2C">Too vague for a machine — try the specific version for this part.</span>';
+    setTimeout(()=>{ slot.classList.remove('wrongfill'); if(!emailFilled[targetSlot]) body.textContent='Drag the specific version here…'; }, 1400);
+    return;
+  }
+  emailFilled[targetSlot] = true;
+  chip.classList.add('used');
+  slot.classList.add('filled');
+  slot.querySelector('.email-slot-body').innerHTML = chip.innerHTML;
+  if(Object.keys(emailFilled).length === EMAIL_PARTS.length){
+    const fb = $('feedback1');
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>Instruction assembled — input → instruction → format → fallback.</strong> Read it back: it points at one exact field, gives a task with named choices, pins the answer to a single lowercase word, and has a safe default for the messy cases. Compare the vague versions you skipped — each sounds perfectly reasonable to a person and leaves a machine guessing. That gap is where flaky automations are born.';
+    $('prog1').classList.add('done');
+  }
+}
+function resetEmail(){
+  renderEmail();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Order the build loop ─── */
+const SEQ = [
+  {label:'Step 1 · Add ONE step', text:'Drop a single step onto the empty canvas — the trigger, or just the first action. Not the whole flow.', hint:'Start with exactly one step. Building the entire flow before testing anything is the classic beginner trap.'},
+  {label:'Step 2 · Run it with real sample data', text:'Feed it one realistic example — an actual test form submission — and run just this step.', hint:'Before adding anything else, run the step you just built with a real example, so you see what it truly does.'},
+  {label:'Step 3 · Check the output', text:'Look at exactly what came out. Is it the shape and value the next step will need? Fix it now if not.', hint:'Inspect the actual output. Confirm it is correct and in the right shape before you build on top of it.'},
+  {label:'Step 4 · Add the next step', text:'Only once this one is proven, wire the next step onto its output — then repeat the loop from step 2.', hint:'Now — and only now — add the next step, connecting it to an output you have already checked and trust.'},
+  {label:'Step 5 · Turn it on carefully', text:'When the whole chain passes on real data, switch it live — then watch the first real runs closely.', hint:'The final move is going live: flip it on for real traffic and keep an eye on the first genuine runs.'}
+];
+let seqNext = 0;
+function renderSeq(){
+  seqNext = 0;
+  const order = shuffle(SEQ.map((_,i)=>i));
+  $('seqPool').innerHTML = order.map(i=>`<div class="chain-chip" data-step="${i}" onclick="clickSeq(${i})"><b style="color:var(--orange);font-size:.72rem">${SEQ[i].label}</b><br>${SEQ[i].text}</div>`).join('');
+  $('seqSlots').innerHTML = SEQ.map((_,i)=>`
+    <div class="chain-slot" id="sslot${i}">
+      <span class="chain-slot-num">${i+1}</span>
+      <span class="chain-slot-text">Move ${i+1}…</span>
+    </div>`).join('');
+  $('seqHint').className = 'chain-hintbox';
+  $('feedback2').className = 'activity-feedback';
+}
+function clickSeq(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('seqHint');
+  if(!chip || chip.classList.contains('used')) return;
+  if(i !== seqNext){
+    chip.classList.remove('shake'); void chip.offsetWidth; chip.classList.add('shake');
+    hintBox.className='chain-hintbox show';
+    hintBox.innerHTML=`<strong>Not yet.</strong> That move comes later. Think about move ${seqNext+1}: ${SEQ[seqNext].hint}`;
+    setTimeout(()=>chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('sslot'+i);
+  slot.classList.add('filled');
+  slot.querySelector('.chain-slot-text').innerHTML = `<b style="color:#256B29;font-size:.72rem">${SEQ[i].label}</b><br>${SEQ[i].text}`;
+  hintBox.className='chain-hintbox';
+  seqNext++;
+  if(seqNext >= SEQ.length){
+    const fb = $('feedback2');
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>Build loop complete — add, run, check, add, then go live.</strong> This rhythm feels slower and is dramatically faster overall, because you never debug a five-step mystery. Every step stands on an output you have already seen with your own eyes. The people who "build it all then run it" spend their time hunting for which of five things broke; you spend yours shipping.';
+    $('prog2').classList.add('done');
+  }
+}
+function resetSeq(){
+  renderSeq();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Build-approach judge (three-way) ─── */
+const JUDGE_OPTS = [
+  {key:'connector', label:'Simple connector'},
+  {key:'builder', label:'Visual multi-step builder'},
+  {key:'code', label:'Code-capable tool'}
+];
+const JUDGE_LABELS = {connector:'a simple connector', builder:'a visual multi-step builder', code:'a code-capable tool'};
+const JUDGE = [
+  {scen:'When a new file lands in a shared folder, copy it to a backup folder. Nothing else.', answer:'connector',
+   e:'A simple connector. This is a single trigger and a single action with no logic in between — the textbook case for the lightest tool. Reaching for a full builder or code here is over-engineering; the simplest tool that fits wins.'},
+  {scen:'When a contact form comes in: drop obvious spam, use an AI step to classify the message, send billing ones to the finance inbox and everything else to support, and log every case in a spreadsheet.', answer:'builder',
+   e:'A visual multi-step builder. You have a filter, an AI step, a branch, and several apps — real logic across multiple steps, but nothing that needs custom code. This is exactly the sweet spot a visual builder was made for.'},
+  {scen:'You must reconcile two large exports every night, matching records with fuzzy name-and-address logic and a custom scoring rule that a drag-and-drop builder simply cannot express.', answer:'code',
+   e:'A code-capable tool. Fuzzy matching with a bespoke scoring rule is beyond what visual blocks can do. When the logic genuinely outgrows the builder, that is the signal to step up to code — not before.'},
+  {scen:'When a support email arrives, use an AI step to draft a reply, pause for a teammate to approve or edit it, then send the approved version and log it.', answer:'builder',
+   e:'A visual multi-step builder. An AI step, a human-approval pause, a send, and a log — multiple steps with a checkpoint, but no custom code required. A visual builder handles this cleanly; a plain connector could not manage the approval step.'}
+];
+let judgeAns = {};
+function renderJudge(){
+  judgeAns = {};
+  $('judgeGrid').innerHTML = JUDGE.map((j,i)=>`
+    <div class="judge-card" id="jc${i}">
+      <div class="judge-scen"><span class="qn">Job ${i+1}</span>${j.scen}</div>
+      <div class="judge-btns">
+        ${JUDGE_OPTS.map(o=>`<button class="judge-btn" id="jb${i}_${o.key}" onclick="answerJudge(${i},'${o.key}')">${o.label}</button>`).join('')}
+      </div>
+      <div class="judge-explain" id="jex${i}"></div>
+    </div>`).join('');
+  $('feedback3').className = 'activity-feedback';
+}
+function answerJudge(i, choice){
+  if(judgeAns[i]!==undefined) return;
+  const j = JUDGE[i];
+  const right = choice === j.answer;
+  judgeAns[i] = right;
+  const card = $('jc'+i);
+  JUDGE_OPTS.forEach(o=>{ const b=$('jb'+i+'_'+o.key); if(b) b.disabled = true; });
+  const picked = $('jb'+i+'_'+choice);
+  card.classList.add(right?'right':'miss');
+  if(picked) picked.classList.add(right?'picked-right':'picked-wrong');
+  if(!right){ const rb=$('jb'+i+'_'+j.answer); if(rb) rb.classList.add('reveal-right'); }
+  const ex = $('jex'+i);
+  ex.className = 'judge-explain show';
+  ex.innerHTML = `<span class="judge-verdict ${right?'v-right':'v-miss'}">${right?'✓ Correct':'✗ Not quite'} — reach for ${JUDGE_LABELS[j.answer]}.</span><br>${j.e}`;
+  if(Object.keys(judgeAns).length === JUDGE.length){
+    const score = Object.values(judgeAns).filter(Boolean).length;
+    const fb = $('feedback3');
+    if(score === JUDGE.length){
+      fb.className='activity-feedback show success';
+      fb.innerHTML='<strong>4 of 4 — you match the tool to the job.</strong> The ladder is simple: a connector for one-trigger-one-action, a visual builder the moment you need branches, filters, or an AI step, and code only when the logic truly outgrows the builder. Picking the simplest tool that fits keeps your automations easy to read, easy to fix, and easy to hand to someone else.';
+    } else {
+      fb.className='activity-feedback show partial';
+      fb.innerHTML=`<strong>You got ${score} of 4.</strong> Re-read the ones you missed. Ask: how many steps and how much branching? None → a connector. Several steps or an AI step, no custom logic → a visual builder. Logic the builder cannot express → code. Try again.`;
+    }
+    $('prog3').classList.add('done');
+  }
+}
+function resetJudge(){
+  renderJudge();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {q:'Trace it. A flow reads: <span class="flow">WHEN a form is submitted → an AI step labels the message as billing / technical / general → IF label = "billing" send to finance, ELSE send to support.</span> A customer writes asking how to reset their password, and the AI labels it "technical". Where does it go?',
+   opts:['To finance','To support','Nowhere — the flow errors','To both finance and support'], ans:1,
+   why:'Only "billing" goes to finance; the ELSE branch catches everything else. "technical" is not "billing", so it falls to support. Reading a flow means following the exact branch conditions, not the vibe of the message.'},
+  {q:'Trace it. The same flow has a validation step: <span class="flow">IF the AI\'s answer is NOT one of the three allowed words → route to a human instead.</span> For one message the AI returns "I think this is a billing question." What happens?',
+   opts:['It is sent to finance, because it contains the word "billing"','It is routed to a human, because the answer is not exactly one of the allowed words','It is sent to support','It crashes the whole automation'], ans:1,
+   why:'The validation checks for an exact match to an allowed word. "I think this is a billing question." is a whole sentence, not the single word "billing", so it fails validation and goes to a human. This is exactly why you pin the output format — and why a validation step is a good safety net.'},
+  {q:'You built a five-step flow all at once, hit run, and it errors somewhere in the middle. Why is this painful?',
+   opts:['Long flows are always broken','You did not test step by step, so you cannot tell which step\'s output caused the failure','Five steps is too many for any tool','The tool needs to be restarted'], ans:1,
+   why:'Because nothing was checked along the way, the error could originate in any step. Building one step at a time and running each with real data means a failure points straight at the step you just added.'},
+  {q:'Your AI step sometimes returns "billing.", sometimes "Billing", sometimes "This is billing." — and a downstream branch that checks for exactly "billing" keeps missing. The most likely cause?',
+   opts:['The AI is broken and should be removed','Your output-format instruction was not strict enough, so the answer\'s shape varies','The form is sending bad data','The branch condition is impossible to write'], ans:1,
+   why:'When the format is left loose, the AI answers in slightly different shapes each time, and an exact-match branch quietly fails. Pinning the format ("exactly one lowercase word, nothing else") makes the output predictable enough for the next step to rely on.'},
+  {q:'You need: when a file lands in a folder, copy it to a backup folder — nothing else. What is the simplest tool that fits?',
+   opts:['A custom coding project, to be safe','A simple connector — one trigger, one action','A full data pipeline','It cannot be automated'], ans:1,
+   why:'One trigger, one action, no logic in between is the definition of a job for a simple connector. Reaching for code or a heavy builder here just adds complexity you will have to maintain for no benefit.'},
+  {q:'An AI step that summarizes each message suddenly receives a blank submission and returns an empty string, which then gets emailed to a customer as an empty message. The best design fix?',
+   opts:['Hope blank submissions never happen','Add a check before the send: if the AI output is empty or malformed, skip or flag it instead of passing it on','Delete the AI step entirely','Email the customer twice to make up for it'], ans:1,
+   why:'Real inputs are messy — blanks, gibberish, and surprises will arrive. A validation check that catches empty or malformed output and stops or flags it keeps junk from flowing downstream. Handling the unexpected output is part of building the step, not an afterthought.'}
+];
+function renderQuiz(){
+  $('quizWrap').innerHTML = QUIZ.map((item,i)=>`
+    <div class="quiz-q" id="qq${i}">
+      <div class="quiz-q-head"><span class="quiz-q-num">Q${i+1}</span><span class="quiz-q-text">${item.q}</span></div>
+      ${item.opts.map((o,j)=>`
+        <label class="quiz-opt"><input type="radio" name="quiz${i}" value="${j}"><span>${o}</span></label>`).join('')}
+      <div class="quiz-review" id="qr${i}"></div>
+    </div>`).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function submitQuiz(){
+  const fb = $('feedback4');
+  const answers = QUIZ.map((_,i)=>{
+    const sel = document.querySelector(`input[name="quiz${i}"]:checked`);
+    return sel ? +sel.value : null;
+  });
+  const blank = answers.filter(a=>a===null).length;
+  if(blank>0){
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${blank} question${blank>1?'s':''} unanswered.</strong> Guessing is allowed, blank is not — answer everything and submit again.`;
+    return;
+  }
+  let score=0;
+  QUIZ.forEach((item,i)=>{
+    const card=$('qq'+i), rev=$('qr'+i);
+    card.classList.remove('right','miss');
+    if(answers[i]===item.ans){
+      score++; card.classList.add('right');
+      rev.className='quiz-review show good'; rev.innerHTML='✓ Correct. '+item.why;
+    } else {
+      card.classList.add('miss');
+      rev.className='quiz-review show bad';
+      rev.innerHTML=`✗ The answer is "<strong>${item.opts[item.ans]}</strong>". ${item.why}`;
+    }
+  });
+  if(score===QUIZ.length){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>'+score+' of '+QUIZ.length+' — you can read a flow like a machine.</strong> Clear AI-step instructions, the build loop, the simplest tool that fits, and tracing exactly what happens to a given input — that is the whole craft of building an automation you can trust. Next: keeping it trustworthy when nobody is watching.';
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${score} of ${QUIZ.length} — read the red notes.</strong> The misses are usually about following the exact branch or the exact output shape rather than the message\'s vibe — which is precisely how a machine reads a flow. Reset and aim for a clean sweep.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderEmail();
+  renderSeq();
+  renderJudge();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

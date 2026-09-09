@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 4 · Reliability, Monitoring &amp; Scaling — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.55;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── CONCEPT PRIMER CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.2rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-pros{margin-top:.6rem;font-size:.75rem;line-height:1.6;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-pros .pro{color:#2E6B30;display:block}
+.compare-pros .con{color:#A03A2C;display:block}
+
+/* ── ACTIVITY 1: ESCALATION LADDER (click order) ── */
+.chain-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.chain-grid{grid-template-columns:1fr}}
+.chain-pool{display:flex;flex-direction:column;gap:.6rem}
+.chain-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.82rem;line-height:1.5;font-weight:500;cursor:pointer;transition:all .2s;user-select:none;display:flex;gap:.6rem;align-items:flex-start}
+.chain-chip:hover{border-color:var(--orange);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.chain-chip.used{opacity:.3;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.chain-chip.shake{animation:shake .45s;border-color:var(--red);background:var(--red-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.chip-kind{font-family:var(--mono);font-size:.6rem;font-weight:600;padding:.15rem .4rem;border-radius:4px;flex-shrink:0;letter-spacing:.04em;margin-top:.05rem}
+.chip-kind.trigger{background:rgba(232,122,46,.18);color:var(--orange-dark)}
+.chip-kind.action{background:rgba(91,143,224,.18);color:#3159A0}
+.chain-slots{display:flex;flex-direction:column;gap:.5rem}
+.chain-slot{display:flex;align-items:flex-start;gap:.7rem;border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;min-height:46px;font-size:.82rem;line-height:1.5;color:var(--text-muted);transition:all .25s;background:rgba(255,255,255,0.5)}
+.chain-slot.filled{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary)}
+.chain-slot.trigger-slot{border-color:var(--orange)}
+.chain-slot.trigger-slot.filled{border-color:#E89B2E;background:#FFF4E5}
+.chain-slot-num{width:24px;height:24px;border-radius:50%;background:var(--text-muted);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0}
+.chain-slot.filled .chain-slot-num{background:var(--green)}
+.chain-slot.trigger-slot .chain-slot-num{background:var(--orange)}
+.chain-hintbox{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.chain-hintbox.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 2: MATCH BREAKAGE TO FIX (click-pair) ── */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:.5rem}
+@media (max-width:760px){.match-grid{grid-template-columns:1fr}}
+.match-col-title{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.6rem}
+.match-pool{display:flex;flex-direction:column;gap:.55rem}
+.match-item{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem .95rem;font-size:.82rem;line-height:1.45;cursor:pointer;transition:all .2s;user-select:none;font-weight:500}
+.match-item:hover{border-color:var(--orange)}
+.match-item.selected{border-color:var(--orange);background:var(--orange-glow);box-shadow:var(--shadow-sm)}
+.match-item.matched{opacity:.45;pointer-events:none;background:var(--green-light);border-color:var(--green)}
+.match-item.shake{animation:shake .4s;border-color:var(--red);background:var(--red-light)}
+.match-item .m-badge{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.1rem .4rem;border-radius:4px;margin-right:.4rem}
+.match-hint{margin-top:.8rem;padding:.7rem .9rem;background:#FFF4E5;border-left:3px solid #E89B2E;border-radius:4px;font-size:.8rem;color:#7A4A0A;line-height:1.55;display:none}
+.match-hint.show{display:block;animation:fadeIn .3s ease}
+
+/* ── ACTIVITY 3: HUMAN-CHECKPOINT JUDGE ── */
+.judge-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.judge-card.right{border-color:var(--green)}
+.judge-card.miss{border-color:var(--red)}
+.judge-scen{font-size:.88rem;font-weight:600;color:var(--navy);line-height:1.5;margin-bottom:.75rem}
+.judge-scen .qn{font-family:var(--mono);font-size:.7rem;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;margin-right:.5rem}
+.judge-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+.judge-btn{padding:.45rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--bg-card);font-size:.76rem;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-secondary)}
+.judge-btn:hover{border-color:var(--orange);color:var(--orange)}
+.judge-btn:disabled{cursor:not-allowed;opacity:.6}
+.judge-btn.picked-right{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.judge-btn.picked-wrong{background:var(--red);border-color:var(--red);color:#fff;opacity:1}
+.judge-btn.reveal-right{border-color:var(--green);color:#1F5723}
+.judge-explain{display:none;margin-top:.7rem;font-size:.8rem;line-height:1.6;color:var(--text-secondary);border-top:1px dashed var(--border);padding-top:.6rem}
+.judge-explain.show{display:block;animation:fadeIn .3s ease}
+.judge-verdict{font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+.judge-verdict.v-right{color:#256B29}.judge-verdict.v-miss{color:#A03A2C}
+
+/* ── ACTIVITY 4: QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin-bottom:.9rem;transition:border-color .3s}
+.quiz-q.right{border-color:var(--green)}
+.quiz-q.miss{border-color:var(--red)}
+.quiz-q-head{display:flex;gap:.7rem;align-items:baseline;margin-bottom:.7rem}
+.quiz-q-num{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--orange);background:var(--orange-glow);padding:.15rem .5rem;border-radius:4px;flex-shrink:0}
+.quiz-q-text{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.5}
+.quiz-opt{display:flex;align-items:flex-start;gap:.55rem;padding:.5rem .6rem;border-radius:6px;cursor:pointer;font-size:.83rem;color:var(--text-secondary);line-height:1.45;transition:background .15s}
+.quiz-opt:hover{background:var(--bg-light)}
+.quiz-opt input{margin-top:.25rem;accent-color:var(--orange);cursor:pointer}
+.quiz-review{font-size:.76rem;line-height:1.55;margin-top:.6rem;padding:.6rem .8rem;border-radius:6px;display:none}
+.quiz-review.show{display:block;animation:fadeIn .3s ease}
+.quiz-review.good{background:var(--green-light);color:#1F5723}
+.quiz-review.bad{background:#FFF4E5;color:#7A4A0A}
+
+/* ── REFLECT / FOOTER ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 4 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 4 · AI Automation</div>
+  <h1>Reliability, Monitoring &amp; Scaling — <em>build one you can trust to run without you</em></h1>
+  <p class="hero-sub">The final lesson. "Set and forget" is a myth — automations break in normal ways. Build a step that fails gracefully, match each breakage to its real fix, decide what still needs a human's eyes, and finish the week by proving your flow is ready to ship.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: ORDER THE ESCALATION LADDER ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">When a step fails — order the escalation ladder</h2>
+    <p class="lesson-intro">A step that can fail (and every step can) needs a plan for failure. The pros wire in a ladder: try the action, and if it fails, <strong>retry</strong> a few times, then <strong>alert a human</strong>, then <strong>fail safe</strong> so nothing is lost — all of it watched by <strong>monitoring</strong>. Click the blocks in the order a robust step should escalate. A wrong click nudges you.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">↻</div>
+        <h4>Retry</h4>
+        <p>The first response to a failure. Most errors are <strong>temporary</strong> — an app blinked, the network hiccuped. Try again a few times, with a growing wait between tries.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Fixes transient glitches automatically</span>
+          <span class="con">− Retrying forever, or too fast, makes it worse</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">🔔</div>
+        <h4>Alert a human</h4>
+        <p>When retries don't help, <strong>tell someone</strong>. A real problem — a wrong password, a changed field — won't fix itself. A human needs to know, and quickly.</p>
+        <div class="compare-pros">
+          <span class="pro">+ Turns a silent stall into a fixable ticket</span>
+          <span class="con">− Alerting on every hiccup trains people to ignore it</span>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-icon">🛟</div>
+        <h4>Fail safe</h4>
+        <p>Whatever happens, <strong>lose nothing</strong>. Queue the item, mark it "needs attention", and never leave a job half-done. A safe failure beats a messy one every time.</p>
+        <div class="compare-pros">
+          <span class="pro">+ No lost or half-processed data</span>
+          <span class="con">− Costs a little more thought up front</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip-note" style="margin-bottom:.5rem">💡 <strong>Read the ladder as a sentence:</strong> "<em>Try</em> it, <em>retry</em> if it blips, <em>alert</em> a human if it truly won't go, <em>fail safe</em> so the data survives, and <em>monitor</em> the whole thing so you'd notice even total silence." Build exactly that below.</div>
+
+    <div class="lesson-card">
+      <div class="chain-grid">
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Blocks (shuffled) — click the next one</h4>
+          <div class="chain-pool" id="wfPool"></div>
+        </div>
+        <div>
+          <h4 style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.6rem">Your escalation ladder, top to bottom</h4>
+          <div class="chain-slots" id="wfSlots"></div>
+        </div>
+      </div>
+      <div class="chain-hintbox" id="wfHint"></div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetWf()">↻ Reset the ladder</button>
+      </div>
+      <div class="tip-note">💡 <strong>The rule that saves you:</strong> retry the cheap, temporary errors automatically — but only escalate to a human once retries are exhausted, and always preserve the data so a failure is recoverable, not destructive. Try → retry → alert → fail safe, with monitoring over all of it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: MATCH BREAKAGE TO FIX ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">It broke — match each breakage to its real fix</h2>
+    <p class="lesson-intro">Automations fail in a handful of familiar ways, and each has a standard fix. Knowing the pattern turns a panicked "everything's broken" into a calm "ah, that one — here's the fix". Click a breakage on the left, then the fix it calls for. A wrong pair shakes; a right pair locks green.</p>
+
+    <div class="lesson-card">
+      <div class="match-grid">
+        <div>
+          <div class="match-col-title">What went wrong</div>
+          <div class="match-pool" id="matchNotes"></div>
+        </div>
+        <div>
+          <div class="match-col-title">The right fix</div>
+          <div class="match-pool" id="matchActions"></div>
+        </div>
+      </div>
+      <div class="match-hint" id="matchHint"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetMatch()">↻ Reset</button>
+      </div>
+      <div class="tip-note">💡 <strong>Failure is normal; being surprised is the bug.</strong> These five breakages cover most of what you'll ever hit. Once you recognise the pattern, the fix is almost mechanical — and the very worst one to miss is the silent failure, because nothing tells you it happened.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: HUMAN-CHECKPOINT JUDGE ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Ship it, or keep a human in the loop?</h2>
+    <p class="lesson-intro">Automation is safe when a mistake is cheap and reversible — and dangerous when an action is public, irreversible, or moves money. Those actions still deserve a <strong>human checkpoint</strong>: the flow pauses and waits for a person to approve before it acts. Judge each action: safe to run <em>unattended</em>, or does it need a <em>human checkpoint</em>?</p>
+
+    <div class="lesson-card">
+      <div id="judgeGrid"></div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetJudge()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Ready to ship? — the readiness quiz</h2>
+    <p class="lesson-intro">Six questions on the checklist that separates a flow you can trust from one that fails in silence: monitoring, retries, de-duplication, validation, and the human checkpoint. Answer all six, then submit for a per-question review — and the finish line of the course.</p>
+
+    <div class="lesson-card">
+      <div id="quizWrap"></div>
+      <div class="activity-feedback" id="feedback4"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-primary" onclick="submitQuiz()">Submit answers</button>
+        <button class="btn btn-ghost" onclick="resetQuiz()">↻ Reset quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it from "seen" to "known". (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Why is a silent failure — a flow that just stops with no error and no alert — more dangerous than a loud one that emails you an error?</div>
+        <textarea placeholder="Because nobody knows it happened, so it can quietly break for weeks while I assume everything is fine..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Name one action you'd let run fully unattended and one you'd put a human checkpoint on — and what makes them different.</div>
+        <textarea placeholder="I'd let a 'welcome' email send itself because a mistake is cheap. I'd put a checkpoint on issuing refunds because..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Week 4 complete — you can build automations people can trust</h3>
+      <p>Thinking in automations, designing them, building your first working flow, and now keeping it reliable when no one is watching — you can take a repetitive task and turn it into a dependable machine, while knowing exactly where a human still belongs. Revisit any lesson to sharpen an activity, or go wire up your own first flow.</p>
+      <a href="01-thinking-in-automations.html" class="btn btn-primary">Back to Lesson 1 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+
+/* ─── ACTIVITY 1: Order the escalation ladder ─── */
+const WF = [
+  {kind:'trigger', label:'TRY', text:'Attempt the action for real — call the app, send the message, write the record.', hint:'Everything starts with the actual attempt: the step tries to do its real job. Which block is the plain "do the work" one?'},
+  {kind:'action', label:'RETRY', text:'If it fails, retry a few times with a growing wait between tries (a "backoff").', hint:'Most failures are temporary. The first response after a failure is an automatic retry with a growing wait — before you bother a human.'},
+  {kind:'action', label:'ALERT', text:'Still failing after the retries? Alert a human so someone can look — don\'t give up silently.', hint:'Only once retries are exhausted do you escalate. A real problem needs a human to be told, loudly and soon.'},
+  {kind:'action', label:'FAIL SAFE', text:'Meanwhile, preserve the item — queue it or mark it "needs attention" so nothing is lost or half-done.', hint:'Around the alert, protect the data: never drop or half-process the item. A safe, recoverable failure comes before the outer safety net.'},
+  {kind:'action', label:'MONITOR', text:'Log every run and send a periodic heartbeat, so you\'d notice even a flow that goes completely silent.', hint:'The outermost layer is monitoring — logging and a heartbeat that would catch even total silence. It wraps around all the steps above.'}
+];
+let wfNext = 0;
+function renderWf(){
+  wfNext = 0;
+  const order = shuffle(WF.map((_,i)=>i));
+  $('wfPool').innerHTML = order.map(i=>`<div class="chain-chip" data-step="${i}" onclick="clickWf(${i})"><span class="chip-kind ${WF[i].kind}">${WF[i].label}</span><span>${WF[i].text}</span></div>`).join('');
+  $('wfSlots').innerHTML = WF.map((w,i)=>`
+    <div class="chain-slot ${i===0?'trigger-slot':''}" id="wslot${i}">
+      <span class="chain-slot-num">${i===0?'▶':i}</span>
+      <span class="chain-slot-text">${i===0?'The attempt…':'Level '+i+'…'}</span>
+    </div>`).join('');
+  $('wfHint').className = 'chain-hintbox';
+  $('feedback1').className = 'activity-feedback';
+}
+function clickWf(i){
+  const chip = document.querySelector(`.chain-chip[data-step="${i}"]`);
+  const hintBox = $('wfHint');
+  if(!chip || chip.classList.contains('used')) return;
+  if(i !== wfNext){
+    chip.classList.remove('shake'); void chip.offsetWidth; chip.classList.add('shake');
+    hintBox.className='chain-hintbox show';
+    const label = wfNext===0 ? 'the attempt' : 'level '+wfNext;
+    hintBox.innerHTML=`<strong>Not yet.</strong> Next you need ${label}: ${WF[wfNext].hint}`;
+    setTimeout(()=>chip.classList.remove('shake'), 500);
+    return;
+  }
+  chip.classList.add('used');
+  const slot = $('wslot'+i);
+  slot.classList.add('filled');
+  slot.querySelector('.chain-slot-text').innerHTML = `<span class="chip-kind ${WF[i].kind}" style="margin-right:.4rem">${WF[i].label}</span>${WF[i].text}`;
+  hintBox.className='chain-hintbox';
+  wfNext++;
+  if(wfNext >= WF.length){
+    const fb = $('feedback1');
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>Ladder built — try, retry, alert, fail safe, monitor.</strong> Read it as a sentence: <em>do the work → retry the temporary blips → call a human when it truly won\'t go → keep the data safe the whole time → and watch it all so silence never hides a problem.</em> A step wired like this turns "it broke and nobody knew for two weeks" into "it hiccuped, retried, and — when it couldn\'t — pinged someone in minutes with the data intact." That is the difference between a demo and something you can trust.';
+    $('prog1').classList.add('done');
+  }
+}
+function resetWf(){
+  renderWf();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Match breakage to fix ─── */
+const MATCH = [
+  {id:'n1', note:'An app you connect to renamed a field — the value your flow expected now arrives blank.', action:'Re-map the field to its new name, and add an alert so you catch the next rename fast.', hint:'A changed field means your mapping is stale — point it at the new field, and add an alert so the next change surfaces quickly.'},
+  {id:'n2', note:'A trigger double-fired, so the same order got processed — and charged — twice.', action:'Add a de-duplication key so the same event is only ever processed once.', hint:'The same event ran twice. The fix is a de-duplication (idempotency) key so a repeat of the same item is ignored.'},
+  {id:'n3', note:'You\'re calling an app so fast it starts rejecting you with "too many requests" errors.', action:'Batch the requests and back off — slow down and space them out under the limit.', hint:'That is a rate limit. The fix is to batch and back off — send fewer, spaced-out requests instead of hammering the app.'},
+  {id:'n4', note:'An AI step occasionally returns malformed junk, and the flow passes it straight downstream.', action:'Validate the AI output before using it — and stop or flag it if it fails the check.', hint:'Unpredictable AI output needs a gate: validate the shape before use, and catch anything malformed instead of trusting it blindly.'},
+  {id:'n5', note:'A flow quietly stopped running days ago and nobody noticed until a customer complained.', action:'Add monitoring — logging plus a heartbeat that pings you if a run is missed.', hint:'A silent stop is the dangerous one. The fix is monitoring: a heartbeat or success-check that alerts you when a run goes missing.'}
+];
+let matchState = { selectedNote:null, done:{} };
+function renderMatch(){
+  matchState = { selectedNote:null, done:{} };
+  $('matchNotes').innerHTML = shuffle(MATCH).map(m=>`
+    <div class="match-item" data-role="note" data-id="${m.id}" onclick="pickNote('${m.id}')">
+      <span class="m-badge">BROKE</span>${m.note}
+    </div>`).join('');
+  $('matchActions').innerHTML = shuffle(MATCH).map(m=>`
+    <div class="match-item" data-role="action" data-for="${m.id}" onclick="pickAction('${m.id}')">
+      <span class="m-badge" style="color:#3D72C9;background:rgba(91,143,224,.15)">FIX</span>${m.action}
+    </div>`).join('');
+  $('matchHint').className = 'match-hint';
+  $('feedback2').className = 'activity-feedback';
+}
+function pickNote(id){
+  if(matchState.done[id]) return;
+  matchState.selectedNote = id;
+  document.querySelectorAll('#matchNotes .match-item').forEach(el=>el.classList.toggle('selected', el.dataset.id===id));
+  $('matchHint').className = 'match-hint';
+}
+function pickAction(forId){
+  const sel = matchState.selectedNote;
+  const hint = $('matchHint');
+  if(!sel){
+    hint.className='match-hint show';
+    hint.innerHTML='<strong>Pick a breakage first.</strong> Click something on the left, then click the fix it calls for.';
+    return;
+  }
+  const actEl = document.querySelector(`#matchActions .match-item[data-for="${forId}"]`);
+  if(sel === forId){
+    matchState.done[sel] = true;
+    const noteEl = document.querySelector(`#matchNotes .match-item[data-id="${sel}"]`);
+    noteEl.classList.remove('selected'); noteEl.classList.add('matched');
+    actEl.classList.add('matched');
+    matchState.selectedNote = null;
+    hint.className='match-hint';
+    if(Object.keys(matchState.done).length === MATCH.length){
+      const fb=$('feedback2');
+      fb.className='activity-feedback show success';
+      fb.innerHTML='<strong>All five matched.</strong> Notice how each breakage has a named, almost mechanical fix: a changed field → re-map and alert; a double-fire → a de-dup key; a rate limit → batch and back off; AI junk → validate before use; a silent stop → monitoring. Once you can name the failure, you already know the fix — and the silent one is the one worth building a heartbeat for first.';
+      $('prog2').classList.add('done');
+    }
+  } else {
+    actEl.classList.remove('shake'); void actEl.offsetWidth; actEl.classList.add('shake');
+    const correct = MATCH.find(m=>m.id===sel);
+    hint.className='match-hint show';
+    hint.innerHTML=`<strong>Not that fix.</strong> ${correct.hint}`;
+    setTimeout(()=>actEl.classList.remove('shake'), 420);
+  }
+}
+function resetMatch(){
+  renderMatch();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Human-checkpoint judge ─── */
+const JUDGE = [
+  {scen:'Automatically deleting every customer record the flow has tagged "inactive" — no review, straight to permanent deletion.', answer:'human',
+   e:'Keep a human checkpoint. Deletion is irreversible, and one wrong tag wipes a real customer for good. High-stakes, unrecoverable actions should pause for a person to confirm before they run.'},
+  {scen:'Sending a "thanks for signing up" welcome email the moment someone joins your list.', answer:'auto',
+   e:'Safe to run unattended. It\'s routine, low-risk, and a mistake is cheap and easily corrected. This is exactly the kind of repetitive, reversible action automation should own end to end.'},
+  {scen:'Letting an AI step post its drafted reply directly to your company\'s public social account, with no one reading it first.', answer:'human',
+   e:'Keep a human checkpoint. It\'s public and reputational, and AI can be confidently wrong. A person should approve anything that speaks publicly in your name before it goes live.'},
+  {scen:'Copying each new form submission into a spreadsheet and tagging where it came from.', answer:'auto',
+   e:'Safe to run unattended. It\'s pure, reversible data capture — tedious by hand and easy to fix if a tag is off. Let the flow handle it so nothing is missed.'}
+];
+let judgeAns = {};
+const JUDGE_LABELS = {auto:'run it unattended', human:'keep a human checkpoint'};
+function renderJudge(){
+  judgeAns = {};
+  $('judgeGrid').innerHTML = JUDGE.map((j,i)=>`
+    <div class="judge-card" id="jc${i}">
+      <div class="judge-scen"><span class="qn">Action ${i+1}</span>${j.scen}</div>
+      <div class="judge-btns">
+        <button class="judge-btn" id="jauto${i}" onclick="answerJudge(${i},'auto')">Run unattended</button>
+        <button class="judge-btn" id="jhuman${i}" onclick="answerJudge(${i},'human')">Human checkpoint</button>
+      </div>
+      <div class="judge-explain" id="jex${i}"></div>
+    </div>`).join('');
+  $('feedback3').className = 'activity-feedback';
+}
+function answerJudge(i, choice){
+  if(judgeAns[i]!==undefined) return;
+  const j = JUDGE[i];
+  const right = choice === j.answer;
+  judgeAns[i] = right;
+  const card = $('jc'+i);
+  const autoBtn = $('jauto'+i), humanBtn = $('jhuman'+i);
+  const picked = choice==='auto' ? autoBtn : humanBtn;
+  card.classList.add(right?'right':'miss');
+  picked.classList.add(right?'picked-right':'picked-wrong');
+  if(!right){ (j.answer==='auto'?autoBtn:humanBtn).classList.add('reveal-right'); }
+  autoBtn.disabled = true; humanBtn.disabled = true;
+  const ex = $('jex'+i);
+  ex.className = 'judge-explain show';
+  ex.innerHTML = `<span class="judge-verdict ${right?'v-right':'v-miss'}">${right?'✓ Correct':'✗ Not quite'} — ${JUDGE_LABELS[j.answer]}.</span><br>${j.e}`;
+  if(Object.keys(judgeAns).length === JUDGE.length){
+    const score = Object.values(judgeAns).filter(Boolean).length;
+    const fb = $('feedback3');
+    if(score === JUDGE.length){
+      fb.className='activity-feedback show success';
+      fb.innerHTML='<strong>4 of 4 — you know where a human belongs.</strong> The test is two questions: <em>Is it reversible?</em> and <em>Is it public or does it move money?</em> Cheap-and-reversible → let it run. Irreversible, public, or financial → pause for a human to approve. Automating everything blindly is how a single bad tag deletes a customer; a checkpoint on the risky few keeps scale from becoming a liability.';
+    } else {
+      fb.className='activity-feedback show partial';
+      fb.innerHTML=`<strong>You got ${score} of 4.</strong> Re-read the ones you missed. Ask of each action: could one mistake be undone easily? If yes, automate it. If a slip is public, permanent, or costs money, keep a human checkpoint. Try again.`;
+    }
+    $('prog3').classList.add('done');
+  }
+}
+function resetJudge(){
+  renderJudge();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {q:'Which kind of failure is the MOST dangerous?',
+   opts:['A loud error that immediately emails you the details','A flow that stops silently, with no error and no alert, and runs unnoticed for weeks','A step that retries once and then succeeds','A rate-limit warning you see in the logs'], ans:1,
+   why:'A loud failure gets fixed fast. The silent one is deadly precisely because nothing tells you: it can quietly do nothing — or the wrong thing — for weeks while you assume all is well. That is why monitoring and a heartbeat matter more than any single retry.'},
+  {q:'What is the best way to know your automation is still working when nothing appears to be wrong?',
+   opts:['Wait until a customer complains','Add monitoring — logging plus a heartbeat or success-check that pings you if a run is missed','Check it once a year','Assume no news is good news'], ans:1,
+   why:'"No news" and "silently broken" look identical from the outside. A heartbeat that actively confirms "I ran, and here\'s the result" — and alerts you when it goes missing — is how you catch silent failures before your customers do.'},
+  {q:'A payment webhook occasionally fires twice, causing the same customer to be charged twice. The right fix is...',
+   opts:['Refund everyone and hope it stops','Add a de-duplication (idempotency) key so the same event is only processed once','Turn the automation off permanently','Charge everyone once more to average it out'], ans:1,
+   why:'Duplicate triggers are common. A de-duplication key records which events have already been handled, so a repeat of the same event is safely ignored — no double charge, no double email, no double anything.'},
+  {q:'A step fails because an app was briefly unreachable for a few seconds (a temporary glitch). The best FIRST response is to...',
+   opts:['Immediately alert a human and stop the whole flow','Automatically retry a few times with a growing wait, before escalating','Delete the step','Ignore it and move on, losing the item'], ans:1,
+   why:'Temporary glitches usually clear on their own. An automatic retry with backoff handles them quietly — you only escalate to a human once the retries are exhausted, so people aren\'t pestered about problems that fixed themselves.'},
+  {q:'Your flow uses an AI step whose output occasionally comes back malformed. Before the next step relies on it, you should...',
+   opts:['Trust it — the AI is usually right','Validate the output first, and stop or flag it if it fails the check','Remove the AI step so there\'s nothing to validate','Send it downstream and fix problems later'], ans:1,
+   why:'AI output is powerful but not guaranteed. A validation gate that checks the shape and catches anything malformed keeps junk from flowing into the rest of the flow. Handling the bad case is part of building the step, not an afterthought.'},
+  {q:'You\'re about to "ship" an automation to run without you. The single most important habit is...',
+   opts:['Assume it will just keep working forever','Set up monitoring and write down what it does and how to turn it off, so failures are visible and someone can fix it','Never tell anyone it exists','Add as many steps as possible so it feels thorough'], ans:1,
+   why:'"Set and forget" is a myth — things break in normal ways. A shipped automation needs monitoring so failures surface, and a short note on what it does and how to stop it so any human (including future-you) can step in. A documented, monitored flow beats a clever undocumented one every time.'}
+];
+function renderQuiz(){
+  $('quizWrap').innerHTML = QUIZ.map((item,i)=>`
+    <div class="quiz-q" id="qq${i}">
+      <div class="quiz-q-head"><span class="quiz-q-num">Q${i+1}</span><span class="quiz-q-text">${item.q}</span></div>
+      ${item.opts.map((o,j)=>`
+        <label class="quiz-opt"><input type="radio" name="quiz${i}" value="${j}"><span>${o}</span></label>`).join('')}
+      <div class="quiz-review" id="qr${i}"></div>
+    </div>`).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function submitQuiz(){
+  const fb = $('feedback4');
+  const answers = QUIZ.map((_,i)=>{
+    const sel = document.querySelector(`input[name="quiz${i}"]:checked`);
+    return sel ? +sel.value : null;
+  });
+  const blank = answers.filter(a=>a===null).length;
+  if(blank>0){
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${blank} question${blank>1?'s':''} unanswered.</strong> Guessing is allowed, blank is not — answer everything and submit again.`;
+    return;
+  }
+  let score=0;
+  QUIZ.forEach((item,i)=>{
+    const card=$('qq'+i), rev=$('qr'+i);
+    card.classList.remove('right','miss');
+    if(answers[i]===item.ans){
+      score++; card.classList.add('right');
+      rev.className='quiz-review show good'; rev.innerHTML='✓ Correct. '+item.why;
+    } else {
+      card.classList.add('miss');
+      rev.className='quiz-review show bad';
+      rev.innerHTML=`✗ The answer is "<strong>${item.opts[item.ans]}</strong>". ${item.why}`;
+    }
+  });
+  if(score===QUIZ.length){
+    fb.className='activity-feedback show success';
+    fb.innerHTML='<strong>'+score+' of '+QUIZ.length+' — Week 4 mastered, course complete.</strong> You can now build an automation and keep it trustworthy: an escalation ladder for failures, a named fix for every common breakage, a human checkpoint on the risky few, and monitoring so silence never hides a problem. That is a genuinely job-ready skill — the ability to hand a machine real work and sleep at night. Congratulations.';
+  } else {
+    fb.className='activity-feedback show partial';
+    fb.innerHTML=`<strong>${score} of ${QUIZ.length} — nearly there.</strong> Read the red notes. The two ideas worth locking in: the silent failure is the dangerous one (so monitor for it), and retry the temporary errors but keep a human checkpoint on the irreversible ones. Reset and aim for a clean sweep to finish the course strong.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderWf();
+  renderMatch();
+  renderJudge();
+  renderQuiz();
+});
+</script>
+</body>
+</html>
