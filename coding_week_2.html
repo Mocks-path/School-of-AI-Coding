@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Week 2 — Build &amp; Ship ShiftSwap, Your First Real App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;
+  --green:#4CAF50;--green-light:#E8F5E9;
+  --blue:#3F88C5;--purple:#8B5CF6;--pink:#EC4899;--red:#E74C3C;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);
+  --shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.7rem}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);line-height:1.2}
+.header-title span{color:var(--orange)}
+.header-tag{font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.logo-mascot{width:44px;height:44px;flex-shrink:0}
+.progress-pill{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;background:var(--orange-glow);border-radius:50px;font-size:.72rem;color:var(--orange);font-weight:700}
+.progress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-light) 100%);position:relative;overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .7s ease}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;color:var(--navy);margin-bottom:.9rem;animation:fadeUp .7s ease .1s both}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.4rem;animation:fadeUp .7s ease .2s both}
+.usecase-banner{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:1rem;animation:fadeUp .7s ease .3s both}
+.usecase-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#EC4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem}
+.usecase-text{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.usecase-text strong{color:var(--navy);font-weight:700}
+.hero-visual{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s ease .2s both}
+.hero-mascot{width:230px;height:auto;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 40px rgba(232,122,46,0.22))}
+.budget-strip{max-width:1100px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;animation:fadeUp .8s ease .35s both}
+.budget-chip{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;text-align:center;box-shadow:var(--shadow-sm)}
+.budget-chip .bv{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--orange)}
+.budget-chip .bl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.15rem}
+
+/* ─── SECTION SHELL ─── */
+.section{padding:3rem 2rem;scroll-margin-top:80px}
+.section.alt{background:var(--bg-light)}
+.container{max-width:1100px;margin:0 auto}
+.section-header{margin-bottom:2rem}
+.section-num{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.5rem}
+.section-num .num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,2.8vw,2rem);color:var(--navy);line-height:1.25;margin-bottom:.4rem}
+.section-sub{font-size:.92rem;color:var(--text-secondary);line-height:1.65;max-width:720px}
+.story-beat{background:#fff;border-left:4px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.2rem;font-size:.88rem;color:var(--text-primary);line-height:1.65;box-shadow:var(--shadow-sm);margin-bottom:1.6rem}
+.story-beat .sb-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.3rem}
+.story-beat em{color:var(--text-secondary)}
+
+/* ─── TAB NAV ─── */
+.tab-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border-radius:50px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:72px;z-index:50;margin:0 auto 2rem;max-width:fit-content;flex-wrap:nowrap;-ms-overflow-style:none;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.55rem 1.1rem;border-radius:50px;border:none;background:transparent;color:var(--text-secondary);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--orange)}
+.tab-btn.active{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(232,122,46,0.35)}
+
+/* ─── GENERIC CARDS/GRIDS ─── */
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.pick-card{background:#fff;border-radius:var(--radius);padding:1.4rem;border:2px solid var(--border);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;transition:height .3s}
+.pick-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),#7BC67E)}
+.pick-card:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),#5DADE2)}
+.pick-card:nth-child(3)::before{background:linear-gradient(90deg,var(--pink),#F48FB1)}
+.pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.pick-card.active{border-color:var(--orange);box-shadow:var(--shadow-md)}
+.pick-card.active::before{height:6px}
+.pick-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:var(--bg-light)}
+.pick-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.pick-card .pc-tag{font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.pick-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+.pick-detail{background:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);font-size:.86rem;line-height:1.65;display:none}
+.pick-detail.show{display:block;animation:fadeUp .4s ease}
+.pick-detail strong{color:var(--navy)}
+.pick-detail .verdict-pill{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.vp-good{background:var(--green-light);color:#2E7D32}
+.vp-mid{background:#FFF3CD;color:#856404}
+.vp-bad{background:#FEE;color:#C62828}
+
+/* ─── SCENARIO QUIZ ─── */
+.scenario-panel{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.scenario-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.scenario-q{font-size:1rem;color:var(--navy);margin-bottom:1rem;font-weight:600;line-height:1.5}
+.scenario-options{display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:1rem}
+.scenario-btn{padding:.75rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left;line-height:1.45}
+.scenario-btn:hover{border-color:var(--orange);color:var(--orange)}
+.scenario-btn.correct{background:var(--green-light);border-color:var(--green);color:#2E7D32}
+.scenario-btn.wrong{background:#FEE;border-color:var(--red);color:#C62828}
+.scenario-feedback{padding:.9rem;border-radius:8px;font-size:.83rem;line-height:1.55;display:none}
+.scenario-feedback.show{display:block;animation:fadeUp .4s ease}
+.scenario-feedback.success{background:var(--green-light);color:#2E7D32;border-left:3px solid var(--green)}
+.scenario-feedback.fail{background:#FEE;color:#C62828;border-left:3px solid var(--red)}
+.btn-action{padding:.55rem 1.1rem;border-radius:8px;background:var(--orange);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-action:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-secondary{background:transparent;color:var(--text-primary);border:1.5px solid var(--border);padding:.55rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── CHAT MOCK ─── */
+.chat-mock{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:1rem}
+.chat-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.chat-head .cdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-body{padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;min-height:150px}
+.chat-msg{max-width:88%;padding:.8rem 1rem;border-radius:12px;font-size:.83rem;line-height:1.55}
+.chat-msg.user{align-self:flex-end;background:var(--orange-glow);color:var(--text-primary);border:1px solid rgba(232,122,46,0.25);border-bottom-right-radius:3px}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-light);border:1px solid var(--border);border-bottom-left-radius:3px}
+.chat-msg.ai strong{color:var(--orange)}
+.chat-msg .who{display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem}
+
+/* ─── FEATURE / DESIGN GRID ─── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.prod-card{background:#fff;border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.prod-card.chosen{border-color:var(--orange)}
+.prod-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.prod-card:nth-child(1) .prod-img{background:linear-gradient(135deg,#FBE4D5,#F8C8A8)}
+.prod-card:nth-child(2) .prod-img{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.prod-card:nth-child(3) .prod-img{background:linear-gradient(135deg,#E3E4F5,#C9CBEE)}
+.prod-body{padding:1rem 1.1rem}
+.prod-body h4{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.5rem}
+.prod-stats{display:flex;flex-direction:column;gap:.3rem}
+.prod-stat{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-secondary)}
+.prod-stat b{color:var(--navy)}
+.prod-stat .good{color:#2E7D32;font-weight:700}
+.prod-stat .bad{color:#C62828;font-weight:700}
+.prod-stat .mid{color:#B8860B;font-weight:700}
+.prod-cta{margin-top:.7rem;font-size:.72rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em}
+
+/* notebook / mining */
+.review-mine{background:#fff;border-radius:var(--radius);padding:1.4rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.review-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.9rem}
+.review-col{border-radius:var(--radius-sm);padding:1rem 1.1rem}
+.review-col.love{background:var(--green-light)}
+.review-col.hate{background:#FEE}
+.review-col h5{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.review-col.love h5{color:#2E7D32}
+.review-col.hate h5{color:#C62828}
+.review-col li{font-size:.8rem;line-height:1.5;margin-left:1.1rem;margin-bottom:.35rem;color:var(--text-primary)}
+
+/* ─── CALCULATOR ─── */
+.calc{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.calc-field{margin-bottom:1rem}
+.calc-field label{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem}
+.calc-field label output{color:var(--orange);font-weight:800}
+.calc-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer}
+.calc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--orange);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.calc-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--orange);cursor:pointer}
+.calc-out{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-content:start}
+.calc-tile{padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent;transition:all .3s}
+.calc-tile.warn{border-color:var(--red);background:#FEE}
+.calc-tile.ok{border-color:var(--green);background:var(--green-light)}
+.calc-tile .cv{font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1}
+.calc-tile .cl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem}
+.calc-note{grid-column:1/-1;font-size:.8rem;line-height:1.55;padding:.8rem 1rem;border-radius:8px;background:var(--orange-glow);color:var(--text-primary)}
+.calc-note strong{color:var(--orange)}
+
+/* ─── DESIGN ASSEMBLER (Beat 2) ─── */
+.gen-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.4rem;margin-top:1.4rem}
+.gen-controls .prompt-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.gen-controls label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.gen-controls select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:#fff}
+.gen-controls select:focus{outline:none;border-color:var(--orange)}
+.gen-prompt-box{margin-top:.6rem;background:var(--navy-dark);color:#D8DAE5;border-radius:10px;padding:.9rem 1rem;font-size:.8rem;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.gen-prompt-box .pk{color:var(--orange-light);font-weight:700}
+.design-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.dp-canvas{height:230px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.4rem;font-size:3rem;text-align:center;padding:1rem;transition:all .35s;position:relative}
+.dp-canvas .dp-caption{font-family:'DM Serif Display',serif;font-size:1.05rem;line-height:1.3;max-width:280px}
+.dp-badge{position:absolute;top:.7rem;left:.7rem;font-size:.6rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .6rem;border-radius:5px;color:#fff}
+.dp-meta{display:flex;gap:.5rem;padding:.8rem 1rem;flex-wrap:wrap;border-top:1px solid var(--border);background:var(--bg-light)}
+.dp-chip{font-size:.66rem;font-weight:700;padding:.25rem .6rem;border-radius:50px;background:#fff;border:1px solid var(--border);color:var(--text-secondary)}
+.dp-chip.ok{color:#2E7D32;border-color:rgba(76,175,80,0.4);background:var(--green-light)}
+.dp-chip.bad{color:#C62828;border-color:rgba(231,76,60,0.4);background:#FEE}
+
+/* ─── SCREEN PREVIEW (Beat 3) ─── */
+.voice-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.voice-tab{padding:.45rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-tab:hover{border-color:var(--orange);color:var(--orange)}
+.voice-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.store-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.store-chrome{background:#F5F5F7;padding:.55rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted)}
+.store-chrome .sdot{width:9px;height:9px;border-radius:50%}
+.store-url{margin-left:.6rem;background:#fff;border:1px solid var(--border);border-radius:50px;padding:.2rem .9rem;font-size:.7rem;color:var(--text-secondary)}
+.listing-body{padding:1.2rem 1.4rem;display:grid;grid-template-columns:150px 1fr;gap:1.2rem;align-items:start}
+.listing-mock{border-radius:10px;height:150px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;border:1px solid var(--border);transition:all .35s;position:relative;overflow:hidden}
+.listing-mock.flat{background:repeating-conic-gradient(#EDE6DD 0% 25%, #F6F1EA 0% 50%) 50% / 20px 20px}
+.listing-mock.tshirt{background:linear-gradient(135deg,#EADFD3,#D8C7B4)}
+.listing-mock.mug{background:linear-gradient(135deg,#E3E4F5,#C6C9EE)}
+.listing-mock.tote{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.mock-flag{position:absolute;bottom:.4rem;left:.4rem;right:.4rem;font-size:.58rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:.2rem;border-radius:4px;text-align:center;color:#fff}
+.listing-info h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);line-height:1.3;margin-bottom:.4rem;transition:opacity .3s}
+.listing-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin:.5rem 0}
+.listing-tags span{font-size:.66rem;font-weight:700;padding:.2rem .55rem;border-radius:50px;background:var(--orange-glow);color:var(--orange-dark)}
+.listing-price{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--orange);margin-top:.4rem}
+.listing-price small{font-size:.7rem;color:var(--text-muted);font-weight:600}
+.copy-toggle{display:flex;gap:.5rem;margin:1.4rem 0 .8rem;flex-wrap:wrap}
+.before-after{border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.85rem;line-height:1.6}
+.before-after.before{background:var(--bg-light);border:1.5px dashed var(--border);color:var(--text-muted)}
+.before-after.after{background:var(--orange-glow);border:1.5px solid rgba(232,122,46,0.35);color:var(--text-primary)}
+
+/* checklist + feed */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.build-card{background:#fff;border-radius:var(--radius);padding:1.3rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.build-card h4{font-size:.95rem;color:var(--navy);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.build-card h4::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:.6rem;padding:.42rem 0;font-size:.84rem;color:var(--text-primary);cursor:pointer;line-height:1.45}
+.checklist li .check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.checklist li.done .check{background:var(--green);border-color:var(--green)}
+.checklist li.done .check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:800}
+.checklist li.done{color:var(--text-muted);text-decoration:line-through}
+.feed{background:var(--navy-dark);border-radius:10px;padding:1rem 1.1rem;min-height:220px;max-height:280px;overflow-y:auto}
+.feed-line{display:flex;gap:.6rem;font-size:.78rem;line-height:1.55;padding:.3rem 0;color:#D8DAE5;animation:fadeUp .4s ease}
+.feed-line .ft{color:var(--orange-light);font-weight:700;flex-shrink:0}
+.feed-line.hint-line{color:#8B8DA0;font-style:italic}
+.done-note{margin-top:1rem;padding:.8rem;background:var(--green-light);border-radius:7px;font-size:.78rem;color:#2E7D32;display:none}
+
+/* ─── FEATURE BATCH (Beat 2 continued) ─── */
+.batch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1rem}
+.batch-tile{border-radius:10px;border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .25s;background:#fff}
+.batch-tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.batch-tile.keep{border-color:var(--green);box-shadow:0 0 0 3px var(--green-light)}
+.batch-tile.cut{opacity:.4;border-color:var(--red)}
+.batch-art{height:90px;display:flex;align-items:center;justify-content:center;font-size:2.1rem;background:var(--bg-light)}
+.batch-label{font-size:.66rem;padding:.4rem .5rem;color:var(--text-secondary);line-height:1.35;text-align:center;min-height:3em}
+.batch-verdict{margin-top:.6rem;text-align:center;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:.25rem;border-radius:0 0 8px 8px}
+.batch-verdict.keep{background:var(--green-light);color:#2E7D32}
+.batch-verdict.cut{background:#FEE;color:#C62828}
+
+/* ─── REVIEW DASHBOARD (Beat 4) ─── */
+.eval-dashboard{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+.metric-card{padding:1rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent}
+.metric-card.highlight{border-color:var(--orange);background:var(--orange-glow)}
+.metric-value{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1}
+.metric-card.highlight .metric-value{color:var(--orange)}
+.metric-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.4rem}
+.adset{display:grid;grid-template-columns:1.2fr 1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.adset.decided-scale{border-color:var(--green);background:var(--green-light)}
+.adset.decided-kill{border-color:var(--red);background:#FEE}
+.adset.decided-watch{border-color:#E0A800;background:#FFF8E1}
+.adset-name{font-size:.86rem;font-weight:700;color:var(--navy);line-height:1.4}
+.adset-name span{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted)}
+.adset-nums{display:flex;gap:1rem;font-size:.75rem;color:var(--text-secondary);flex-wrap:wrap}
+.adset-nums b{display:block;font-size:.88rem;color:var(--navy)}
+.adset-actions{display:flex;gap:.4rem}
+.adset-btn{padding:.4rem .8rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.adset-btn:hover{border-color:var(--orange);color:var(--orange)}
+.adset-btn:disabled{opacity:.45;cursor:not-allowed}
+.adset-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.adset-feedback.show{display:block;animation:fadeUp .4s ease}
+.adset-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.adset-feedback.warn{background:#FFF3CD;color:#856404}
+.week-verdict{display:none;margin-top:1.4rem;background:var(--navy-dark);border-radius:var(--radius);padding:1.6rem;color:#fff;animation:popIn .5s ease}
+.week-verdict.show{display:block}
+.week-verdict h4{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.8rem}
+.week-verdict h4 em{font-style:normal;color:var(--orange-light)}
+.wv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
+.wv-tile{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:9px;padding:.8rem;text-align:center}
+.wv-tile .v{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--orange-light)}
+.wv-tile .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.55);font-weight:700;margin-top:.25rem}
+.week-verdict p{font-size:.87rem;line-height:1.65;color:rgba(255,255,255,0.85)}
+.week-verdict p strong{color:var(--orange-light)}
+
+/* ─── FOOTER / RECAP ─── */
+.footer-cta{text-align:center;padding:3rem 2rem 5.5rem;background:var(--navy-dark);color:#fff}
+.footer-cta h2{font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.6rem}
+.footer-cta h2 em{color:var(--orange);font-style:normal}
+.footer-cta>p{font-size:.92rem;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 1.8rem}
+.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;max-width:1050px;margin:0 auto 1.8rem;text-align:left}
+.recap-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.recap-card .rn{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.35rem}
+.recap-card h4{font-family:'DM Serif Display',serif;font-size:1.02rem;margin-bottom:.35rem;color:#fff}
+.recap-card p{font-size:.76rem;color:rgba(255,255,255,0.65);line-height:1.55}
+.footer-note{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:1.6rem;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ─── COMPLETION BAR ─── */
+.completion-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,0.05)}
+.completion-info{display:flex;align-items:center;gap:.8rem;font-size:.82rem;color:var(--text-primary);font-weight:600}
+.completion-track{flex:1;max-width:280px;height:8px;background:var(--bg-light);border-radius:4px;overflow:hidden;margin:0 1rem}
+.completion-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:4px;transition:width .5s ease}
+.completion-percent{font-family:'DM Serif Display',serif;color:var(--orange);font-size:1.15rem}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:880px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-mascot{width:170px;margin:0 auto}
+  .usecase-banner{text-align:left}
+  .budget-strip{grid-template-columns:repeat(2,1fr)}
+  .pick-grid,.prod-grid{grid-template-columns:1fr}
+  .calc-grid,.build-grid,.gen-grid,.review-cols{grid-template-columns:1fr}
+  .batch-grid{grid-template-columns:repeat(2,1fr)}
+  .listing-body{grid-template-columns:1fr}
+  .eval-metrics{grid-template-columns:repeat(2,1fr)}
+  .adset{grid-template-columns:1fr}
+  .wv-grid,.recap-grid{grid-template-columns:repeat(2,1fr)}
+  .header{padding:.7rem 1rem}
+  .section{padding:2.2rem 1rem}
+  .hero{padding:2.5rem 1rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-left">
+    <svg class="logo-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="477" cy="380" rx="285" ry="324" fill="#EBE3D6"/>
+      <ellipse cx="477" cy="380" rx="240" ry="270" fill="#412C23"/>
+      <circle cx="389" cy="430" r="36" fill="#fff"/>
+      <circle cx="565" cy="430" r="36" fill="#fff"/>
+      <circle cx="389" cy="430" r="14" fill="#2B2D42"/>
+      <circle cx="565" cy="430" r="14" fill="#2B2D42"/>
+      <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="14" stroke-linecap="round" fill="none"/>
+      <ellipse cx="477" cy="1350" rx="430" ry="100" fill="#EF7F1A"/>
+      <ellipse cx="477" cy="1350" rx="380" ry="78" fill="#FF9429"/>
+    </svg>
+    <div>
+      <div class="header-title">AI Coding <span>&amp; Building</span></div>
+      <div class="header-tag">MokshPath · Week 2 · Fun While You Learn</div>
+    </div>
+  </div>
+  <div class="progress-pill"><span class="dot"></span> <span id="headerProgressText">0 of 6 stages explored</span></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block"></span> Story Project · Script → Shipped App</div>
+      <h1>Turn an Idea Into an App — Maya Builds &amp; Ships <em>ShiftSwap</em> (Still No Coding Background)</h1>
+      <p class="hero-sub">Last week, Maya built <strong>ReceiptTidy</strong> — a small script that cleaned her candle-business receipts and printed one honest number. It ran on her laptop, for her. But her weekend market stall now has two part-time helpers, and they sort out who works which Saturday in a chaotic group chat: double-booked days, no-shows, "wait, whose turn is it?" A script can't fix that — other people need to use it, from their own phones, and it has to remember things. This week Maya turns a useful idea into a real app: ShiftSwap. You'll make every decision with her, across the four moves every app maker learns: <strong>From Script to App → Design First → Build It → Test, Ship &amp; Iterate</strong>.</p>
+      <div class="usecase-banner">
+        <div class="usecase-icon">📱</div>
+        <div class="usecase-text"><strong>The Mission:</strong> By the end of the story, ShiftSwap is live at a real URL that Maya's helpers open on their phones — a screen they can see (interface), a Claim button that actually swaps a shift (logic), shifts that survive a refresh (data), and a first real teammate using it. No computer-science degree. Just design, build, test, ship.</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBE3D6"/><stop offset="1" stop-color="#D1D0CC"/></linearGradient>
+          <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A6A48"/><stop offset="1" stop-color="#412C23"/></linearGradient>
+          <linearGradient id="feetGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9429"/><stop offset="1" stop-color="#EF7F1A"/></linearGradient>
+        </defs>
+        <ellipse cx="210" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="740" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="477" cy="380" rx="285" ry="324" fill="url(#bodyGrad)"/>
+        <ellipse cx="477" cy="392" rx="240" ry="225" fill="url(#faceGrad)"/>
+        <circle cx="389" cy="430" r="38" fill="#fff"/>
+        <circle cx="565" cy="430" r="38" fill="#fff"/>
+        <circle cx="389" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="565" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="395" cy="424" r="5" fill="#fff"/>
+        <circle cx="571" cy="424" r="5" fill="#fff"/>
+        <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <ellipse cx="477" cy="1350" rx="430" ry="105" fill="url(#feetGrad)"/>
+        <ellipse cx="477" cy="1320" rx="380" ry="78" fill="#FF9429"/>
+      </svg>
+    </div>
+  </div>
+  <div class="budget-strip">
+    <div class="budget-chip"><div class="bv">4 parts</div><div class="bl">Interface · Logic · Data · State</div></div>
+    <div class="budget-chip"><div class="bv">1 weekend</div><div class="bl">Idea → live app</div></div>
+    <div class="budget-chip"><div class="bv">1 real URL</div><div class="bl">A teammate can open it</div></div>
+    <div class="budget-chip"><div class="bv">4 lessons</div><div class="bl">Woven into 1 story</div></div>
+  </div>
+</section>
+
+<!-- ─── TAB NAVIGATION ─── -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-target="s1">Beat 1 · Script→App</button>
+  <button class="tab-btn" data-target="s2">Beat 2 · Design</button>
+  <button class="tab-btn" data-target="s3">Beat 2 · Scope</button>
+  <button class="tab-btn" data-target="s4">Beat 3 · Build</button>
+  <button class="tab-btn" data-target="s5">Beat 3 · Wire &amp; Debug</button>
+  <button class="tab-btn" data-target="s6">Beat 4 · Ship</button>
+</div>
+
+<!-- ═══════════ BEAT 1: FROM SCRIPT TO APP ═══════════ -->
+<section class="section" id="s1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">1</div> Beat One · Lesson 1 — From Script to App</div>
+      <h2 class="section-title">When a Script Isn't Enough — Meet the Four Parts of an App</h2>
+      <p class="section-sub">Maya's receipt script was a private tool: she typed a command, it printed a number, done. An app is different — <strong>other people</strong> use it, from their own devices, and it has to remember things between visits. That means four moving parts working together: an <strong>interface</strong> people see, <strong>logic</strong> that does the work, <strong>data</strong> that's stored, and <strong>state</strong> — what's true right now. Today Maya decides ShiftSwap is worth building as a real app, not another lonely script.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Sunday, 8:10 p.m. A helper texts: "Can't do Saturday's market — anyone cover?" Three replies land, two helpers, and nobody's sure who answered first. Maya almost writes another little script to log it. Then she catches herself: <em>a script that only runs on my laptop can't help two people on their phones on a Saturday morning.</em> This isn't a script problem — it's an app problem. But before she builds anything, she has to choose the right path.
+    </div>
+
+    <div class="pick-grid">
+      <div class="pick-card" data-niche="app" onclick="pickNiche('app')">
+        <div class="pick-icon">📱</div>
+        <div class="pc-tag">Focused · Finishable</div>
+        <h4>A small ShiftSwap app</h4>
+        <p>One job: helpers see open shifts and claim one. Runs in a browser on any phone, remembers shifts between visits. Small enough to finish, real enough to actually use.</p>
+      </div>
+      <div class="pick-card" data-niche="script" onclick="pickNiche('script')">
+        <div class="pick-icon">💻</div>
+        <div class="pc-tag">Familiar · Too small</div>
+        <h4>Just another script</h4>
+        <p>Maya knows how to make scripts now. But a script runs on her machine only — her helpers can't open it, and it forgets everything the moment it closes. Comfortable, but it doesn't solve the real problem.</p>
+      </div>
+      <div class="pick-card" data-niche="platform" onclick="pickNiche('platform')">
+        <div class="pick-icon">🏢</div>
+        <div class="pc-tag">Ambitious · Too big</div>
+        <h4>A full staff platform</h4>
+        <p>Payroll, chat, smart scheduling, ratings, notifications… a real product. Also: months of work she'll never finish on weekends. Dreaming this big means shipping nothing.</p>
+      </div>
+    </div>
+    <div class="pick-detail" id="nicheDetail"></div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> AI Builder · Describe-your-app showdown</div>
+      <div class="chat-body" id="promptChat">
+        <div class="chat-msg ai"><span class="who">Narrator</span>An app has four parts — an <strong>interface</strong>, <strong>logic</strong>, <strong>data</strong>, and <strong>state</strong>. The more clearly Maya names them, the better her AI builder can make the right thing. Below are three ways she could describe ShiftSwap. <strong>Pick the one that gives the AI a real app to build</strong> — then see what comes back.</div>
+      </div>
+    </div>
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · How Maya describes the app</div>
+      <div class="scenario-q">Which description does Maya give her AI builder?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="pickPrompt(0)">"Make me an app for my shifts."</button>
+        <button class="scenario-btn" onclick="pickPrompt(1)">"Build the best shift app ever — login, chat, payments, notifications and AI scheduling."</button>
+        <button class="scenario-btn" onclick="pickPrompt(2)">"Build a small web app called ShiftSwap. Interface: a list of open shifts, each with a Claim button, plus a form to post a new shift (date + role). Logic: claiming a shift marks it taken so no one claims it twice. Data: shifts are saved so they survive a refresh. Start with just the list screen."</button>
+      </div>
+      <div class="scenario-feedback" id="promptFb"></div>
+    </div>
+
+    <div class="calc">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🧮 The Weekend Reality Meter — will this app actually get finished?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1.1rem">An app is only real if it <strong>ships</strong>. Every screen and every extra feature costs build-and-test time — and Maya has a finite number of evening hours this week. Drag the sliders and watch whether ShiftSwap fits in the time she actually has. This is <em>why</em> "small and finished" beats "huge and abandoned."</p>
+      <div class="calc-grid">
+        <div>
+          <div class="calc-field">
+            <label>Screens in the app <output id="oBase">3 screens</output></label>
+            <input type="range" class="calc-slider" id="inBase" min="1" max="8" step="1" value="3">
+          </div>
+          <div class="calc-field">
+            <label>Extra "nice-to-have" features <output id="oFee">2</output></label>
+            <input type="range" class="calc-slider" id="inFee" min="0" max="16" step="1" value="2">
+          </div>
+          <div class="calc-field">
+            <label>Evening hours Maya has this week <output id="oPrice">12 h</output></label>
+            <input type="range" class="calc-slider" id="inPrice" min="4" max="40" step="2" value="12">
+          </div>
+        </div>
+        <div class="calc-out">
+          <div class="calc-tile" id="tProfit"><div class="cv" id="vProfit">15 h</div><div class="cl">Build time needed</div></div>
+          <div class="calc-tile" id="tMargin"><div class="cv" id="vMargin">64%</div><div class="cl">Finish odds</div></div>
+          <div class="calc-tile"><div class="cv" id="vFee">4 h</div><div class="cl">Spent on nice-to-haves</div></div>
+          <div class="calc-tile"><div class="cv" id="vSales">2</div><div class="cl">Weekends to finish</div></div>
+          <div class="calc-note" id="calcNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2: DESIGN FIRST ═══════════ -->
+<section class="section alt" id="s2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">2</div> Beat Two · Lesson 2 — Design First</div>
+      <h2 class="section-title">Design Before You Build — Screens, a User Story, and a Data Sketch</h2>
+      <p class="section-sub">The biggest beginner trap is building before you know what you're building. Maya spends one evening with pen and paper first: what screens exist, how a person moves between them, the one-sentence <strong>user story</strong> that defines "done," and a rough sketch of what <strong>data</strong> gets stored. Fifteen minutes of design saves hours of rebuilding.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Monday evening. Path chosen: a small ShiftSwap app. Before a single line of code, Maya sketches. She draws three boxes — a <strong>Shift List</strong>, an <strong>Add-Shift form</strong>, and a <strong>confirmation</strong> — and draws arrows for how a helper moves between them. Then she writes one sentence that decides everything the app must (and must not) do. <em>Design is cheap on paper and expensive in code.</em>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">🔍 Maya's notebook — a user story vs. a vague wish</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">A user story is one sentence: <em>"As a [who], I want to [do what], so that [why]."</em> It's the smallest complete definition of a feature. Vague wishes ("make it nice") can't be built or checked; a user story can — it tells you exactly what to build and how to know it works.</p>
+      <div class="review-cols">
+        <div class="review-col love">
+          <h5>💚 Stories you can actually build</h5>
+          <ul>
+            <li>"As a helper, I want to see the open shifts, so that I know what's free."</li>
+            <li>"As a helper, I want to claim an open shift, so that the others know it's covered."</li>
+            <li>"As Maya, I want to post a shift I can't make, so that someone can pick it up."</li>
+          </ul>
+        </div>
+        <div class="review-col hate">
+          <h5>💔 Wishes that build nothing</h5>
+          <ul>
+            <li>"Make it modern and clean" → <strong>a taste, not a task — unbuildable</strong></li>
+            <li>"Handle everything about scheduling" → <strong>infinite scope, never done</strong></li>
+            <li>"It should just work" → <strong>defines nothing to build or test</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="gen-grid">
+      <div class="gen-controls">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.8rem">🎨 Screen &amp; Scope Assembler — sketch one finishable MVP</div>
+        <div class="prompt-field">
+          <label>Which screen to build first</label>
+          <select id="genSubject" onchange="renderDesign()">
+            <option value="list">Shift List — see open shifts + a Claim button</option>
+            <option value="add">Add-Shift form — post a date + role</option>
+            <option value="dashboard">Analytics dashboard — charts of everyone's hours</option>
+          </select>
+        </div>
+        <div class="prompt-field">
+          <label>How much to build now (scope)</label>
+          <select id="genStyle" onchange="renderDesign()">
+            <option value="mvp">Just enough: list + claim + add</option>
+            <option value="some">Core + one small extra (a "my shifts" filter)</option>
+            <option value="everything">Everything at once: login, chat, ratings, calendar sync</option>
+          </select>
+        </div>
+        <div class="prompt-field">
+          <label>Data — what it stores</label>
+          <select id="genPrint" onchange="renderDesign()">
+            <option value="simple">One list of shifts: date, role, status (open/taken)</option>
+            <option value="none">Nothing saved — it forgets on refresh</option>
+          </select>
+        </div>
+        <div class="gen-prompt-box" id="genPromptBox"></div>
+      </div>
+      <div>
+        <div class="design-preview">
+          <div class="dp-canvas" id="dpCanvas">
+            <div id="dpEmoji">📋</div>
+            <div class="dp-caption" id="dpCaption">Shift List — open shifts + Claim</div>
+            <div class="dp-badge" id="dpBadge" style="background:var(--green)">Finishable ✓</div>
+          </div>
+          <div class="dp-meta" id="dpMeta"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Pick the finishable MVP</div>
+      <div class="scenario-q">Maya has one weekend. Which version of ShiftSwap should she build first?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="fileQ(0)">Everything a scheduling app could have: a login for each helper, in-app chat, shift ratings, calendar sync, and push notifications.</button>
+        <button class="scenario-btn" onclick="fileQ(1)">One screen listing open shifts with a Claim button, plus a small form to post a shift. Shifts are saved so they persist. Nothing else — yet.</button>
+        <button class="scenario-btn" onclick="fileQ(2)">A single screen that just shows the word "ShiftSwap" with no way to see, add, or claim any shift.</button>
+      </div>
+      <div class="scenario-feedback" id="fileFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2 CONTINUED: SCOPE & DATA ═══════════ -->
+<section class="section" id="s3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">3</div> Beat Two · Lesson 2 continued — Cut Scope, Sketch the Data</div>
+      <h2 class="section-title">Cut to a Finishable MVP — Keep the Core, Park the Rest</h2>
+      <p class="section-sub">Design isn't just adding ideas — it's the discipline of <em>removing</em> them. Maya lists everything ShiftSwap <em>could</em> do, then ruthlessly cuts anything that isn't essential to the one user story. What survives is the <strong>MVP</strong>: the smallest version that's genuinely useful. The rest goes on a "someday" list, not into this weekend.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday. Maya brainstorms freely — eight features pour out. Then she plays editor. For each one she asks a single question: <em>"Does a helper need this to see and claim a shift?"</em> If no, it's cut — not deleted, just parked for later. <em>Click each feature to KEEP it in the MVP or CUT it for v2.</em> Only the essentials survive to the build.
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card" style="grid-column:1/-1">
+        <h4>The feature brainstorm — 8 ideas, one weekend (click to judge each)</h4>
+        <div class="batch-grid" id="batchGrid"></div>
+        <div class="done-note" id="batchDone">✅ <strong>Scope locked.</strong> You kept the four features that serve the user story and parked the rest without guilt — exactly the habit that ships apps instead of stalling them. Four core features head to the build tomorrow.</div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Your favourite feature isn't in the MVP</div>
+      <div class="scenario-q">Maya is most excited about slick two-way calendar sync — it's the coolest idea. But the user story only needs see + claim + post. What should she do?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="tasteQ(0)">Build the calendar sync first — it's the most impressive part and will make ShiftSwap stand out.</button>
+        <button class="scenario-btn" onclick="tasteQ(1)">Park calendar sync on the "v2 someday" list and build the four core features first. Ship the useful core, then add extras once real helpers ask.</button>
+        <button class="scenario-btn" onclick="tasteQ(2)">Don't ship anything until the whole thing — sync, chat, ratings and all — is perfect and complete.</button>
+      </div>
+      <div class="scenario-feedback" id="tasteFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3: BUILD IT ═══════════ -->
+<section class="section alt" id="s4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">4</div> Beat Three · Lesson 3 — Build It</div>
+      <h2 class="section-title">Build One Screen at a Time — Wire Interface to Logic to Data</h2>
+      <p class="section-sub">Now Maya builds — but not all at once. She picks a low-friction approach (an AI builder that shows a live preview in the browser, nothing to install), then grows the app <strong>one screen at a time</strong>: get the list showing, then the Claim button working, then saving. Each small piece is tested before the next is added. An app is <em>assembled</em>, not summoned.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday. Maya opens an AI app builder — the kind that turns a plain-language description into a working screen you can see instantly, with nothing to install. She resists asking for the whole app in one go. Instead: <em>"First, just show a list of three example shifts."</em> It appears. Then the Claim button. Then saving. Switch the tabs to watch ShiftSwap's screens come to life, one at a time.
+    </div>
+
+    <div class="voice-tabs">
+      <button class="voice-tab active" data-mock="flat" onclick="setMock('flat')">🧱 Empty screen (before)</button>
+      <button class="voice-tab" data-mock="tshirt" onclick="setMock('tshirt')">📋 Shift List screen</button>
+      <button class="voice-tab" data-mock="mug" onclick="setMock('mug')">📝 Add-Shift screen</button>
+      <button class="voice-tab" data-mock="tote" onclick="setMock('tote')">✅ Claim confirmation</button>
+    </div>
+
+    <div class="store-preview">
+      <div class="store-chrome">
+        <span class="sdot" style="background:#FF5F57"></span><span class="sdot" style="background:#FEBC2E"></span><span class="sdot" style="background:#28C840"></span>
+        <span class="store-url">🔒 shiftswap.app / preview</span>
+      </div>
+      <div class="listing-body">
+        <div class="listing-mock flat" id="listingMock">
+          <span id="mockArt">🧱</span>
+          <div class="mock-flag" id="mockFlag" style="background:var(--text-muted)">Empty · nothing built yet</div>
+        </div>
+        <div class="listing-info">
+          <h4 id="listingTitle">ShiftSwap — a browser app your helpers open on their phones</h4>
+          <div class="listing-tags" id="listingTags">
+            <span>interface</span><span>logic</span><span>data</span><span>state</span><span>runs in a browser</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--text-secondary);line-height:1.55" id="listingDesc">One small app: see open shifts, claim one, post one you can't make. Built one screen at a time and previewed live in the browser.</div>
+          <div class="listing-price">0 screens <small>· blank canvas</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toggle">
+      <button class="btn-secondary" id="beforeBtn" onclick="toggleCopy('before')">😬 Before: vague ask</button>
+      <button class="btn-action" id="afterBtn" onclick="toggleCopy('after')">✨ After: precise, one-screen ask</button>
+    </div>
+    <div class="before-after before" id="copyBefore" style="display:none">
+      "Build me the shift app." — the AI has to guess every screen, every rule, and every field. It returns a big, tangled draft that half-works and is impossible to debug. Too much at once, described too loosely.
+      <div style="margin-top:.5rem;font-size:.75rem">← A vague ask gets a vague app you can't fix.</div>
+    </div>
+    <div class="before-after after" id="copyAfter">
+      "Build just the Shift List screen: show a list of shifts, each with its date, role, and a Claim button. Use three example shifts for now." — one screen, named parts, testable in a minute. Get it working, then ask for the next piece.
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-secondary)">← Same AI. The difference is <strong>direction</strong>: one screen, exact fields, small enough to test right away.</div>
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Maya's build order (click each step)</h4>
+        <ul class="checklist" id="buildList">
+          <li data-step="0" onclick="runBuildStep(0)"><span class="check"></span>Describe the app &amp; its four parts to the AI builder</li>
+          <li data-step="1" onclick="runBuildStep(1)"><span class="check"></span>Build screen 1: the Shift List (with 3 example shifts)</li>
+          <li data-step="2" onclick="runBuildStep(2)"><span class="check"></span>Build screen 2: the Add-Shift form</li>
+          <li data-step="3" onclick="runBuildStep(3)"><span class="check"></span>Wire the form to the list — a posted shift appears in the list</li>
+          <li data-step="4" onclick="runBuildStep(4)"><span class="check"></span>Add the Claim button logic — claiming marks the shift "taken"</li>
+          <li data-step="5" onclick="runBuildStep(5)"><span class="check"></span>Save shifts to the browser so they survive a refresh</li>
+        </ul>
+        <div class="done-note" id="buildDone">✅ <strong>ShiftSwap runs!</strong> Interface, logic, and data are wired together — screen by screen, each tested before the next. One cross-layer bug is hiding, though…</div>
+      </div>
+      <div class="build-card">
+        <h4>Build log (click steps on the left)</h4>
+        <div class="feed" id="buildFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Waiting for Maya to start building… tick a step on the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Ask for the right amount at once</div>
+      <div class="scenario-q">Maya wants the Shift List screen next. Which request gets her a working, testable screen fastest?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="titleQ(0)">"Build the entire ShiftSwap app — all screens, login, chat and saving — and make it look amazing."</button>
+        <button class="scenario-btn" onclick="titleQ(1)">"Build just the Shift List screen: show three example shifts, each with its date, role, and a Claim button. Nothing else yet."</button>
+        <button class="scenario-btn" onclick="titleQ(2)">"You know what I mean — just make the shift thing work."</button>
+      </div>
+      <div class="scenario-feedback" id="titleFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3 CONTINUED: WIRE & DEBUG ═══════════ -->
+<section class="section" id="s5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">5</div> Beat Three · Lesson 3 continued — The Cross-Layer Bug</div>
+      <h2 class="section-title">The Data Vanishes on Refresh — Debug Across the Layers</h2>
+      <p class="section-sub">Real apps break at the <strong>seams</strong> between parts — where the interface hands off to logic, or logic to data. Maya hits the classic beginner bug: everything works until she refreshes the page, and every shift disappears. The fix isn't in the screen she's staring at; it's one layer down. Debugging an app means finding <em>which layer actually failed</em>.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday, late. ShiftSwap looks finished: Maya posts a shift, claims one, it all works. Then she presses refresh to check — and the list is <em>empty.</em> Every shift gone. Her Week-1 instinct kicks in: don't panic, read what's happening. The interface is fine, the logic is fine — so the problem must live in the layer that's supposed to <em>remember</em>. Work through the wiring checklist, then diagnose the bug.
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Trace the layers (click each step)</h4>
+        <ul class="checklist" id="launchList">
+          <li data-step="0" onclick="runLaunchStep(0)"><span class="check"></span>Confirm the interface shows shifts from the data, not a fixed list in the code</li>
+          <li data-step="1" onclick="runLaunchStep(1)"><span class="check"></span>Trace a Claim click: interface → logic → update the data</li>
+          <li data-step="2" onclick="runLaunchStep(2)"><span class="check"></span>Reproduce the bug on purpose: add a shift, refresh, watch it vanish</li>
+          <li data-step="3" onclick="runLaunchStep(3)"><span class="check"></span>Ask the AI, with context: "shifts disappear on refresh — where are they stored?"</li>
+          <li data-step="4" onclick="runLaunchStep(4)"><span class="check"></span>Fix it: save shifts to the browser's storage, load them on start-up</li>
+          <li data-step="5" onclick="runLaunchStep(5)"><span class="check"></span>Re-test: add a shift, refresh — it's still there. Bug closed.</li>
+        </ul>
+        <div class="done-note" id="launchDone">🔧 <strong>Cross-layer bug fixed.</strong> The data now lives in storage, not just in memory — so a refresh no longer wipes it. Maya can explain exactly which layer failed and why.</div>
+      </div>
+      <div class="build-card">
+        <h4>Debug log</h4>
+        <div class="feed" id="launchFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Complete the wiring checklist to trace the bug…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">⚖️ Choice Point · Where did the shifts go?</div>
+      <div class="scenario-q">Maya adds a shift, it shows perfectly, then a refresh wipes the whole list. <strong>What's actually wrong?</strong></div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="panicQ(0)">The list screen is broken — rebuild the interface until the shifts stop disappearing.</button>
+        <button class="scenario-btn" onclick="panicQ(1)">The AI builder is buggy. Delete everything and start the whole app over from scratch.</button>
+        <button class="scenario-btn" onclick="panicQ(2)">The shifts only live in memory, so they're wiped when the page reloads. The data was never saved to storage — fix the data layer by writing shifts to the browser's storage and loading them on start-up.</button>
+      </div>
+      <div class="scenario-feedback" id="panicFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4: TEST, SHIP & ITERATE ═══════════ -->
+<section class="section alt" id="s6">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">6</div> Beat Four · Lesson 4 — Test, Ship &amp; Iterate</div>
+      <h2 class="section-title">Test the Sad Paths, Ship to a URL, Then Trust-Check the Code</h2>
+      <p class="section-sub">A build that works for <em>you</em> isn't shipped. Maya tests the happy path <strong>and</strong> the sad ones (what if a helper leaves a field blank? types nonsense?), deploys ShiftSwap to a real URL a teammate can open, gets first-user feedback — and does a <strong>trust-check</strong> on the AI's code before she relies on it. Three things got flagged. For each, she decides: <strong>Ship it</strong>, <strong>Verify it</strong>, or <strong>Block &amp; fix</strong>.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Thursday night. ShiftSwap survives a refresh, so Maya sends the link to one helper — the first real user who isn't her. Within minutes it breaks in a way she never tried: the helper pressed <strong>Post with the date left blank</strong>, and the app threw an error. Good — that's exactly what testing before a wide launch is for. She adds a check that catches the blank field with a friendly message, then runs a final <strong>trust-check</strong> on the AI's code, the way a professional reviews a pull request. Three items sit in front of her. Judge each: <strong>Ship</strong> (verified good), <strong>Verify</strong> (one quick check first), or <strong>Block &amp; fix</strong> (a real problem to fix before shipping).
+    </div>
+
+    <div class="eval-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)">ShiftSwap · Test &amp; Ship Review</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">Deployed to a live URL · 1 real user · happy path + sad paths tested</div>
+        </div>
+      </div>
+      <div class="eval-metrics">
+        <div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Screens shipped</div></div>
+        <div class="metric-card"><div class="metric-value">2</div><div class="metric-label">Sad paths caught</div></div>
+        <div class="metric-card"><div class="metric-value">1</div><div class="metric-label">Real user testing</div></div>
+        <div class="metric-card highlight"><div class="metric-value">LIVE</div><div class="metric-label">At a real URL</div></div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1rem 0 .6rem">Trust-check &amp; first-user feedback — decide each before a wider launch</div>
+
+      <div class="adset" id="asA">
+        <div class="adset-name">Item A · A password sitting in the code<span>The AI hard-coded a secret key straight into a visible file</span></div>
+        <div class="adset-nums"><span>Layer<b>Data / config</b></span><span>Risk<b>Exposed secret</b></span><span>Status<b>In the code</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('A','scale',this)">Ship it</button>
+          <button class="adset-btn" onclick="judge('A','watch',this)">Verify it</button>
+          <button class="adset-btn" onclick="judge('A','kill',this)">Block &amp; fix</button>
+        </div>
+        <div class="adset-feedback" id="fbA"></div>
+      </div>
+
+      <div class="adset" id="asB">
+        <div class="adset-name">Item B · An import Maya doesn't recognise<span>The AI added <code>import shiftmagic</code> — a library she's never heard of</span></div>
+        <div class="adset-nums"><span>Layer<b>Logic</b></span><span>Source<b>AI-written</b></span><span>Status<b>Unverified</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('B','scale',this)">Ship it</button>
+          <button class="adset-btn" onclick="judge('B','watch',this)">Verify it</button>
+          <button class="adset-btn" onclick="judge('B','kill',this)">Block &amp; fix</button>
+        </div>
+        <div class="adset-feedback" id="fbB"></div>
+      </div>
+
+      <div class="adset" id="asC">
+        <div class="adset-name">Item C · A plain empty-state message<span>When there are no shifts, it just says "No shifts."</span></div>
+        <div class="adset-nums"><span>Layer<b>Interface</b></span><span>Type<b>Cosmetic</b></span><span>Status<b>Works, a bit bare</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('C','scale',this)">Ship it</button>
+          <button class="adset-btn" onclick="judge('C','watch',this)">Verify it</button>
+          <button class="adset-btn" onclick="judge('C','kill',this)">Block &amp; fix</button>
+        </div>
+        <div class="adset-feedback" id="fbC"></div>
+      </div>
+
+      <div class="week-verdict" id="weekVerdict">
+        <h4>📜 The Verdict: <em>Maya shipped a real app.</em></h4>
+        <div class="wv-grid">
+          <div class="wv-tile"><div class="v">LIVE</div><div class="l">At a real URL</div></div>
+          <div class="wv-tile"><div class="v">4</div><div class="l">Parts wired together</div></div>
+          <div class="wv-tile"><div class="v">1</div><div class="l">Real user, day one</div></div>
+          <div class="wv-tile"><div class="v">0</div><div class="l">Coding background needed</div></div>
+        </div>
+        <p>ShiftSwap is live at a link Maya's helpers open on their phones — and this weekend it settled its first double-booked Saturday without a single confusing group-chat thread. Why did it work? Because Maya didn't <em>summon</em> an app; she <strong>built</strong> one. She turned a script-sized idea into a four-part app, designed it on paper before touching code, cut scope to a finishable MVP, built it one screen at a time, debugged across the layers when the data vanished, tested the sad paths, and trust-checked the AI's code before trusting it — blocking a hard-coded secret and verifying an unfamiliar library. She even wrote a short README so future-Maya (and her helpers) know how it works. Most beginners either never start or try to build everything and finish nothing. <strong>Maya shipped.</strong> 🎉</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER RECAP ─── -->
+<div class="footer-cta">
+  <h2>🎉 A weekend ago, <em>ShiftSwap</em> was just a messy group chat.</h2>
+  <p>Now it's a real app, live at a URL, quietly settling shift swaps for Maya's helpers. Here's what the story secretly taught you: the four lessons of Week 2.</p>
+  <div class="recap-grid">
+    <div class="recap-card">
+      <div class="rn">Lesson 1</div>
+      <h4>From Script to App</h4>
+      <p>A script runs for you; an app runs for other people and remembers things. Every app is four parts — interface, logic, data, state. Knowing when you've outgrown a script is the first move. Beat 1.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 2</div>
+      <h4>Design First</h4>
+      <p>Sketch the screens and the flow, write a one-sentence user story, sketch the data — then cut scope hard to a finishable MVP. Fifteen minutes on paper saves hours in code. Beat 2.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 3</div>
+      <h4>Build It</h4>
+      <p>Pick a low-friction builder, grow the app one screen at a time, and wire interface → logic → data. When a bug crosses layers (the data vanished on refresh), find which layer actually failed. Beat 3.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 4</div>
+      <h4>Test, Ship &amp; Iterate</h4>
+      <p>Test the happy and sad paths, handle the user who types something weird, deploy to a real URL, gather first-user feedback, and trust-check the AI's code — catch the hallucinated library, never ship a hard-coded secret. Then document and ship. Beat 4.</p>
+    </div>
+  </div>
+  <button class="btn-action" style="font-size:.9rem;padding:.8rem 1.8rem" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">↻ Replay the build</button>
+  <div class="footer-note">ShiftSwap is a teaching scenario. Real first apps are small, a little rough, and that's exactly right — the goal of Week 2 is a working, shipped, four-part app you understand end to end, which is worth far more than a flashy demo you can't explain. Next week: <strong>AI Agents</strong> — apps that don't just wait for a click, but take steps on your behalf. Details illustrative.</div>
+</div>
+
+<!-- ─── COMPLETION BAR ─── -->
+<div class="completion-bar">
+  <div class="completion-info"><span style="font-size:1.1rem">📱</span><span>ShiftSwap Progress</span></div>
+  <div class="completion-track"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
+  <div class="completion-percent" id="completionPct">0%</div>
+</div>
+
+<script>
+/* ───────── PROGRESS TRACKING ───────── */
+const visited = new Set();
+function markVisited(id){
+  visited.add(id);
+  const pct = Math.round((visited.size / 6) * 100);
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = pct + '%';
+  document.getElementById('headerProgressText').textContent = `${visited.size} of 6 stages explored`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    markVisited(btn.dataset.target);
+  });
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.3) {
+      markVisited(e.target.id);
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.target === e.target.id));
+    }
+  });
+}, {threshold:[0.3]});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+/* ───────── BEAT 1: PATH PICK ───────── */
+const nicheInfo = {
+  app: `<span class="verdict-pill vp-good">Right call</span><br><strong>A small ShiftSwap app — this becomes the project.</strong> This is the textbook first app: one clear job (see and claim open shifts), used by real people on their own phones, and small enough to actually finish. It has all four parts working together — an interface the helpers see, logic that claims a shift, data that's stored, and state that says which shift is taken. Narrow and finished beats broad and abandoned every time. <em>The story continues with this app.</em>`,
+  script: `<span class="verdict-pill vp-mid">Comfortable trap</span><br><strong>Just another script — solves the wrong problem.</strong> Maya's good at scripts now, so this feels safe. But a script runs on <em>her</em> machine only, and forgets everything the moment it closes. Her helpers can't open it from the market on a Saturday, and it can't remember who claimed which shift. A script is a private tool; this problem needs a shared, remembering one. <em>She sets the script instinct aside.</em>`,
+  platform: `<span class="verdict-pill vp-bad">Ambitious but doomed</span><br><strong>A full staff platform — the "everything" trap.</strong> Payroll, chat, smart scheduling, ratings, notifications… it sounds impressive, and it's months of work she'll never finish on weekends. The classic beginner failure isn't aiming too small — it's aiming so big that nothing ever ships. <em>She parks the dream and picks the version she can finish.</em>`
+};
+function pickNiche(k){
+  document.querySelectorAll('#s1 .pick-card').forEach(c => c.classList.toggle('active', c.dataset.niche === k));
+  const d = document.getElementById('nicheDetail');
+  d.innerHTML = nicheInfo[k];
+  d.classList.add('show');
+}
+
+/* describe-your-app showdown */
+const promptResults = [
+  {ok:false, fb:'✗ Too vague. "An app for my shifts" could mean a hundred different things — the AI has to guess every screen, rule, and field, and it guesses wrong. Vague description in, tangled draft out. Try the one that names the four parts.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Make me an app for my shifts.</div><div class="chat-msg ai"><span class="who">AI Builder</span>Sure — here's a starting point! <strong>(…and it invents a calendar, a login, colour themes and settings you never asked for — none of them the thing you actually needed.)</strong> What did you want it to do, exactly?</div>`},
+  {ok:false, fb:'✗ The feature dump. Asking for login, chat, payments, notifications and AI scheduling all at once buries the one job that matters under five you don\'t need yet — and guarantees nothing gets finished. A first app is one clear thing, built small.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Build the best shift app ever — login, chat, payments, notifications and AI scheduling.</div><div class="chat-msg ai"><span class="who">AI Builder</span>That\'s a large project spanning many systems. <strong>(Heads up: building all of this at once is weeks of work and very hard to test or debug.)</strong> Want to start with the single most important screen instead?</div>`},
+  {ok:true, fb:'✓ Exactly. It names all four parts — <strong>interface</strong> (a list + Claim button + form), <strong>logic</strong> (claiming marks it taken), <strong>data</strong> (shifts are saved), and <strong>state</strong> (open vs. taken) — and asks for just the first screen. That gives the AI a real, buildable app and Maya something she can test in minutes.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Build a small web app, ShiftSwap. Interface: a list of open shifts with a Claim button + a form to post a shift (date + role). Logic: claiming marks it taken so no one claims twice. Data: shifts are saved so they survive a refresh. Start with just the list screen.</div><div class="chat-msg ai"><span class="who">AI Builder</span>Clear brief. Here\'s <strong>screen 1: the Shift List</strong> with three example shifts, each showing date, role and a Claim button — running live in the preview. <strong>← One screen, testable now. Say "next" for the Add-Shift form.</strong></div>`}
+];
+let promptAnswered = false;
+function pickPrompt(i){
+  const r = promptResults[i];
+  const btns = document.querySelectorAll('#s1 .scenario-panel:first-of-type .scenario-btn');
+  if (!promptAnswered){
+    btns.forEach((b,j) => { if (j===2) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) promptAnswered = true;
+  }
+  const fb = document.getElementById('promptFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+  document.getElementById('promptChat').innerHTML = r.chat;
+}
+
+/* weekend reality meter */
+function calc(){
+  const screens = +document.getElementById('inBase').value;
+  const extras = +document.getElementById('inFee').value;
+  const hours = +document.getElementById('inPrice').value;
+  document.getElementById('oBase').textContent = screens + (screens === 1 ? ' screen' : ' screens');
+  document.getElementById('oFee').textContent = extras;
+  document.getElementById('oPrice').textContent = hours + ' h';
+  const extrasCost = extras * 2;
+  const needed = Math.round(screens * 2.5 + extrasCost);
+  const slack = hours - needed;
+  const odds = needed <= 0 ? 100 : Math.max(5, Math.min(99, Math.round((hours / needed) * 80)));
+  const weekends = needed > 0 ? Math.ceil(needed / Math.max(hours, 1)) : 1;
+  document.getElementById('vProfit').textContent = needed + ' h';
+  document.getElementById('vMargin').textContent = odds + '%';
+  document.getElementById('vFee').textContent = extrasCost + ' h';
+  document.getElementById('vSales').textContent = weekends;
+  const tP = document.getElementById('tProfit'), tM = document.getElementById('tMargin');
+  tP.className = 'calc-tile ' + (slack < 0 ? 'warn' : slack >= needed * 0.25 ? 'ok' : '');
+  tM.className = 'calc-tile ' + (odds < 55 ? 'warn' : odds >= 80 ? 'ok' : '');
+  const note = document.getElementById('calcNote');
+  if (slack < 0){
+    note.innerHTML = '🚨 <strong>Over budget.</strong> ShiftSwap needs about ' + needed + ' h but Maya has only ' + hours + ' h this week — it won\'t ship. Cut a screen or a nice-to-have. A smaller app that ships beats a bigger one that doesn\'t.';
+  } else if (odds < 55){
+    note.innerHTML = '⚠️ <strong>Tight.</strong> About ' + needed + ' h of work against ' + hours + ' h leaves almost no room for the bugs that always appear. Trim a nice-to-have so there\'s slack to test.';
+  } else if (extras >= 4){
+    note.innerHTML = '🟡 The core fits, but <strong>' + extrasCost + ' h</strong> of this is nice-to-haves. Every extra is one more thing to build, test and debug. Ship the core first; add extras once real helpers ask for them.';
+  } else {
+    note.innerHTML = '✅ <strong>Finishable!</strong> About ' + needed + ' h of work fits inside ' + hours + ' h with room for the inevitable bugs. This is a weekend-sized app — exactly what a first build should be.';
+  }
+}
+['inBase','inFee','inPrice'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+
+/* ───────── BEAT 2: SCREEN & SCOPE ASSEMBLER ───────── */
+const designData = {
+  subjects: {
+    list:{emoji:'📋', cap:'Shift List — open shifts + Claim', good:true, key:'a Shift List screen where each open shift shows its date, role, and a Claim button'},
+    add:{emoji:'📝', cap:'Add-Shift form — date + role', good:true, key:'an Add-Shift form with a date field, a role field, and a Post button'},
+    dashboard:{emoji:'📊', cap:'Analytics dashboard (not core)', good:false, key:'an analytics dashboard with charts of everyone\'s monthly hours'}
+  },
+  styles: {
+    mvp:{good:true, key:'built as a tiny MVP — just list, claim, and add; nothing else'},
+    some:{good:true, key:'the core plus one small filter to show only my shifts'},
+    everything:{good:false, key:'everything at once — login, chat, ratings, and calendar sync'}
+  },
+  prints: {
+    simple:{good:true, key:'saving one list of shifts (date, role, status: open or taken) so it survives a refresh'},
+    none:{good:false, key:'keeping shifts only in memory and saving nothing — so a refresh wipes them'}
+  }
+};
+function renderDesign(){
+  const s = document.getElementById('genSubject').value;
+  const st = document.getElementById('genStyle').value;
+  const p = document.getElementById('genPrint').value;
+  const sub = designData.subjects[s], sty = designData.styles[st], pr = designData.prints[p];
+  document.getElementById('dpEmoji').textContent = sub.emoji;
+  document.getElementById('dpCaption').textContent = sub.cap;
+  document.getElementById('genPromptBox').innerHTML =
+    '<span class="pk">Build →</span> "' + sub.key + ', ' + sty.key + ', ' + pr.key + ', as a small browser app I can preview live."';
+  const screenOk = sub.good, scopeOk = sty.good, dataOk = pr.good;
+  const canvas = document.getElementById('dpCanvas');
+  const badge = document.getElementById('dpBadge');
+  const allGood = screenOk && scopeOk && dataOk;
+  canvas.style.background = allGood
+    ? 'linear-gradient(135deg,#EAF4EC,#CDE9D3)'
+    : 'repeating-conic-gradient(#EDE6DD 0% 25%, #F6F1EA 0% 50%) 50% / 22px 22px';
+  badge.textContent = allGood ? 'Finishable ✓' : 'Won\'t ship ✗';
+  badge.style.background = allGood ? 'var(--green)' : 'var(--red)';
+  const meta = document.getElementById('dpMeta');
+  meta.innerHTML =
+    chip('Screen fit', screenOk, screenOk ? 'A core screen' : 'Not core yet') +
+    chip('Scope', scopeOk, scopeOk ? 'Small enough to finish' : 'Too big to ship') +
+    chip('Data plan', dataOk, dataOk ? 'Saved · survives refresh' : 'Forgets everything');
+}
+function chip(label, ok, detail){
+  return `<span class="dp-chip ${ok?'ok':'bad'}">${ok?'✓':'✗'} ${label}: ${detail}</span>`;
+}
+renderDesign();
+
+/* finishable-MVP quiz */
+const fileFbs = [
+  {ok:false, fb:'✗ That\'s the "everything at once" trap. Logins, chat, ratings, calendar sync and notifications are five projects wearing one costume — weeks of work, impossible to finish in a weekend, and none of it is the one thing a helper actually needs. Scope kills more first apps than bad code does.'},
+  {ok:true, fb:'✓ That\'s the MVP. One list screen + a Claim button + a form to post a shift, with shifts <strong>saved</strong> so they persist. It fully satisfies the user story (see, claim, post) and nothing more. Small, useful, and finishable this weekend — you add extras later, once real helpers ask.'},
+  {ok:false, fb:'✗ Too thin the other way. A screen that only shows the word "ShiftSwap" with no way to see, add, or claim a shift isn\'t a smaller app — it\'s a non-app. An MVP is the smallest thing that\'s genuinely <em>useful</em>, not the smallest thing that renders.'}
+];
+function fileQ(i){
+  const r = fileFbs[i];
+  const btns = document.querySelectorAll('#s2 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (fileFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('fileFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 2 CONTINUED: FEATURE SCOPE ───────── */
+const batchDesigns = [
+  {emoji:'📋', label:'See a list of open shifts', keep:true, note:'The whole point. KEEP.'},
+  {emoji:'✅', label:'Claim an open shift', keep:true, note:'Core action. KEEP.'},
+  {emoji:'📝', label:'Post a shift you can\'t make', keep:true, note:'Core action. KEEP.'},
+  {emoji:'💾', label:'Shifts saved so they survive a refresh', keep:true, note:'Without this it\'s a toy. KEEP.'},
+  {emoji:'💬', label:'In-app chat between helpers', keep:false, note:'Nice, not needed. CUT to v2.'},
+  {emoji:'⭐', label:'Rate each helper after a shift', keep:false, note:'Off-scope. CUT.'},
+  {emoji:'🔔', label:'Push notifications', keep:false, note:'Extra plumbing. CUT for now.'},
+  {emoji:'📅', label:'Two-way calendar sync', keep:false, note:'A whole project on its own. CUT.'}
+];
+let batchJudged = 0;
+function renderBatch(){
+  const grid = document.getElementById('batchGrid');
+  grid.innerHTML = batchDesigns.map((d,i)=>`
+    <div class="batch-tile" id="bt${i}" onclick="judgeBatch(${i})">
+      <div class="batch-art">${d.emoji}</div>
+      <div class="batch-label">${d.label}</div>
+    </div>`).join('');
+}
+function judgeBatch(i){
+  const tile = document.getElementById('bt'+i);
+  if (tile.classList.contains('keep') || tile.classList.contains('cut')) return;
+  const d = batchDesigns[i];
+  tile.classList.add(d.keep ? 'keep' : 'cut');
+  tile.onclick = null;
+  tile.insertAdjacentHTML('beforeend', `<div class="batch-verdict ${d.keep?'keep':'cut'}">${d.keep?'✓ Keep':'✕ Cut'} — ${d.note}</div>`);
+  batchJudged++;
+  if (batchJudged === batchDesigns.length) document.getElementById('batchDone').style.display = 'block';
+}
+renderBatch();
+
+/* favourite-vs-MVP quiz */
+const tasteFbs = [
+  {ok:false, fb:'✗ The classic beginner mistake — <strong>building the shiny feature instead of the useful one.</strong> Calendar sync is impressive and completely optional; it isn\'t in the user story. Chasing it first means weeks on plumbing while the actual job (see + claim + post) still doesn\'t exist. Build the core; the toy can wait.'},
+  {ok:true, fb:'✓ Exactly right. <strong>Park the exciting extra on the "v2 someday" list and ship the core.</strong> The MVP has to earn the right to grow — once real helpers are using it and <em>ask</em> for sync, you\'ll know it\'s worth the effort. Scope discipline is what separates a shipped app from a beautiful idea that never launches.'},
+  {ok:false, fb:'✗ The perfectionist trap. "Don\'t ship until everything is perfect" is how apps die unlaunched. You cannot polish your way to knowing what helpers actually need — only a real, live MVP tells you that. Ship the small useful thing first, then iterate with real feedback.'}
+];
+function tasteQ(i){
+  const r = tasteFbs[i];
+  const btns = document.querySelectorAll('#s3 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (tasteFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('tasteFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 3: SCREEN PREVIEW ───────── */
+const mockData = {
+  flat:{art:'🧱', cls:'flat', flag:'Empty · nothing built yet', flagBg:'var(--text-muted)', title:'ShiftSwap — a browser app your helpers open on their phones', price:'0 screens <small>· blank canvas</small>'},
+  tshirt:{art:'📋', cls:'tshirt', flag:'Interface + data · shifts show and save', flagBg:'var(--green)', title:'Shift List — each open shift shows date, role &amp; a Claim button', price:'Screen 1 <small>· the list, wired to saved data</small>'},
+  mug:{art:'📝', cls:'mug', flag:'Interface + logic · posts a new shift', flagBg:'var(--green)', title:'Add-Shift form — pick a date &amp; role, press Post to add it to the list', price:'Screen 2 <small>· form wired to the list</small>'},
+  tote:{art:'✅', cls:'tote', flag:'Logic + state · marks the shift taken', flagBg:'var(--green)', title:'Claim confirmation — the shift flips to "Taken" so no one double-claims', price:'Screen 3 <small>· logic + state working</small>'}
+};
+function setMock(m){
+  document.querySelectorAll('.voice-tab').forEach(t => t.classList.toggle('active', t.dataset.mock === m));
+  const d = mockData[m];
+  const mock = document.getElementById('listingMock');
+  mock.className = 'listing-mock ' + d.cls;
+  document.getElementById('mockArt').textContent = d.art;
+  const flag = document.getElementById('mockFlag');
+  flag.textContent = d.flag; flag.style.background = d.flagBg;
+  const title = document.getElementById('listingTitle');
+  title.style.opacity = 0;
+  setTimeout(()=>{ title.innerHTML = d.title; title.style.opacity = 1; }, 200);
+  document.querySelector('.listing-price').innerHTML = d.price;
+}
+function toggleCopy(which){
+  document.getElementById('copyBefore').style.display = which==='before' ? 'block' : 'none';
+  document.getElementById('copyAfter').style.display = which==='after' ? 'block' : 'none';
+}
+
+/* build checklist + log */
+const buildEvents = [
+  {t:'Wed 19:04', msg:'Maya describes ShiftSwap and its four parts. The AI scaffolds a blank app with a live browser preview — nothing to install.'},
+  {t:'Wed 19:22', msg:'Screen 1 appears: a Shift List showing three example shifts, each with date, role and a Claim button. The interface is real now.'},
+  {t:'Wed 20:05', msg:'Screen 2 built: an Add-Shift form with a date field, a role field and a Post button. Still separate from the list for the moment.'},
+  {t:'Wed 20:40', msg:'Wired the form to the list — pressing Post adds a new shift to the list on screen. Interface now talks to logic.'},
+  {t:'Wed 21:15', msg:'Claim button logic added: clicking Claim flips a shift from "open" to "taken" and hides the button. State is working.'},
+  {t:'Wed 21:50', msg:'Shifts now saved in the browser\'s storage. Refresh the page and they\'re still there. Data layer connected — the app is real.'}
+];
+const buildSteps = new Set();
+function runBuildStep(i){
+  if (buildSteps.has(i)) return;
+  buildSteps.add(i);
+  document.querySelector(`#buildList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('buildFeed');
+  if (buildSteps.size === 1) feed.innerHTML = '';
+  const e = buildEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (buildSteps.size === buildEvents.length) document.getElementById('buildDone').style.display = 'block';
+}
+
+/* build-request quiz */
+const titleFbs = [
+  {ok:false, fb:'✗ Too much at once. Asking for the whole app — every screen, login, chat and saving, "make it amazing" — gives the AI no way to get any single piece right, and gives you nothing you can test in a minute. Big-bang requests produce big tangled drafts. Grow it one screen at a time.'},
+  {ok:true, fb:'✓ Yes. One screen, named fields (date, role, Claim button), example data, and an explicit "nothing else yet." The AI returns a working Shift List you can see and test immediately — then you ask for the next piece. Small, precise, testable: that\'s how apps get built.'},
+  {ok:false, fb:'✗ "You know what I mean" is exactly what the AI doesn\'t. It can\'t read intent — only the words you give it. A vague request gets a vague guess. Name the screen and its fields, and you get the screen you meant.'}
+];
+function titleQ(i){
+  const r = titleFbs[i];
+  const btns = document.querySelectorAll('#s4 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (titleFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('titleFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 3 CONTINUED: WIRE & DEBUG ───────── */
+const launchEvents = [
+  {t:'23:02', msg:'Checked: the list on screen is drawn from the shifts data, not a fixed list typed into the code. So the interface is reading the right source.'},
+  {t:'23:10', msg:'Traced a Claim click: button → logic marks the shift taken → the data updates in memory. Works perfectly… until you leave the page.'},
+  {t:'23:14', msg:'Reproduced on purpose: added a shift, hit refresh — the list is empty. Consistent and repeatable. A reproducible bug is a solvable bug.'},
+  {t:'23:20', msg:'Asked the AI with context: "shifts disappear on refresh." It spots the cause instantly — the shifts only ever lived in memory; nothing was written to storage.'},
+  {t:'23:35', msg:'Fix applied: save the shifts to the browser\'s local storage whenever they change, and load them back when the app starts.'},
+  {t:'23:41', msg:'Re-tested: added a shift, refreshed twice, closed the tab and reopened — every shift still there. The data layer is finally real.'}
+];
+const launchSteps = new Set();
+function runLaunchStep(i){
+  if (launchSteps.has(i)) return;
+  launchSteps.add(i);
+  document.querySelector(`#launchList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('launchFeed');
+  if (launchSteps.size === 1) feed.innerHTML = '';
+  const e = launchEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (launchSteps.size === launchEvents.length){
+    document.getElementById('launchDone').style.display = 'block';
+    feed.innerHTML += `<div class="feed-line"><span class="ft">23:45</span><span>The four parts finally hold together: interface, logic, data and state. ShiftSwap survives a refresh. Next: does it survive a real user?</span></div>`;
+    feed.scrollTop = feed.scrollHeight;
+  }
+}
+
+/* cross-layer bug diagnosis */
+const panicFbs = [
+  {cls:'fail', fb:'✗ The interface is fine — it displayed the shift perfectly right up until the refresh. Rebuilding the screen you can see won\'t help, because the bug is one layer down. When something works and then vanishes on reload, suspect the <strong>data layer</strong>, not the display.'},
+  {cls:'fail', fb:'✗ Nuking the whole app throws away a working interface and working logic to chase a bug that lives in one specific place. "Start over" is almost never the fix. The layers that work are innocent; only the data layer failed.'},
+  {cls:'success', fb:'✓ <strong>Exactly right.</strong> The shifts were only held in memory — the moment the page reloads, memory is wiped and the app starts blank. The interface and logic were never the problem. The fix lives in the <strong>data layer</strong>: save shifts to the browser\'s storage whenever they change, and load them when the app opens. This interface → logic → data thinking is how you debug <em>any</em> app — find which layer actually failed, then fix only that.'}
+];
+function panicQ(i){
+  const btns = document.querySelectorAll('#s5 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (j===2) b.classList.add('correct'); else if (j===i && i!==2) b.classList.add('wrong'); });
+  const fb = document.getElementById('panicFb');
+  fb.className = 'scenario-feedback show ' + panicFbs[i].cls;
+  fb.innerHTML = panicFbs[i].fb;
+}
+
+/* ───────── BEAT 4: TRUST-CHECK / SHIP ───────── */
+const judgeKey = {
+  A: {right:'kill', fb:{
+    kill:'✓ Correct — <strong>BLOCK &amp; FIX.</strong> A secret key written straight into the code is visible to anyone who can see the app\'s files — the digital equivalent of taping your house key to the front door. This never ships. Move it out of the code into a private setting the app reads at run time, and rotate the exposed key. Catching this is exactly why builders read the AI\'s code instead of trusting it blindly.',
+    scale:'✗ Shipping a hard-coded secret exposes it to anyone who can view the files. Confident-looking AI code often includes real security mistakes, and this is one of them. Verdict: <strong>BLOCK &amp; FIX</strong> before anything goes live.',
+    watch:'△ This isn\'t a "check later" — an exposed secret is a definite problem, not a maybe. Don\'t ship and verify in parallel; fix it first, then ship. Verdict: <strong>BLOCK &amp; FIX</strong>.'}},
+  B: {right:'watch', fb:{
+    watch:'✓ Correct — <strong>VERIFY.</strong> <code>import shiftmagic</code> isn\'t a library Maya recognises, and AI sometimes invents plausible-sounding packages that don\'t actually exist (a "hallucination"). Before trusting it: check the package is real, does what the code assumes, and is even needed. Often the honest fix is to replace it with something standard. Verify, don\'t assume.',
+    kill:'△ Deleting it outright might rip out something the app genuinely relies on. The right move is one quick check first — does this library exist, and is it needed? — before cutting or keeping. Verdict: <strong>VERIFY</strong>.',
+    scale:'✗ Shipping code that leans on an unrecognised library is how an app breaks for real users the moment that library turns out to be imaginary or wrong. A 30-second check settles it. Verdict: <strong>VERIFY</strong> before you rely on it.'}},
+  C: {right:'scale', fb:{
+    scale:'✓ Correct — <strong>SHIP.</strong> A plain "No shifts." message is a little bare, but it works, it\'s honest, and it blocks nothing. Perfect is the enemy of shipped. Note it on the v2 list ("friendlier empty state") and launch — you can polish the wording after real people are actually using it.',
+    kill:'✗ There\'s nothing broken to fix here — the empty state just looks plain. Blocking a working app over cosmetics is how launches slip forever. Verdict: <strong>SHIP</strong>, and park the polish for v2.',
+    watch:'△ Nothing to verify — it plainly works, it\'s simply not pretty. Endless "let me just check the wording" is procrastination in disguise. Verdict: <strong>SHIP</strong> it and note the polish for later.'}}
+};
+const judged = {};
+function judge(set, verdict, btn){
+  const k = judgeKey[set];
+  judged[set] = true;
+  const row = document.getElementById('as'+set);
+  row.className = 'adset decided-' + k.right;
+  row.querySelectorAll('.adset-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('fb'+set);
+  fb.className = 'adset-feedback show ' + (verdict===k.right ? 'good' : 'warn');
+  fb.innerHTML = k.fb[verdict];
+  if (judged.A && judged.B && judged.C){
+    setTimeout(()=>{ document.getElementById('weekVerdict').classList.add('show'); document.getElementById('weekVerdict').scrollIntoView({behavior:'smooth', block:'center'}); }, 600);
+  }
+}
+</script>
+</body>
+</html>

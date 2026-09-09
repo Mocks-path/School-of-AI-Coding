@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Week 5 — Ship CandleConcierge, Maya's API Capstone</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;
+  --green:#4CAF50;--green-light:#E8F5E9;
+  --blue:#3F88C5;--purple:#8B5CF6;--pink:#EC4899;--red:#E74C3C;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);
+  --shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.7rem}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);line-height:1.2}
+.header-title span{color:var(--orange)}
+.header-tag{font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.logo-mascot{width:44px;height:44px;flex-shrink:0}
+.progress-pill{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;background:var(--orange-glow);border-radius:50px;font-size:.72rem;color:var(--orange);font-weight:700}
+.progress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-light) 100%);position:relative;overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .7s ease}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;color:var(--navy);margin-bottom:.9rem;animation:fadeUp .7s ease .1s both}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.4rem;animation:fadeUp .7s ease .2s both}
+.usecase-banner{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:1rem;animation:fadeUp .7s ease .3s both}
+.usecase-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#EC4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem}
+.usecase-text{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.usecase-text strong{color:var(--navy);font-weight:700}
+.hero-visual{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s ease .2s both}
+.hero-mascot{width:230px;height:auto;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 40px rgba(232,122,46,0.22))}
+.budget-strip{max-width:1100px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;animation:fadeUp .8s ease .35s both}
+.budget-chip{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;text-align:center;box-shadow:var(--shadow-sm)}
+.budget-chip .bv{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--orange)}
+.budget-chip .bl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.15rem}
+
+/* ─── SECTION SHELL ─── */
+.section{padding:3rem 2rem;scroll-margin-top:80px}
+.section.alt{background:var(--bg-light)}
+.container{max-width:1100px;margin:0 auto}
+.section-header{margin-bottom:2rem}
+.section-num{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.5rem}
+.section-num .num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,2.8vw,2rem);color:var(--navy);line-height:1.25;margin-bottom:.4rem}
+.section-sub{font-size:.92rem;color:var(--text-secondary);line-height:1.65;max-width:720px}
+.story-beat{background:#fff;border-left:4px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.2rem;font-size:.88rem;color:var(--text-primary);line-height:1.65;box-shadow:var(--shadow-sm);margin-bottom:1.6rem}
+.story-beat .sb-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.3rem}
+.story-beat em{color:var(--text-secondary)}
+
+/* ─── TAB NAV ─── */
+.tab-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border-radius:50px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:72px;z-index:50;margin:0 auto 2rem;max-width:fit-content;flex-wrap:nowrap;-ms-overflow-style:none;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.55rem 1.1rem;border-radius:50px;border:none;background:transparent;color:var(--text-secondary);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--orange)}
+.tab-btn.active{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(232,122,46,0.35)}
+
+/* ─── GENERIC CARDS/GRIDS ─── */
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.pick-grid.two{grid-template-columns:repeat(2,1fr)}
+.pick-card{background:#fff;border-radius:var(--radius);padding:1.4rem;border:2px solid var(--border);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;transition:height .3s}
+.pick-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),#7BC67E)}
+.pick-card:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),#5DADE2)}
+.pick-card:nth-child(3)::before{background:linear-gradient(90deg,var(--pink),#F48FB1)}
+.pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.pick-card.active{border-color:var(--orange);box-shadow:var(--shadow-md)}
+.pick-card.active::before{height:6px}
+.pick-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:var(--bg-light)}
+.pick-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.pick-card .pc-tag{font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.pick-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+.pick-detail{background:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);font-size:.86rem;line-height:1.65;display:none}
+.pick-detail.show{display:block;animation:fadeUp .4s ease}
+.pick-detail strong{color:var(--navy)}
+.pick-detail .verdict-pill{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.vp-good{background:var(--green-light);color:#2E7D32}
+.vp-mid{background:#FFF3CD;color:#856404}
+.vp-bad{background:#FEE;color:#C62828}
+
+/* ─── SCENARIO QUIZ ─── */
+.scenario-panel{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.scenario-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.scenario-q{font-size:1rem;color:var(--navy);margin-bottom:1rem;font-weight:600;line-height:1.5}
+.scenario-options{display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:1rem}
+.scenario-btn{padding:.75rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left;line-height:1.45}
+.scenario-btn:hover{border-color:var(--orange);color:var(--orange)}
+.scenario-btn.correct{background:var(--green-light);border-color:var(--green);color:#2E7D32}
+.scenario-btn.wrong{background:#FEE;border-color:var(--red);color:#C62828}
+.scenario-feedback{padding:.9rem;border-radius:8px;font-size:.83rem;line-height:1.55;display:none}
+.scenario-feedback.show{display:block;animation:fadeUp .4s ease}
+.scenario-feedback.success{background:var(--green-light);color:#2E7D32;border-left:3px solid var(--green)}
+.scenario-feedback.fail{background:#FEE;color:#C62828;border-left:3px solid var(--red)}
+.btn-action{padding:.55rem 1.1rem;border-radius:8px;background:var(--orange);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-action:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-secondary{background:transparent;color:var(--text-primary);border:1.5px solid var(--border);padding:.55rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── CHAT MOCK ─── */
+.chat-mock{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:1rem}
+.chat-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.chat-head .cdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-body{padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;min-height:150px}
+.chat-msg{max-width:88%;padding:.8rem 1rem;border-radius:12px;font-size:.83rem;line-height:1.55}
+.chat-msg.user{align-self:flex-end;background:var(--orange-glow);color:var(--text-primary);border:1px solid rgba(232,122,46,0.25);border-bottom-right-radius:3px}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-light);border:1px solid var(--border);border-bottom-left-radius:3px}
+.chat-msg.ai strong{color:var(--orange)}
+.chat-msg .who{display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem}
+.chat-msg code{background:rgba(43,45,66,0.06);padding:.05rem .3rem;border-radius:4px;font-size:.78rem}
+
+/* ─── OPTION / TRACE ─── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.prod-card{background:#fff;border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.prod-card.chosen{border-color:var(--orange)}
+.prod-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.prod-card:nth-child(1) .prod-img{background:linear-gradient(135deg,#EDE4F5,#D6C3EE)}
+.prod-card:nth-child(2) .prod-img{background:linear-gradient(135deg,#FBE4D5,#F8C8A8)}
+.prod-card:nth-child(3) .prod-img{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.prod-body{padding:1rem 1.1rem}
+.prod-body h4{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.5rem}
+.prod-stats{display:flex;flex-direction:column;gap:.3rem}
+.prod-stat{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-secondary)}
+.prod-stat b{color:var(--navy)}
+.prod-stat .good{color:#2E7D32;font-weight:700}
+.prod-stat .bad{color:#C62828;font-weight:700}
+.prod-stat .mid{color:#B8860B;font-weight:700}
+.prod-cta{margin-top:.7rem;font-size:.72rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em}
+
+/* two-col info box (durable/hype) */
+.review-mine{background:#fff;border-radius:var(--radius);padding:1.4rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.review-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.9rem}
+.review-col{border-radius:var(--radius-sm);padding:1rem 1.1rem}
+.review-col.love{background:var(--green-light)}
+.review-col.hate{background:#FEE}
+.review-col h5{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.review-col.love h5{color:#2E7D32}
+.review-col.hate h5{color:#C62828}
+.review-col li{font-size:.8rem;line-height:1.5;margin-left:1.1rem;margin-bottom:.35rem;color:var(--text-primary)}
+
+/* ─── BLUEPRINT PREVIEW ─── */
+.voice-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.voice-tab{padding:.45rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-tab:hover{border-color:var(--orange);color:var(--orange)}
+.voice-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.store-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.store-chrome{background:#F5F5F7;padding:.55rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted)}
+.store-chrome .sdot{width:9px;height:9px;border-radius:50%}
+.store-url{margin-left:.6rem;background:#fff;border:1px solid var(--border);border-radius:50px;padding:.2rem .9rem;font-size:.7rem;color:var(--text-secondary)}
+.store-body{padding:1.4rem 1.6rem}
+.store-brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.store-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;font-size:1rem}
+.store-brand b{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)}
+.store-hero-line{font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--navy);line-height:1.3;margin-bottom:.6rem;transition:opacity .3s}
+.store-desc{font-size:.84rem;color:var(--text-secondary);line-height:1.65;transition:opacity .3s}
+.store-price-row{display:flex;align-items:center;gap:.8rem;margin-top:1rem}
+.store-price{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--orange);line-height:1.4}
+.store-buy{padding:.55rem 1.4rem;border-radius:8px;background:var(--navy);color:#fff;font-size:.8rem;font-weight:700;border:none;cursor:default}
+.copy-toggle{display:flex;gap:.5rem;margin:1.4rem 0 .8rem}
+.before-after{border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.85rem;line-height:1.6}
+.before-after.before{background:var(--bg-light);border:1.5px dashed var(--border);color:var(--text-muted)}
+.before-after.after{background:var(--orange-glow);border:1.5px solid rgba(232,122,46,0.35);color:var(--text-primary)}
+
+/* ─── PARAM / SAFETY WIDGET ─── */
+.perso-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.4rem;margin-top:1.4rem;align-items:start}
+.perso-controls .prompt-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.perso-controls label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.perso-controls select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:#fff}
+.perso-controls select:focus{outline:none;border-color:var(--orange)}
+.perso-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.pp-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.74rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.pp-body{padding:1.1rem 1.2rem}
+.pp-greeting{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.7rem;transition:opacity .3s}
+.pp-recos{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.pp-reco{background:var(--bg-light);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;text-align:center;transition:opacity .3s}
+.pp-reco .ppe{font-size:1.5rem}
+.pp-reco .ppn{font-size:.66rem;font-weight:700;color:var(--navy);margin-top:.25rem;line-height:1.3}
+
+/* ─── CHECKLIST + FEED ─── */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.build-card{background:#fff;border-radius:var(--radius);padding:1.3rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.build-card h4{font-size:.95rem;color:var(--navy);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.build-card h4::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:.6rem;padding:.42rem 0;font-size:.84rem;color:var(--text-primary);cursor:pointer;line-height:1.45}
+.checklist li .check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.checklist li.done .check{background:var(--green);border-color:var(--green)}
+.checklist li.done .check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:800}
+.checklist li.done{color:var(--text-muted);text-decoration:line-through}
+.feed{background:var(--navy-dark);border-radius:10px;padding:1rem 1.1rem;min-height:220px;max-height:280px;overflow-y:auto}
+.feed-line{display:flex;gap:.6rem;font-size:.78rem;line-height:1.55;padding:.3rem 0;color:#D8DAE5;animation:fadeUp .4s ease}
+.feed-line .ft{color:var(--orange-light);font-weight:700;flex-shrink:0}
+.feed-line.hint-line{color:#8B8DA0;font-style:italic}
+.done-note{margin-top:1rem;padding:.8rem;background:var(--green-light);border-radius:7px;font-size:.78rem;color:#2E7D32;display:none}
+
+/* ─── TRACE TRIAGE ─── */
+.triage{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.ticket{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.ticket.decided-bot{border-color:var(--green);background:var(--green-light)}
+.ticket.decided-human{border-color:var(--blue);background:rgba(63,136,197,0.08)}
+.ticket.wrongdrop{border-color:var(--red);background:#FEE}
+.ticket-msg{font-size:.85rem;color:var(--text-primary);line-height:1.45}
+.ticket-msg span{display:block;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+.ticket-msg code{background:rgba(43,45,66,0.06);padding:.05rem .3rem;border-radius:4px;font-size:.78rem}
+.ticket-actions{display:flex;gap:.4rem}
+.ticket-btn{padding:.45rem .85rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.ticket-btn:hover{border-color:var(--orange);color:var(--orange)}
+.ticket-btn:disabled{opacity:.5;cursor:not-allowed}
+.ticket-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.ticket-feedback.show{display:block;animation:fadeUp .4s ease}
+.ticket-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.ticket-feedback.warn{background:#FFF3CD;color:#856404}
+
+/* ─── EVAL DASHBOARD ─── */
+.eval-dashboard{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+.metric-card{padding:1rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent}
+.metric-card.highlight{border-color:var(--orange);background:var(--orange-glow)}
+.metric-card.warn{border-color:var(--red);background:#FEE}
+.metric-value{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1}
+.metric-card.highlight .metric-value{color:var(--orange)}
+.metric-card.warn .metric-value{color:#C62828}
+.metric-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.4rem}
+.adset{display:grid;grid-template-columns:1.3fr 1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.adset.decided-scale{border-color:var(--green);background:var(--green-light)}
+.adset.decided-kill{border-color:var(--red);background:#FEE}
+.adset.decided-watch{border-color:#E0A800;background:#FFF8E1}
+.adset-name{font-size:.86rem;font-weight:700;color:var(--navy);line-height:1.4}
+.adset-name span{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted)}
+.adset-nums{display:flex;gap:1rem;font-size:.75rem;color:var(--text-secondary);flex-wrap:wrap}
+.adset-nums b{display:block;font-size:.88rem;color:var(--navy)}
+.adset-actions{display:flex;gap:.4rem}
+.adset-btn{padding:.4rem .8rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.adset-btn:hover{border-color:var(--orange);color:var(--orange)}
+.adset-btn:disabled{opacity:.45;cursor:not-allowed}
+.adset-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.adset-feedback.show{display:block;animation:fadeUp .4s ease}
+.adset-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.adset-feedback.warn{background:#FFF3CD;color:#856404}
+.week-verdict{display:none;margin-top:1.4rem;background:var(--navy-dark);border-radius:var(--radius);padding:1.6rem;color:#fff;animation:popIn .5s ease}
+.week-verdict.show{display:block}
+.week-verdict h4{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.8rem}
+.week-verdict h4 em{font-style:normal;color:var(--orange-light)}
+.wv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
+.wv-tile{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:9px;padding:.8rem;text-align:center}
+.wv-tile .v{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--orange-light)}
+.wv-tile .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.55);font-weight:700;margin-top:.25rem}
+.week-verdict p{font-size:.87rem;line-height:1.65;color:rgba(255,255,255,0.85)}
+.week-verdict p strong{color:var(--orange-light)}
+
+/* ─── FOOTER / RECAP ─── */
+.footer-cta{text-align:center;padding:3rem 2rem 5.5rem;background:var(--navy-dark);color:#fff}
+.footer-cta h2{font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.6rem}
+.footer-cta h2 em{color:var(--orange);font-style:normal}
+.footer-cta>p{font-size:.92rem;color:rgba(255,255,255,0.7);max-width:640px;margin:0 auto 1.8rem}
+.journey-band{max-width:1050px;margin:0 auto 1.8rem;background:linear-gradient(135deg,rgba(232,122,46,0.16),rgba(139,92,246,0.14));border:1px solid rgba(255,255,255,0.14);border-radius:var(--radius);padding:1.4rem 1.5rem}
+.journey-band h3{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff;margin-bottom:.4rem}
+.journey-band h3 em{color:var(--orange-light);font-style:normal}
+.journey-band p{font-size:.82rem;color:rgba(255,255,255,0.75);line-height:1.6}
+.recap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;max-width:1080px;margin:0 auto 1.8rem;text-align:left}
+.recap-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:var(--radius);padding:1.1rem 1.15rem}
+.recap-card.finale{border-color:rgba(232,122,46,0.6);background:rgba(232,122,46,0.12)}
+.recap-card .rn{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.35rem}
+.recap-card h4{font-family:'DM Serif Display',serif;font-size:1.0rem;margin-bottom:.35rem;color:#fff}
+.recap-card p{font-size:.73rem;color:rgba(255,255,255,0.65);line-height:1.5}
+.lesson-recap{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:1050px;margin:0 auto 1.8rem;text-align:left}
+.footer-note{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:1.6rem;max-width:660px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ─── COMPLETION BAR ─── */
+.completion-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,0.05)}
+.completion-info{display:flex;align-items:center;gap:.8rem;font-size:.82rem;color:var(--text-primary);font-weight:600}
+.completion-track{flex:1;max-width:280px;height:8px;background:var(--bg-light);border-radius:4px;overflow:hidden;margin:0 1rem}
+.completion-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:4px;transition:width .5s ease}
+.completion-percent{font-family:'DM Serif Display',serif;color:var(--orange);font-size:1.15rem}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:880px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-mascot{width:170px;margin:0 auto}
+  .usecase-banner{text-align:left}
+  .budget-strip{grid-template-columns:repeat(2,1fr)}
+  .pick-grid,.pick-grid.two,.prod-grid{grid-template-columns:1fr}
+  .build-grid,.review-cols,.perso-grid{grid-template-columns:1fr}
+  .eval-metrics{grid-template-columns:repeat(2,1fr)}
+  .adset,.ticket{grid-template-columns:1fr}
+  .pp-recos{grid-template-columns:repeat(3,1fr)}
+  .wv-grid,.recap-grid,.lesson-recap{grid-template-columns:repeat(2,1fr)}
+  .header{padding:.7rem 1rem}
+  .section{padding:2.2rem 1rem}
+  .hero{padding:2.5rem 1rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-left">
+    <svg class="logo-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="477" cy="380" rx="285" ry="324" fill="#EBE3D6"/>
+      <ellipse cx="477" cy="380" rx="240" ry="270" fill="#412C23"/>
+      <circle cx="389" cy="430" r="36" fill="#fff"/>
+      <circle cx="565" cy="430" r="36" fill="#fff"/>
+      <circle cx="389" cy="430" r="14" fill="#2B2D42"/>
+      <circle cx="565" cy="430" r="14" fill="#2B2D42"/>
+      <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="14" stroke-linecap="round" fill="none"/>
+      <ellipse cx="477" cy="1350" rx="430" ry="100" fill="#EF7F1A"/>
+      <ellipse cx="477" cy="1350" rx="380" ry="78" fill="#FF9429"/>
+    </svg>
+    <div>
+      <div class="header-title">AI Coding <span>&amp; APIs</span></div>
+      <div class="header-tag">MokshPath · Week 5 · Fun While You Learn · Finale</div>
+    </div>
+  </div>
+  <div class="progress-pill"><span class="dot"></span> <span id="headerProgressText">0 of 5 beats shipped</span></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block"></span> Final Week · Ship Your Capstone</div>
+      <h1>From Automation to <em>API</em> — Maya Ships the Capstone That Uses Everything</h1>
+      <p class="hero-sub">Five weeks ago Maya couldn't read a line of code. She wrote <strong>ReceiptTidy</strong>, a tiny script. Then <strong>ShiftSwap</strong>, a real app. Then <strong>InboxScout</strong>, an agent that decides its own steps. Then <strong>BookingBridge</strong>, an automation that runs itself. This week she does the thing every builder eventually needs: she calls an <strong>AI model directly from her own code</strong> — an <em>API</em> — and wires it into a single capstone, <strong>CandleConcierge</strong>, that ties all five weeks together. You'll make every call with her, across the four beats every API-builder learns: <strong>What's an API → First Call → Build With APIs → The Capstone</strong>.</p>
+      <div class="usecase-banner">
+        <div class="usecase-icon">🔌</div>
+        <div class="usecase-text"><strong>The Mission:</strong> Build one small, real thing — an AI intake assistant for Maya's candle-workshop business. A customer submits a messy request in a little app; an <strong>AI API call</strong> reads it and drafts a clean, structured reply; an automation logs it and pings Maya; a light agent-style follow-up chases anything missing. Not magic — a shipped, documented capstone with the key kept safe, the cost watched, and a human on anything that touches money.</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBE3D6"/><stop offset="1" stop-color="#D1D0CC"/></linearGradient>
+          <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A6A48"/><stop offset="1" stop-color="#412C23"/></linearGradient>
+          <linearGradient id="feetGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9429"/><stop offset="1" stop-color="#EF7F1A"/></linearGradient>
+        </defs>
+        <ellipse cx="210" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="740" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="477" cy="380" rx="285" ry="324" fill="url(#bodyGrad)"/>
+        <ellipse cx="477" cy="392" rx="240" ry="225" fill="url(#faceGrad)"/>
+        <circle cx="389" cy="430" r="38" fill="#fff"/>
+        <circle cx="565" cy="430" r="38" fill="#fff"/>
+        <circle cx="389" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="565" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="395" cy="424" r="5" fill="#fff"/>
+        <circle cx="571" cy="424" r="5" fill="#fff"/>
+        <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <ellipse cx="477" cy="1350" rx="430" ry="105" fill="url(#feetGrad)"/>
+        <ellipse cx="477" cy="1320" rx="380" ry="78" fill="#FF9429"/>
+      </svg>
+    </div>
+  </div>
+  <div class="budget-strip">
+    <div class="budget-chip"><div class="bv">4 beats</div><div class="bl">One capstone, shipped</div></div>
+    <div class="budget-chip"><div class="bv">1 API call</div><div class="bl">Request → response</div></div>
+    <div class="budget-chip"><div class="bv">5 weeks</div><div class="bl">Woven into 1 build</div></div>
+    <div class="budget-chip"><div class="bv">Builder-ready</div><div class="bl">Where this ends</div></div>
+  </div>
+</section>
+
+<!-- ─── TAB NAVIGATION ─── -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-target="s1">Beat 1 · What's an API</button>
+  <button class="tab-btn" data-target="s2">Beat 2 · First Call</button>
+  <button class="tab-btn" data-target="s3">Beat 3 · Build With APIs</button>
+  <button class="tab-btn" data-target="s4">Beat 4 · The Capstone</button>
+  <button class="tab-btn" data-target="s5">The Finale</button>
+</div>
+
+<!-- ═══════════ BEAT 1: WHAT IS AN API ═══════════ -->
+<section class="section" id="s1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">1</div> Beat One · What's an API</div>
+      <h2 class="section-title">Every AI Feature Is "Just" an API Call — Request, Response, JSON</h2>
+      <p class="section-sub">Before Maya builds anything, one realisation reframes the whole week: the fancy AI feature she wants — read a messy customer request and draft a tidy reply — isn't something she has to <em>invent</em> or <em>host</em>. It already exists behind an <strong>API</strong>: she sends a <strong>request</strong>, she gets a <strong>response</strong> back (usually as <strong>JSON</strong>), and that's the whole trick. Learning to picture that request→response loop, and reading the docs to pick the right API, is the first beat.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Monday, 8:10 a.m. Maya sketches her capstone: a little intake box where a customer types "hey, want to book a candle night for my sister's hen do, maybe 8 of us, something calming" — and something reads that mush and hands her back a clean summary and a warm draft reply. Her first instinct is panic: <em>I'd have to build an AI for that.</em> Then she remembers the whole point of this week. <em>No — I don't build the model. I call one.</em> Somebody already runs the model; they expose a door called an <strong>API</strong>; she sends text in, she gets structured text back. Her job isn't to be a scientist. It's to make one good phone call and use the answer well.
+    </div>
+
+    <div class="pick-grid two">
+      <div class="pick-card" data-plat="host" onclick="pickPlat('host')">
+        <div class="pick-icon">🏭</div>
+        <div class="pc-tag">Build &amp; run your own model · Rarely right</div>
+        <h4>Host your own AI model</h4>
+        <p>Train or run a large model yourself on your own machines. Enormous cost, deep expertise, and months of work — the answer for a handful of big labs, and almost never the answer for a builder who just wants a feature. Reaching here first is the classic beginner over-reach.</p>
+      </div>
+      <div class="pick-card" data-plat="api" onclick="pickPlat('api')">
+        <div class="pick-icon">🔌</div>
+        <div class="pc-tag">Call a model someone else runs · The fit</div>
+        <h4>Call an AI API</h4>
+        <p>Send a <strong>request</strong> (your prompt + a few settings) to a model someone else already runs; get a <strong>response</strong> back, usually as JSON, in a second or two. You pay per use, you skip all the hosting, and you wire the answer into your own app. This is how nearly every AI feature you've ever used is actually built.</p>
+      </div>
+    </div>
+    <div class="pick-detail" id="platDetail"></div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> Maya's AI assistant · "Help me understand what I'm actually building"</div>
+      <div class="chat-body" id="stackChat">
+        <div class="chat-msg ai"><span class="who">Narrator</span>An API call is really just three parts: a <strong>request</strong> you send (where, with your key, carrying your prompt and settings), the model doing its work, and a <strong>response</strong> that comes back — almost always as <strong>JSON</strong>, a tidy labelled format your code can read. The docs tell you exactly what to send and what you'll get. But you only get a useful plan if you ask a useful question. Below are three ways Maya could open the conversation. <strong>Pick the one that earns a real answer.</strong></div>
+      </div>
+    </div>
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Pick Maya's opening message</div>
+      <div class="scenario-q">Which prompt does Maya send her AI assistant?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="pickPrompt(0)">"Build me an AI that understands my customers so I never read a message again."</button>
+        <button class="scenario-btn" onclick="pickPrompt(1)">"Just tell me the single best AI to use for everything."</button>
+        <button class="scenario-btn" onclick="pickPrompt(2)">"Act as a coding mentor. I'm a beginner. I want one feature: a customer types a messy workshop request, and I get back a clean summary (name, date, party size, notes) plus a friendly draft reply. Explain, in plain terms, how an AI API call would do this — what I send in the request, what comes back in the response, and what I should check in the docs before I pick one."</button>
+      </div>
+      <div class="scenario-feedback" id="promptFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · API instincts (3 rounds)</div>
+      <div class="scenario-q" id="stackQ">Loading…</div>
+      <div class="scenario-options" id="stackOpts"></div>
+      <div class="scenario-feedback" id="stackFb"></div>
+      <button class="btn-secondary" id="stackNext" onclick="nextStackQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2: THE FIRST CALL ═══════════ -->
+<section class="section alt" id="s2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">2</div> Beat Two · The First Call</div>
+      <h2 class="section-title">Make the First Call — Key, Model, Prompt, Params — and Keep the Key Safe</h2>
+      <p class="section-sub">Now Maya makes a real call. Four things go into it: an <strong>API key</strong> (proves it's her account and gets billed), a <strong>model</strong> (which brain answers), a <strong>prompt</strong> (what she's asking), and a few <strong>params</strong> (settings like how long and how creative the answer is). Then she reads the <strong>response</strong> and watches the <strong>token cost</strong>. The one thing that can burn her: where she puts the key. A key in the browser is a key anyone can steal — it belongs on a <strong>server</strong>, not in code the whole world can view.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday evening. Maya makes CandleConcierge's very first API call — and it works. A messy sentence goes in; a clean summary comes back as JSON. She almost celebrates by pasting her key straight into the web page so the browser can call the model directly. Then a chill: <em>if the key is in the page, anyone who opens "view source" can read it — and run up my bill.</em> So she moves the key behind a small server of her own; the browser talks to her server, and only her server holds the key. Flip between three ways she could wire it up below and watch a working feature turn into a security hole — or a safe one.
+    </div>
+
+    <div class="voice-tabs">
+      <button class="voice-tab" data-voice="leaky" onclick="setVoice('leaky')">🕳️ Key in the browser</button>
+      <button class="voice-tab active" data-voice="safe" onclick="setVoice('safe')">🔒 Key on the server</button>
+      <button class="voice-tab" data-voice="reckless" onclick="setVoice('reckless')">💣 Key hardcoded &amp; shared</button>
+    </div>
+
+    <div class="store-preview">
+      <div class="store-chrome">
+        <span class="sdot" style="background:#FF5F57"></span><span class="sdot" style="background:#FEBC2E"></span><span class="sdot" style="background:#28C840"></span>
+        <span class="store-url">🔌 candleconcierge / call-config.md</span>
+      </div>
+      <div class="store-body">
+        <div class="store-brand"><div class="store-logo">🔌</div><b>CandleConcierge</b><span style="font-size:.7rem;color:var(--text-muted);margin-left:auto">First API call · setup</span></div>
+        <div class="store-hero-line" id="storeHeadline">The key lives in a server-side secret. The browser calls my little server; my server adds the key and calls the model. Nobody can read the key from the page.</div>
+        <div class="store-desc" id="storeDesc">Request: model + prompt + params (short max-length, low temperature for tidy, predictable output). Key: stored as a server environment variable, never sent to the browser. Response: parsed JSON. Cost: I log the tokens each call uses so a bug can't quietly run up the bill.</div>
+        <div class="store-price-row">
+          <div class="store-price">Key: server-side · Params: set · Cost: watched</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toggle">
+      <button class="btn-secondary" id="beforeBtn" onclick="toggleCopy('before')">😬 Before: key in the browser</button>
+      <button class="btn-action" id="afterBtn" onclick="toggleCopy('after')">✨ After: key on the server</button>
+    </div>
+    <div class="before-after before" id="copyBefore" style="display:none">
+      "I'll just paste my API key into the page's JavaScript so the browser can call the model directly — one less thing to build."
+      <div style="margin-top:.5rem;font-size:.75rem">← Anything in the browser is public. Anyone who opens "view source" or the network tab can read that key, then spend on Maya's account until it's shut off. A leaked key is the single most common, most expensive first-time API mistake. Convenient, and a security hole.</div>
+    </div>
+    <div class="before-after after" id="copyAfter">
+      "Key lives on my server as a secret. Browser → my server → model. My server attaches the key and returns only the answer. The key never touches the page."
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-secondary)">← Same feature, one boundary added. The browser never sees the key; a small backend holds it and makes the call. This is the rule for every API key you'll ever use: <strong>the key belongs on a server, never in client code, never in a public repo.</strong></div>
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Maya's first-call checklist</h4>
+        <ul class="checklist" id="buildList">
+          <li data-step="0" onclick="runBuildStep(0)"><span class="check"></span>Get an <strong>&nbsp;API key&nbsp;</strong> and store it as a server-side secret (never in the page)</li>
+          <li data-step="1" onclick="runBuildStep(1)"><span class="check"></span>Pick the <strong>&nbsp;model&nbsp;</strong> from the docs — good enough for the job, not the priciest</li>
+          <li data-step="2" onclick="runBuildStep(2)"><span class="check"></span>Write the <strong>&nbsp;prompt&nbsp;</strong> — clear instruction plus the customer's message</li>
+          <li data-step="3" onclick="runBuildStep(3)"><span class="check"></span>Set the <strong>&nbsp;params&nbsp;</strong> — a max length, and low temperature for tidy output</li>
+          <li data-step="4" onclick="runBuildStep(4)"><span class="check"></span>Send the request and <strong>&nbsp;parse the JSON&nbsp;</strong> response into fields she can use</li>
+          <li data-step="5" onclick="runBuildStep(5)"><span class="check"></span>Log the <strong>&nbsp;token cost&nbsp;</strong> per call so a runaway bug can't quietly rack up a bill</li>
+        </ul>
+        <div class="done-note" id="buildDone">✅ <strong>CandleConcierge's first call is live and safe.</strong> Key on the server, model chosen, prompt and params set, JSON parsed, tokens logged. Maya made a real AI feature with one well-formed request — and nobody can read her key. Onto building something bigger with it.</div>
+      </div>
+      <div class="build-card">
+        <h4>Call log (click checklist items)</h4>
+        <div class="feed" id="buildFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Waiting for Maya to make the call… tick items on the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">🔐 The Safety Dial — where does each piece of your API setup belong?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">The most important choice in a first call isn't the prompt — it's what's allowed to touch the browser. Public things (the model name, the prompt template) are fine anywhere; the <em>key</em> and anything that spends money must stay server-side. Pick a piece and see where it lives.</p>
+      <div class="perso-grid">
+        <div class="perso-controls">
+          <div class="prompt-field">
+            <label>Where should this piece of the setup live?</label>
+            <select id="persoWho" onchange="renderPerso()">
+              <option value="model">The model name and the prompt wording</option>
+              <option value="params">The params (max length, temperature)</option>
+              <option value="key">Your API key</option>
+              <option value="public">The key pasted into the web page / a public repo</option>
+            </select>
+          </div>
+          <p style="font-size:.78rem;color:var(--text-muted);line-height:1.55;margin-top:.6rem">💡 Rule of thumb: if leaking it would let a stranger spend your money, it goes on the server behind a secret. Everything else can be public. Treat your key like a password you can never un-share once it's out.</p>
+        </div>
+        <div class="perso-preview">
+          <div class="pp-head">🔌 CandleConcierge — safety check</div>
+          <div class="pp-body">
+            <div class="pp-greeting" id="ppGreeting">✅ Fine anywhere — the model name and prompt wording aren't secrets; they don't cost anything to reveal.</div>
+            <div class="pp-recos" id="ppRecos">
+              <div class="pp-reco"><div class="ppe">📝</div><div class="ppn">Not a secret</div></div>
+              <div class="pp-reco"><div class="ppe">🌐</div><div class="ppn">Safe to expose</div></div>
+              <div class="pp-reco"><div class="ppe">👍</div><div class="ppn">Client or server</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Where does the API key belong?</div>
+      <div class="scenario-q">Maya's first call works. Now she has to decide where the key lives before she shares the app. Which choice does she ship?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="headlineQ(0)">Paste the key into the page's JavaScript — the browser calls the model directly, less to build.</button>
+        <button class="scenario-btn" onclick="headlineQ(1)">Keep the key as a secret on a small server; the browser talks to the server, and only the server calls the model with the key attached.</button>
+        <button class="scenario-btn" onclick="headlineQ(2)">Hardcode the key in the source and push it to a public code repo so it's backed up and easy to share.</button>
+      </div>
+      <div class="scenario-feedback" id="headlineFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3: BUILD WITH APIS ═══════════ -->
+<section class="section" id="s3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">3</div> Beat Three · Build With APIs</div>
+      <h2 class="section-title">Chain the Calls — Ask for Structured Output, Validate It, Survive Failures</h2>
+      <p class="section-sub">One call is a party trick; a <em>build</em> chains calls into something useful — extract the details in one call, draft the reply in the next. Two hard truths make or break it. First: an AI response is text, so you must ask for a <strong>structured output</strong> (clean, labelled fields) and <strong>validate</strong> it before the next step trusts it. Second: calls fail — a <strong>429</strong> (too many requests) or a <strong>timeout</strong> — so you add <strong>retry with backoff</strong> and a <strong>fail-safe</strong> for when it still won't answer.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday. Maya chains two calls: call one turns the customer's mush into structured fields; call two writes a warm draft reply from those fields. She resists trusting the output blindly — <em>the model answers in text, and text lies about being tidy.</em> So she demands a strict format, checks it matches before moving on, and decides what happens when a call errors instead of pretending it never will. Below is one test run's log, replaying a real customer message. Read each step and call it: <strong>looks right, or a bug to fix?</strong>
+    </div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> CandleConcierge · test run log (replaying a real customer message)</div>
+      <div class="chat-body">
+        <div class="chat-msg user"><span class="who">Customer message in</span>"hey! want to book a candle night for my sister's hen do, prob Feb 14, maybe 8 of us, one's pregnant so nothing too strong scent-wise x"</div>
+        <div class="chat-msg ai"><span class="who">CandleConcierge · call 1</span><strong>Extract call:</strong> sent the message to the model asking for a strict structure. Response came back and passed validation: <code>{name:null, date:"Feb 14", party_size:8, notes:"hen do; one pregnant — keep scents mild"}</code>. Clean fields, ready for the draft call. Looks right.</div>
+        <div class="chat-msg ai"><span class="who">Narrator</span>That first call was correct — a strict format asked for, a valid structure returned. But the steps after it aren't always this tidy. Watch the log unfold below and judge each one.</div>
+      </div>
+    </div>
+
+    <div class="triage">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🔬 Read the run log — good step or bug?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1rem">For each thing CandleConcierge does, decide: <strong>ship it</strong> (the step is working) or <strong>debug it</strong> (something's wrong and needs fixing). Reading an API run against real data like this <em>is</em> the skill of building with APIs.</p>
+
+      <div class="ticket" id="tk1">
+        <div class="ticket-msg"><span>Draft call · validation</span>The <b>draft call</b> returns a warm, on-brand reply that fills in the missing name politely ("Hi there!") and confirms the mild-scent note. The output matches the required format and <b>passes validation</b> before it's shown to Maya.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(1,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(1,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf1"></div>
+      </div>
+
+      <div class="ticket" id="tk2">
+        <div class="ticket-msg"><span>Extract call · output</span>On the next message, the extract call replies with a chatty paragraph — <b>"Sure! It sounds like they'd like to book…"</b> — instead of the strict structure. The code assumes clean fields, so it grabs junk and the party size comes through as the word "eight" in the date slot.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(2,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(2,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf2"></div>
+      </div>
+
+      <div class="ticket" id="tk3">
+        <div class="ticket-msg"><span>Call fails · 429</span>A burst of five messages arrives at once. The model returns <code>429 — too many requests</code> on three of them. The code has no retry, so it <b>crashes</b> and three customers get nothing back, silently.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(3,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(3,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf3"></div>
+      </div>
+
+      <div class="ticket" id="tk4">
+        <div class="ticket-msg"><span>Fail-safe path</span>A call times out twice, retries with a short back-off, times out again — so CandleConcierge stops retrying, saves the raw message, and flags it for Maya to answer by hand rather than sending a half-built reply.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(4,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(4,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf4"></div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🐞 Debug · The API rate-limited you and the output isn't always clean</div>
+      <div class="scenario-q">Under load, calls sometimes return <code>429</code> or time out, and the extract call occasionally answers in prose instead of the required structure. Which fix do you ship?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="reviewQ(0)">Add "please don't error and answer neatly" to the prompt and call it done.</button>
+        <button class="scenario-btn" onclick="reviewQ(1)">Handle both properly: on 429/timeout, <strong>retry with a short back-off</strong> a few times, then a <strong>fail-safe</strong> (save the message and flag Maya); and pin the extract call to a <strong>strict output format</strong>, <strong>validate</strong> it, and route anything that doesn't match to the fail-safe instead of trusting junk.</button>
+        <button class="scenario-btn" onclick="reviewQ(2)">Leave it — most calls succeed, and a few dropped customers or garbled replies now and then are fine.</button>
+      </div>
+      <div class="scenario-feedback" id="reviewFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4: THE CAPSTONE ═══════════ -->
+<section class="section alt" id="s4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">4</div> Beat Four · The Capstone</div>
+      <h2 class="section-title">Weave It All Together — One Build: Program + App + Agent + Automation + API</h2>
+      <p class="section-sub">This is the finale build. CandleConcierge uses <strong>everything</strong>: a bit of <strong>programming</strong> to glue it, a small <strong>app</strong> for the customer to type into, an <strong>API</strong> call to read and draft, an <strong>automation</strong> to log it and ping Maya, and a light <strong>agent</strong>-style follow-up to chase a missing detail. Before it ships, Maya runs one whole-system check: <strong>cost</strong> (tokens per request), <strong>security</strong> (the key), and <strong>reliability</strong> (does it survive real messages?) — then ships it as her portfolio centerpiece, documented.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Thursday. Every week of the course clicks into one build. The <strong>app</strong> from Week 2 gives the customer a box to type in; the <strong>API</strong> from this week reads it and drafts; the <strong>automation</strong> from Week 4 logs the request and pings Maya; a small <strong>agent</strong>-style step from Week 3 notices a missing date and drafts a follow-up question; and the plain <strong>programming</strong> from Week 1 stitches it together. But a capstone isn't shipped because the demo worked once. Maya replays real requests, checks the cost per call, confirms the key is safe, and — for each behaviour — decides: run it unattended, require her approval, or fix it first.
+    </div>
+
+    <div class="calc" style="background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:1.4rem">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🧮 The Capstone Readiness Meter — is CandleConcierge ready to ship?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1.1rem">Readiness isn't a feeling — it's how often the whole system produces a good, valid reply across enough real requests, weighed against how bad one bad reply going out unseen would be. Drag the sliders and watch where "ship it, unattended" turns into "keep a human in the loop."</p>
+      <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+        <div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Real requests replayed in testing <output id="oCost" style="color:var(--orange);font-weight:800">20</output></label>
+            <input type="range" class="calc-slider" id="inCost" min="3" max="60" step="1" value="20" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Calls that failed or returned bad output <output id="oPrice" style="color:var(--orange);font-weight:800">2</output></label>
+            <input type="range" class="calc-slider" id="inPrice" min="0" max="20" step="1" value="2" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Damage if a bad reply is sent unseen <output id="oUnits" style="color:var(--orange);font-weight:800">3 / 5</output></label>
+            <input type="range" class="calc-slider" id="inUnits" min="1" max="5" step="1" value="3" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+        </div>
+        <div class="calc-out" style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-content:start">
+          <div class="calc-tile" id="tProfit" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vProfit" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">90%</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Good replies</div></div>
+          <div class="calc-tile" id="tMargin" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vMargin" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">20</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Sample size</div></div>
+          <div class="calc-note" id="calcNote" style="grid-column:1/-1;font-size:.8rem;line-height:1.55;padding:.8rem 1rem;border-radius:8px;background:var(--orange-glow);color:var(--text-primary)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eval-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)">CandleConcierge · Whole-System Check</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">Measured, not assumed — cost, security, reliability. Each behaviour below is a decision: run it unattended, require approval, or fix it first.</div>
+        </div>
+      </div>
+      <div class="eval-metrics">
+        <div class="metric-card"><div class="metric-value">30</div><div class="metric-label">Requests replayed</div></div>
+        <div class="metric-card"><div class="metric-value">93%</div><div class="metric-label">Good, valid replies</div></div>
+        <div class="metric-card highlight"><div class="metric-value">5</div><div class="metric-label">Weeks in one build</div></div>
+        <div class="metric-card warn"><div class="metric-value">1</div><div class="metric-label">Security hole found</div></div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1rem 0 .6rem">For each behaviour — Run unattended, Require approval, or Fix first</div>
+
+      <div class="adset" id="opA">
+        <div class="adset-name">✍️ Drafting a reply for Maya to review before sending<span>30/30 valid · Maya reads it first · a bad draft is caught before any customer sees it</span></div>
+        <div class="adset-nums"><span>Valid<b>30/30</b></span><span>Reversible<b>yes</b></span><span>Damage<b>tiny</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('A','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('A','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('A','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbA"></div>
+      </div>
+
+      <div class="adset" id="opB">
+        <div class="adset-name">💳 Auto-sending a confirmation &amp; charging the customer<span>Works, but a charge and a promise can't be quietly taken back · touches real money</span></div>
+        <div class="adset-nums"><span>Ran<b>30/30 ok</b></span><span>Reversible<b>no</b></span><span>Damage<b>high</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('B','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('B','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('B','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbB"></div>
+      </div>
+
+      <div class="adset" id="opC">
+        <div class="adset-name">🔑 The API key is still sitting in the app's client-side code<span>Anyone opening the page can read the key and spend on Maya's account · silent until the bill spikes</span></div>
+        <div class="adset-nums"><span>Exposed<b>yes</b></span><span>Noticed?<b>no</b></span><span>Damage<b>severe</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('C','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('C','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('C','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbC"></div>
+      </div>
+
+      <div class="week-verdict" id="weekVerdict">
+        <h4>📜 The Builder's Verdict: <em>Maya shipped her capstone.</em></h4>
+        <div class="wv-grid">
+          <div class="wv-tile"><div class="v">5</div><div class="l">Weeks in one build</div></div>
+          <div class="wv-tile"><div class="v">2</div><div class="l">API calls, chained</div></div>
+          <div class="wv-tile"><div class="v">93%</div><div class="l">Good replies, measured</div></div>
+          <div class="wv-tile"><div class="v">1</div><div class="l">Documented portfolio piece</div></div>
+        </div>
+        <p>CandleConcierge ships — on Maya's terms. It <strong>drafts</strong> replies on its own, because she reads each one before it sends and a bad draft hurts nobody. It <strong>never charges a card</strong> without her nod, because that can't be undone. And she <strong>fixed the security hole first</strong> — moving the key off the page and onto her server — before anyone could touch it. The build weaves all five weeks: a script's logic, an app's front door, an API's brain, an automation's tireless logging, an agent's follow-up. She watched the token cost, kept the key safe, and survived real 429s and timeouts with retry and a fail-safe. Then she wrote it up — what it does, how it's wired, what it costs, where a human stays in the loop — as the centerpiece of her portfolio. Not a magic robot. A real, honest, documented thing she built. 🎉</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ THE FINALE / HONEST BEAT ═══════════ -->
+<section class="section" id="s5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">5</div> The Finale · The Honest Beat</div>
+      <h2 class="section-title">Hype vs Durable — What an AI API Actually Gives You</h2>
+      <p class="section-sub">Before the celebration, the slide most courses skip. The internet is loud with "just plug in the AI and everything works, free and forever." Know exactly what an API genuinely changed for you — and what it never will — because that honesty is the difference between a builder and a buyer.</p>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">⚖️ The Durable / Hype Split</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">Build your instincts on the left column. Ignore anyone selling you the right one.</p>
+      <div class="review-cols">
+        <div class="review-col love">
+          <h5>✓ What an AI API genuinely changed</h5>
+          <ul>
+            <li>You can add a real AI feature to anything you build — without training or hosting a model</li>
+            <li>A messy human message can become clean, structured fields your code can use</li>
+            <li>One person can wire a model's brain into a script, an app, or an automation with a single call</li>
+            <li>You pay per use and can watch the cost — no giant upfront bill to experiment</li>
+          </ul>
+        </div>
+        <div class="review-col hate">
+          <h5>✕ What an AI API did NOT change (the hype)</h5>
+          <ul>
+            <li>It isn't free or limitless — every call costs tokens and can be rate-limited or time out</li>
+            <li>The output is text that <em>looks</em> tidy — you still have to require a format and validate it</li>
+            <li>A leaked key is a real, expensive risk; "just put it in the app" is how bills explode</li>
+            <li>Nothing replaces your judgment on the money-touching, irreversible step</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Final Checkpoint · The builder's mindset</div>
+      <div class="scenario-q">An ad promises: "Just plug our AI API into your app and it runs itself — unlimited, basically free, no security to worry about, perfect answers every time." Having just built CandleConcierge, what's your read?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="finalQ(0)">Sounds amazing — plug it in everywhere. The more AI, the better.</button>
+        <button class="scenario-btn" onclick="finalQ(1)">Skeptical. An API genuinely lets me add real AI features cheaply — that's durable. But calls cost tokens, get rate-limited and time out; output is text I must format and validate; and a key is a real secret. "Unlimited, free, no security, perfect" is the hype tell — I'd keep the key server-side, watch cost, retry with a fail-safe, and keep a human on anything irreversible.</button>
+        <button class="scenario-btn" onclick="finalQ(2)">AI APIs are useless hype — nobody can really rely on them for anything.</button>
+      </div>
+      <div class="scenario-feedback" id="finalFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · API-builder instincts (3 rounds)</div>
+      <div class="scenario-q" id="opsQ">Loading…</div>
+      <div class="scenario-options" id="opsOpts"></div>
+      <div class="scenario-feedback" id="opsFb"></div>
+      <button class="btn-secondary" id="opsNext" onclick="nextOpsQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER RECAP / GRAND FINALE ─── -->
+<div class="footer-cta">
+  <h2>🎉 Five weeks ago, <em>Maya</em> couldn't read a line of code.</h2>
+  <p>This week she called an AI model from her own code and wove five weeks into one shipped, documented capstone. Here's the whole journey you just finished — and what Week 5 secretly taught you along the way.</p>
+
+  <div class="journey-band">
+    <h3>The whole arc: <em>ReceiptTidy → ShiftSwap → InboxScout → BookingBridge → CandleConcierge</em></h3>
+    <p>A script that saved five minutes. An app people actually used. An agent that decided its own steps. An automation that ran itself. And a capstone that ties every one of them together with an AI API. You didn't learn to type code — you learned to <strong>think like a builder</strong>: name the real problem, pick the right tool, design before you build, test on real data, keep the money-touching step honest, and ship something you can explain.</p>
+  </div>
+
+  <div class="recap-grid">
+    <div class="recap-card">
+      <div class="rn">Week 1</div>
+      <h4>Programming</h4>
+      <p>ReceiptTidy — a tiny script. You learned code is just clear instructions, run in order, to kill a small chore.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Week 2</div>
+      <h4>Apps</h4>
+      <p>ShiftSwap — a real app with a front door people could open, type into, and actually use.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Week 3</div>
+      <h4>AI Agents</h4>
+      <p>InboxScout — an agent given a goal and tools that decides its own next step when the job needs judgment.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Week 4</div>
+      <h4>Automations</h4>
+      <p>BookingBridge — a trigger firing fixed steps that run themselves, tested and monitored, on every event.</p>
+    </div>
+    <div class="recap-card finale">
+      <div class="rn">Week 5 · Finale</div>
+      <h4>AI APIs</h4>
+      <p>CandleConcierge — one API call, chained and safe, weaving all five weeks into your portfolio centerpiece.</p>
+    </div>
+  </div>
+
+  <div class="lesson-recap">
+    <div class="recap-card">
+      <div class="rn">Lesson 1</div>
+      <h4>What's an API</h4>
+      <p>Every AI feature is a request→response call. You don't host a model — you call one, and read the JSON that comes back. Beat 1.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 2</div>
+      <h4>The First Call</h4>
+      <p>Key + model + prompt + params. Keep the key server-side, parse the response, and watch the token cost. Beat 2.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 3</div>
+      <h4>Build With APIs</h4>
+      <p>Chain calls, demand a strict output format and validate it, and survive 429s and timeouts with retry, back-off, and a fail-safe. Beat 3.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 4</div>
+      <h4>The Capstone</h4>
+      <p>Weave program + app + agent + automation + API into one build; check cost, security, reliability; ship it documented. Beat 4.</p>
+    </div>
+  </div>
+
+  <h2 style="font-size:1.5rem;margin-top:.5rem">🏆 You are <em>builder-ready.</em></h2>
+  <p style="margin-bottom:1.4rem">Not "you finished the videos." You can name a problem, pick between a script, an app, an agent, an automation, and an API — and actually build the right one, honestly, and explain it. That's the whole game. CandleConcierge is your proof.</p>
+
+  <button class="btn-action" style="font-size:.9rem;padding:.8rem 1.8rem" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">↻ Replay the finale beats</button>
+  <div class="footer-note">CandleConcierge is a teaching scenario. Real API builds vary widely and most need a few rounds of testing, a couple of real rate-limits, and one scare about a key before they're dependable — the goal of Week 5 is to walk every beat once so your first API build starts as a builder's, not a gambler's. An API gives you a model's brain on tap; it never gives you a free pass on cost, security, or the irreversible step. That's the end of the course — and the start of everything you'll build next. Congratulations. You made it. 🎓</div>
+</div>
+
+<!-- ─── COMPLETION BAR ─── -->
+<div class="completion-bar">
+  <div class="completion-info"><span style="font-size:1.1rem">🔌</span><span>CandleConcierge Capstone Progress</span></div>
+  <div class="completion-track"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
+  <div class="completion-percent" id="completionPct">0%</div>
+</div>
+
+<script>
+/* ───────── PROGRESS TRACKING ───────── */
+const visited = new Set();
+function markVisited(id){
+  visited.add(id);
+  const pct = Math.round((visited.size / 5) * 100);
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = pct + '%';
+  document.getElementById('headerProgressText').textContent = `${visited.size} of 5 beats shipped`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    markVisited(btn.dataset.target);
+  });
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.3) {
+      markVisited(e.target.id);
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.target === e.target.id));
+    }
+  });
+}, {threshold:[0.3]});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+/* ───────── BEAT 1: HOST vs CALL AN API ───────── */
+const platInfo = {
+  host: `<span class="verdict-pill vp-bad">Almost never the right call</span><br><strong>Hosting your own AI model:</strong> training or running a large model on your own hardware. It costs a fortune, needs deep expertise, and takes months — the province of a few big labs, not a builder adding a feature. <em>Maya doesn't need to own a candle factory to buy candles, and she doesn't need to own a model to use one. Reaching for "build my own AI" first is the classic beginner over-reach — you'd spend a year to reinvent a door that already exists.</em>`,
+  api: `<span class="verdict-pill vp-good">✓ The right fit for a builder</span><br><strong>Calling an AI API:</strong> you send a <strong>request</strong> — your key, a model, a prompt, a few settings — to a model someone else already runs, and get a <strong>response</strong> back, usually as <strong>JSON</strong>, in a second or two. No hosting, no training; you pay per use and wire the answer into your own build. <em>CandleConcierge lives here. Notice the honest boundary: you still have to keep the key safe, watch the cost, and check the output — the API gives you the brain, not the judgment.</em>`
+};
+function pickPlat(k){
+  document.querySelectorAll('#s1 .pick-card').forEach(c => c.classList.toggle('active', c.dataset.plat === k));
+  const d = document.getElementById('platDetail');
+  d.innerHTML = platInfo[k];
+  d.classList.add('show');
+}
+
+/* prompt showdown */
+const promptResults = [
+  {ok:false, fb:'✗ Too vague. "Build me an AI that understands my customers" gives no feature, no inputs, no idea what "done" means. You get an enthusiastic, generic reply — and no real understanding of the request→response loop you actually need. Vague prompt in, vague plan out. Name one concrete feature first.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Build me an AI that understands my customers so I never read a message again.</div><div class="chat-msg ai"><span class="who">Assistant</span>Sure! There are lots of directions you <em>could</em> take… <strong>(…a generic pep-talk with no request, no response shape, and no sense of the one feature worth building first — the same answer anyone gets.)</strong></div>`},
+  {ok:false, fb:'✗ Tool-first, problem-never. Asking for "the single best AI for everything" before you\'ve named the feature is how beginners pick a shiny model and then bend a job to fit it. The right question describes the input, the output you need, and asks how a request→response call would do it — the model choice comes last, from the docs.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Just tell me the single best AI to use for everything.</div><div class="chat-msg ai"><span class="who">Assistant</span>There isn\'t one — it depends on the job. What\'s the feature? Once you know what you send and what you need back, the docs make the model choice easy. Almost any capable model can turn a message into clean fields. Lead with the feature, not the product.</div>`},
+  {ok:true, fb:'✓ Exactly. Role + your real situation + a concrete feature + a request to explain the request, the response, and what to check in the docs. This earns a genuine plan — and it becomes the blueprint for the whole week: what you send, what comes back as JSON, and how to choose an API before you write a line.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Coding mentor, please. Beginner. One feature: a customer types a messy workshop request, I get back clean fields (name, date, party size, notes) plus a draft reply. In plain terms — how would an AI API call do this? What\'s in the request, what comes back, what should I check in the docs first?</div><div class="chat-msg ai"><span class="who">Assistant</span>Perfect scope. <strong>Request:</strong> your key + a model + a prompt (your instruction plus the message) + a couple of settings. <strong>Response:</strong> text back, usually JSON — you\'ll ask for those four fields as a strict structure. <strong>Check the docs for:</strong> the models available, the price per token, and any rate limits. <strong>← Your whole Week 5, mapped.</strong></div>`}
+];
+let promptAnswered = false;
+function pickPrompt(i){
+  const r = promptResults[i];
+  const btns = document.querySelectorAll('#s1 .scenario-panel:first-of-type .scenario-btn');
+  if (!promptAnswered){
+    btns.forEach((b,j) => { if (j===2) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) promptAnswered = true;
+  }
+  const fb = document.getElementById('promptFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+  document.getElementById('stackChat').innerHTML = r.chat;
+}
+
+/* API-instincts quiz */
+const stackQs = [
+  {q:"An API is best described as…", opts:["A robot that lives inside your computer","A door another program exposes: you send a request, you get a response back","A file where you store all your passwords"], correct:1, explain:"That's the heart of it: an API is a defined way to ask another service for something — you send a request, it sends a response. An AI API is just that, where the service is a model. You never see its insides; you use the door."},
+  {q:"When you call an AI API, the answer usually comes back as…", opts:["A finished web page you display as-is","JSON — a tidy, labelled text format your code can read field by field","A phone call you have to answer"], correct:1, explain:"Responses are almost always JSON: structured, labelled text like {name:..., date:...}. That's why it's easy to pull out exactly the piece you need — as long as you asked the model to answer in that shape."},
+  {q:"Before you pick which AI API to use, the first thing to read is…", opts:["Nothing — just start typing and hope","The docs — what models exist, what to send, what comes back, the price, and the limits","Only the marketing homepage's biggest claim"], correct:1, explain:"The docs are the map: they tell you exactly what a request needs, what the response looks like, what it costs per token, and any rate limits. Reading the docs before you build is what separates a call that works from a day lost guessing."}
+];
+let sqIdx = 0;
+function renderStackQ(){
+  const s = stackQs[sqIdx];
+  document.getElementById('stackQ').textContent = `Round ${sqIdx+1}/3 — ${s.q}`;
+  document.getElementById('stackOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerStackQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('stackNext').style.display = 'none';
+}
+function answerStackQ(i){
+  const s = stackQs[sqIdx];
+  document.querySelectorAll('#stackOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (sqIdx===stackQs.length-1 ? '<br><br>🎉 Beat 1 complete — you can picture the request→response loop, you know the answer comes back as JSON, and you know to read the docs first. Onto making the first real call.' : '');
+  document.getElementById('stackNext').style.display = sqIdx < stackQs.length-1 ? 'inline-block' : 'none';
+}
+function nextStackQ(){ sqIdx++; if (sqIdx < stackQs.length) renderStackQ(); }
+renderStackQ();
+
+/* ───────── BEAT 2: THE FIRST CALL ───────── */
+const voices = {
+  leaky: {h:'The API key lives in the page\'s JavaScript, so the browser calls the model directly.', d:'Fields: fine. Security: broken. Anyone who opens "view source" or the network tab can read the key and spend on your account until you notice the bill. Convenient to build, and the single most common first-time API mistake. A working feature and a wide-open door.'},
+  safe: {h:'The key lives in a server-side secret. The browser calls my little server; my server adds the key and calls the model. Nobody can read the key from the page.', d:'Request: model + prompt + params (short max-length, low temperature for tidy, predictable output). Key: stored as a server environment variable, never sent to the browser. Response: parsed JSON. Cost: I log the tokens each call uses so a bug can\'t quietly run up the bill.'},
+  reckless: {h:'The key is hardcoded into the source and pushed to a public code repo so it\'s "backed up."', d:'Fields: fine. Security: catastrophic. A public repo is the first place bots scan for keys — a hardcoded, shared key can be found and abused within minutes of being pushed. Never commit a key. This is the fastest known way to get a surprise bill.'}
+};
+function setVoice(v){
+  document.querySelectorAll('.voice-tab').forEach(t => t.classList.toggle('active', t.dataset.voice === v));
+  const h = document.getElementById('storeHeadline'), d = document.getElementById('storeDesc');
+  h.style.opacity = 0; d.style.opacity = 0;
+  setTimeout(()=>{ h.textContent = voices[v].h; d.textContent = voices[v].d; h.style.opacity = 1; d.style.opacity = 1; }, 250);
+}
+function toggleCopy(which){
+  document.getElementById('copyBefore').style.display = which==='before' ? 'block' : 'none';
+  document.getElementById('copyAfter').style.display = which==='after' ? 'block' : 'none';
+}
+
+/* first-call checklist + log */
+const buildEvents = [
+  {t:'Tue 20:05', msg:'API key created and stored as a server-side secret — an environment variable the browser never sees. First rule of API keys: it\'s a password that spends money, so it lives on the server, never in the page.'},
+  {t:'Tue 20:20', msg:'Model chosen from the docs: capable enough to read a messy message into clean fields, without paying for the biggest, priciest model. Matching the model to the job is how you keep the cost sane.'},
+  {t:'Tue 20:35', msg:'Prompt written: a clear instruction ("pull these four fields and draft a warm reply") plus the customer\'s actual message. A specific instruction is what turns a good model into a useful answer.'},
+  {t:'Tue 20:50', msg:'Params set: a sensible max length so replies don\'t run on, and a low temperature so the output is tidy and predictable rather than florid. Small settings, big effect on how usable the response is.'},
+  {t:'Tue 21:05', msg:'Request sent, response received — and parsed. The JSON that came back is turned into real fields the rest of the app can use. Reading the response, not just receiving it, is half the skill.'},
+  {t:'Tue 21:20', msg:'Token cost logged for the call. Now every request records what it spent, so a runaway loop or a giant input can\'t quietly rack up a bill unnoticed. Watching cost from call one is a builder habit, not an afterthought.'}
+];
+const buildSteps = new Set();
+function runBuildStep(i){
+  if (buildSteps.has(i)) return;
+  buildSteps.add(i);
+  document.querySelector(`#buildList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('buildFeed');
+  if (buildSteps.size === 1) feed.innerHTML = '';
+  const e = buildEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (buildSteps.size === buildEvents.length) document.getElementById('buildDone').style.display = 'block';
+}
+
+/* safety dial */
+const persoData = {
+  model: {g:'✅ Fine anywhere — the model name and prompt wording aren\'t secrets; they don\'t cost anything to reveal.', r:[['📝','Not a secret'],['🌐','Safe to expose'],['👍','Client or server']]},
+  params: {g:'✅ Fine anywhere — settings like max length and temperature aren\'t sensitive; they just shape the answer.', r:[['🎚️','Just settings'],['🌐','Not sensitive'],['👍','Client or server']]},
+  key: {g:'🔒 Server only — the key spends your money. It lives in a server-side secret and never reaches the browser.', r:[['🔑','Spends money'],['🖥️','Server-side'],['🙅','Never the page']]},
+  public: {g:'⛔ Never — a key in the page or a public repo can be read and abused within minutes. This is the mistake to design out.', r:[['💣','Wide open'],['🤖','Bots scan repos'],['🚫','Never do this']]}
+};
+function renderPerso(){
+  const who = document.getElementById('persoWho').value;
+  const d = persoData[who];
+  const g = document.getElementById('ppGreeting'), r = document.getElementById('ppRecos');
+  g.style.opacity = 0; r.style.opacity = 0;
+  setTimeout(()=>{
+    g.textContent = d.g;
+    r.innerHTML = d.r.map(x=>`<div class="pp-reco"><div class="ppe">${x[0]}</div><div class="ppn">${x[1]}</div></div>`).join('');
+    g.style.opacity = 1; r.style.opacity = 1;
+  }, 200);
+}
+
+/* where-does-the-key-belong quiz */
+const headlineFbs = [
+  {ok:false, fb:'✗ A key in the page\'s JavaScript is public. Anyone can open "view source" or the network tab, read it, and spend on Maya\'s account until it\'s revoked. "Less to build" here means "wide open to the whole internet." This is the classic, costly first-time mistake.'},
+  {ok:true, fb:'✓ Yes. The key stays a <strong>server-side secret</strong>; the browser talks to a small backend, and only the backend attaches the key and calls the model. The page never sees the key, so it can\'t be stolen from it. This is the rule for every API key you\'ll ever use: <strong>server-side, never client code, never a public repo.</strong>'},
+  {ok:false, fb:'✗ A public repo is the first place automated bots scan for keys — a committed key can be found and abused within minutes. "Backed up and easy to share" also means "shared with everyone." Never commit a key; keep it in a server secret, out of source control entirely.'}
+];
+function headlineQ(i){
+  const r = headlineFbs[i];
+  const btns = document.querySelectorAll('#s2 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (headlineFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('headlineFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb + (r.ok ? '' : '<br><br>The safe answer: <strong>keep the key server-side; the browser calls your server, and only your server calls the model.</strong>');
+}
+
+/* ───────── BEAT 3: BUILD WITH APIS (trace) ───────── */
+const triageKey = {
+  1: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> The draft call returned a warm reply in the required format, and — crucially — it <em>passed validation</em> before being shown. Structured output plus a validation check is exactly what makes a chained call safe to build on. Ship it.',
+    human:'△ This one\'s actually fine. The reply matches the format you required and it passed validation before anyone saw it. Nothing to debug here. Verdict: <strong>LOOKS RIGHT</strong>.'}},
+  2: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> The extract call drifted into prose instead of the strict structure, and the code trusted it, so "eight" lands in the date slot. The fix isn\'t hope — it\'s to pin a required output format, give one example, and <em>validate before you trust it</em>; anything that doesn\'t match goes to the fail-safe. Unvalidated AI output is the number-one API-build bug.',
+    bot:'✗ Look again — the model answered in a chatty paragraph, not the required structure, and the code grabbed junk from it. Trusting free-form text as if it were clean fields is a bug waiting to happen. Verdict: <strong>BUG</strong>.'}},
+  3: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> A 429 (too many requests) is normal under load — it is <em>not</em> a reason to crash and silently drop customers. The fix: catch the 429, <strong>retry with a short back-off</strong> a few times, and if it still fails, hand off to a fail-safe. Calls fail; a build that assumes they never will is fragile by design.',
+    bot:'✗ Three customers silently got nothing because the code assumed every call succeeds. A 429 is expected under load — the code needs a retry-with-back-off, not a crash. Verdict: <strong>BUG</strong>.'}},
+  4: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> This is the fail-safe working exactly as designed: it retried with a back-off, and when the call still wouldn\'t answer, it stopped, saved the raw message, and flagged Maya rather than sending a half-built reply. Failing safely beats failing silently every time.',
+    human:'△ This is the behaviour you want. It retried, gave up gracefully, and handed the message to a human instead of guessing. No bug — the fail-safe is doing its job. Verdict: <strong>LOOKS RIGHT</strong>.'}}
+};
+function triage(n, choice, btn){
+  const k = triageKey[n];
+  const row = document.getElementById('tk'+n);
+  row.querySelectorAll('.ticket-btn').forEach(b => b.disabled = true);
+  const correct = choice === k.right;
+  row.className = 'ticket ' + (correct ? 'decided-'+(k.right==='bot'?'bot':'human') : 'wrongdrop');
+  if (!correct){ setTimeout(()=>{ row.className = 'ticket decided-'+(k.right==='bot'?'bot':'human'); }, 900); }
+  const fb = document.getElementById('tf'+n);
+  fb.className = 'ticket-feedback show ' + (correct ? 'good' : 'warn');
+  fb.innerHTML = k.fb[choice];
+}
+
+/* structured-output + failure quiz */
+const reviewFbs = [
+  {ok:false, fb:'✗ "Please don\'t error and answer neatly" is a wish, not engineering. The model can still be chatty, and a 429 or timeout will still crash you — a polite prompt changes neither. You have to <em>handle</em> failures and <em>validate</em> output, not ask nicely for them to behave.'},
+  {ok:true, fb:'✓ That\'s the fix, on both fronts. For failures: <strong>retry with a short back-off</strong> on 429/timeout, then a <strong>fail-safe</strong> that saves the message and flags Maya. For output: a <strong>strict format</strong>, one example, and <strong>validation</strong> before you trust it — anything that doesn\'t match goes to the fail-safe instead of poisoning the next step. This is what "building with APIs" actually means.'},
+  {ok:false, fb:'✗ "Most calls succeed" is exactly the trap. Every dropped 429 is a customer who silently got nothing, and every unvalidated reply is a garbled answer that might reach someone. On a real build those small failures compound — you handle them on purpose, you don\'t shrug.'}
+];
+function reviewQ(i){
+  const r = reviewFbs[i];
+  const btns = document.querySelectorAll('#s3 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (reviewFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('reviewFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 4: CAPSTONE READINESS METER ───────── */
+function calc(){
+  const runs = +document.getElementById('inCost').value;
+  let wrong = +document.getElementById('inPrice').value;
+  const blast = +document.getElementById('inUnits').value;
+  if (wrong > runs) wrong = runs;
+  const good = runs > 0 ? ((runs - wrong) / runs) * 100 : 0;
+  document.getElementById('oCost').textContent = runs;
+  document.getElementById('oPrice').textContent = wrong;
+  document.getElementById('oUnits').textContent = blast + ' / 5';
+  document.getElementById('vProfit').textContent = Math.round(good) + '%';
+  document.getElementById('vMargin').textContent = runs;
+  const tP = document.getElementById('tProfit'), tM = document.getElementById('tMargin');
+  tP.style.borderColor = good < 80 ? 'var(--red)' : (good >= 95 ? 'var(--green)' : 'transparent');
+  tP.style.background = good < 80 ? '#FEE' : (good >= 95 ? 'var(--green-light)' : 'var(--bg-light)');
+  tM.style.borderColor = runs < 10 ? 'var(--red)' : (runs >= 30 ? 'var(--green)' : 'transparent');
+  tM.style.background = runs < 10 ? '#FEE' : (runs >= 30 ? 'var(--green-light)' : 'var(--bg-light)');
+  const note = document.getElementById('calcNote');
+  if (runs < 10){
+    note.innerHTML = '🟡 <strong>Too few requests to trust anything.</strong> A handful of clean calls isn\'t evidence — a shaky build can pass 5 and fail the 11th on a weirdly-worded message. Replay more real requests before you let any reply go out unseen.';
+  } else if (good < 80){
+    note.innerHTML = '🚨 <strong>Too many bad replies.</strong> Below 80% means roughly one in five calls fails or returns something invalid — nowhere near shippable. Find the pattern (bad parse? rate-limit crash?), add validation and retry, and fix it first.';
+  } else if (good >= 95 && blast <= 2){
+    note.innerHTML = '✅ <strong>Ship it — with a human still glancing.</strong> High-quality replies on a low-damage step (a draft Maya reads before sending) is exactly where a capstone earns its keep. Ship it, keep watching the cost, and keep the error alert on.';
+  } else if (blast >= 4){
+    note.innerHTML = '⚠️ <strong>Good, but the stakes are high.</strong> Even at this quality, one bad reply going out unseen on a money-touching, irreversible step is costly. Ship it, but keep a human approval checkpoint on that step — unattended on the rest.';
+  } else {
+    note.innerHTML = '🟢 <strong>Getting there.</strong> Reliable enough for low-stakes steps a human still reviews. For anything you can\'t undo, keep the approval checkpoint until quality is higher and you\'ve replayed more real requests.';
+  }
+}
+['inCost','inPrice','inUnits'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+
+const judgeKey = {
+  A: {right:'act', fb:{
+    act:'✓ Correct — <strong>RUN UNATTENDED.</strong> 30/30 valid, and Maya reads every draft before it sends, so a bad one is caught before any customer sees it. Drafting-for-review is precisely where you let an API build run on its own. This is the step that gives Maya her hour back.',
+    watch:'△ You <em>could</em> add another approval, but Maya already reviews every draft before it sends — gating the drafting itself just recreates the manual work you\'re removing. Let it draft. Verdict: <strong>RUN UNATTENDED</strong>.',
+    ignore:'✗ Nothing to fix — 30/30 valid and a human reads each draft before it goes. Blocking it here means writing every reply from scratch yourself forever. Verdict: <strong>RUN UNATTENDED</strong>.'}},
+  B: {right:'watch', fb:{
+    watch:'✓ Correct — <strong>REQUIRE APPROVAL.</strong> It runs fine, but a charge and a confirmation to a real customer can\'t be quietly undone. Even a reliable capstone keeps a human checkpoint on the money step — at least until it\'s earned far more trust. Draft freely; charge on Maya\'s nod.',
+    act:'△ Tempting — it ran 30/30. But "can\'t be un-charged" is the line. One wrong auto-charge to a customer is exactly the failure an approval checkpoint exists to catch. Verdict: <strong>REQUIRE APPROVAL</strong>.',
+    ignore:'△ The step itself works — you don\'t need to fix it. You just don\'t let it move money unsupervised yet. Verdict: <strong>REQUIRE APPROVAL</strong>.'}},
+  C: {right:'ignore', fb:{
+    ignore:'✓ Correct — <strong>FIX FIRST.</strong> A key sitting in client-side code is a live security hole — anyone opening the page can read it and spend on Maya\'s account, silently, until the bill spikes. This ships nothing until the key moves to a <strong>server-side secret</strong> and out of the page. Then re-test. Security bugs are never "later."',
+    act:'✗ Shipping an app with the key in the page is handing your wallet to the internet — the fastest way to a surprise bill. This one isn\'t ready. Verdict: <strong>FIX FIRST</strong>.',
+    watch:'△ Approval on the reply won\'t help — the leak is the key in the page, and that\'s exposed the moment anyone opens the app. Move the key server-side before anything else. Verdict: <strong>FIX FIRST</strong>.'}}
+};
+const judged = {};
+function judge(set, verdict, btn){
+  const k = judgeKey[set];
+  judged[set] = true;
+  const row = document.getElementById('op'+set);
+  const cls = k.right==='act' ? 'scale' : (k.right==='ignore' ? 'kill' : 'watch');
+  row.className = 'adset decided-' + cls;
+  row.querySelectorAll('.adset-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('fb'+set);
+  fb.className = 'adset-feedback show ' + (verdict===k.right ? 'good' : 'warn');
+  fb.innerHTML = k.fb[verdict];
+  if (judged.A && judged.B && judged.C){
+    setTimeout(()=>{ document.getElementById('weekVerdict').classList.add('show'); document.getElementById('weekVerdict').scrollIntoView({behavior:'smooth', block:'center'}); }, 600);
+  }
+}
+
+/* ───────── FINALE / HONEST BEAT ───────── */
+const finalFbs = [
+  {ok:false, fb:'✗ "The more AI, the better" is the reflex that gets beginners burned. An app that plugs an API in everywhere with no cost watch, no key safety, and no validation will quietly rack up bills and ship garbled replies — silently, until the invoice or a customer complaint arrives.'},
+  {ok:true, fb:'✓ That\'s the builder\'s read. An API genuinely lets you add real AI features without hosting a model — that\'s durable. But calls cost tokens, get rate-limited, and time out; the output is text you must format and validate; and the key is a real secret. <strong>"Unlimited, free, no security, perfect" is the reliable tell of hype.</strong> You keep the key server-side, watch cost, retry with a fail-safe, and keep a human on anything irreversible.'},
+  {ok:false, fb:'✗ Too far the other way. AI APIs aren\'t useless — you just spent four beats building a real, useful thing with one. The honest read is in the middle: powerful and genuinely worth using, as long as you handle cost, security, and failures like a builder instead of trusting the hype.'}
+];
+let finalAnswered = false;
+function finalQ(i){
+  const r = finalFbs[i];
+  const btns = document.querySelectorAll('#s5 .scenario-panel:first-of-type .scenario-btn');
+  if (!finalAnswered){
+    btns.forEach((b,j)=>{ if (finalFbs[j].ok) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) finalAnswered = true;
+  }
+  const fb = document.getElementById('finalFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* API-builder instincts quiz */
+const opsQs = [
+  {q:"The safest home for your API key is…", opts:["In the web page's JavaScript so the browser can call the model","On a server, as a secret the browser never sees","In a public code repo so it's backed up"], correct:1, explain:"A key spends your money, so it\'s a password. It belongs in a server-side secret; the browser calls your server, and only your server calls the model with the key attached. Never the page, never a public repo."},
+  {q:"An AI API call returns a chatty paragraph instead of the clean fields you needed. The right response is…", opts:["Trust it and hope the next one is tidier","Require a strict output format, give one example, and validate before you use it","Give up on structured output entirely"], correct:1, explain:"AI output is text that only looks tidy. You pin a required format, show one example, and validate the response before the next step trusts it — anything that doesn\'t match goes to a fail-safe, not into your data."},
+  {q:"Your calls sometimes return a 429 (too many requests) or time out. A dependable build…", opts:["Crashes — those errors mean the API is broken","Retries with a short back-off, then falls back to a safe path (save it, flag a human)","Ignores the errors and moves on"], correct:1, explain:"Calls fail; that\'s normal, not a defect. You catch the 429 or timeout, retry a few times with a back-off, and if it still won\'t answer, hand off to a fail-safe instead of dropping the request silently. Failing safely is the whole trick."}
+];
+let opsIdx = 0;
+function renderOpsQ(){
+  const s = opsQs[opsIdx];
+  document.getElementById('opsQ').textContent = `Round ${opsIdx+1}/3 — ${s.q}`;
+  document.getElementById('opsOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerOpsQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('opsNext').style.display = 'none';
+}
+function answerOpsQ(i){
+  const s = opsQs[opsIdx];
+  document.querySelectorAll('#opsOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (opsIdx===opsQs.length-1 ? '<br><br>🎓 That\'s the finale. You can call an AI API safely, build with it honestly, and tell the durable truth from the hype. Five weeks, five builds, one builder — you\'re ready.' : '');
+  document.getElementById('opsNext').style.display = opsIdx < opsQs.length-1 ? 'inline-block' : 'none';
+}
+function nextOpsQ(){ opsIdx++; if (opsIdx < opsQs.length) renderOpsQ(); }
+renderOpsQ();
+</script>
+</body>
+</html>

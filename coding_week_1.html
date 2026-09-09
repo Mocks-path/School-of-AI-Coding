@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Week 1 — Build ReceiptTidy, Your First AI-Made Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;
+  --green:#4CAF50;--green-light:#E8F5E9;
+  --blue:#3F88C5;--purple:#8B5CF6;--pink:#EC4899;--red:#E74C3C;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);
+  --shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.7rem}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);line-height:1.2}
+.header-title span{color:var(--orange)}
+.header-tag{font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.logo-mascot{width:44px;height:44px;flex-shrink:0}
+.progress-pill{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;background:var(--orange-glow);border-radius:50px;font-size:.72rem;color:var(--orange);font-weight:700}
+.progress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-light) 100%);position:relative;overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .7s ease}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;color:var(--navy);margin-bottom:.9rem;animation:fadeUp .7s ease .1s both}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.4rem;animation:fadeUp .7s ease .2s both}
+.usecase-banner{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:1rem;animation:fadeUp .7s ease .3s both}
+.usecase-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#FF6B6B,#EC4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem}
+.usecase-text{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.usecase-text strong{color:var(--navy);font-weight:700}
+.hero-visual{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s ease .2s both}
+.hero-mascot{width:230px;height:auto;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 40px rgba(232,122,46,0.22))}
+.budget-strip{max-width:1100px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;animation:fadeUp .8s ease .35s both}
+.budget-chip{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;text-align:center;box-shadow:var(--shadow-sm)}
+.budget-chip .bv{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--orange)}
+.budget-chip .bl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.15rem}
+
+/* ─── SECTION SHELL ─── */
+.section{padding:3rem 2rem;scroll-margin-top:80px}
+.section.alt{background:var(--bg-light)}
+.container{max-width:1100px;margin:0 auto}
+.section-header{margin-bottom:2rem}
+.section-num{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.5rem}
+.section-num .num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,2.8vw,2rem);color:var(--navy);line-height:1.25;margin-bottom:.4rem}
+.section-sub{font-size:.92rem;color:var(--text-secondary);line-height:1.65;max-width:720px}
+.story-beat{background:#fff;border-left:4px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.2rem;font-size:.88rem;color:var(--text-primary);line-height:1.65;box-shadow:var(--shadow-sm);margin-bottom:1.6rem}
+.story-beat .sb-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.3rem}
+.story-beat em{color:var(--text-secondary)}
+
+/* ─── TAB NAV ─── */
+.tab-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border-radius:50px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:72px;z-index:50;margin:0 auto 2rem;max-width:fit-content;flex-wrap:nowrap;-ms-overflow-style:none;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.55rem 1.1rem;border-radius:50px;border:none;background:transparent;color:var(--text-secondary);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--orange)}
+.tab-btn.active{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(232,122,46,0.35)}
+
+/* ─── GENERIC CARDS/GRIDS ─── */
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.pick-card{background:#fff;border-radius:var(--radius);padding:1.4rem;border:2px solid var(--border);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;transition:height .3s}
+.pick-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),#7BC67E)}
+.pick-card:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),#5DADE2)}
+.pick-card:nth-child(3)::before{background:linear-gradient(90deg,var(--pink),#F48FB1)}
+.pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.pick-card.active{border-color:var(--orange);box-shadow:var(--shadow-md)}
+.pick-card.active::before{height:6px}
+.pick-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:var(--bg-light)}
+.pick-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.pick-card .pc-tag{font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.pick-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+.pick-detail{background:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);font-size:.86rem;line-height:1.65;display:none}
+.pick-detail.show{display:block;animation:fadeUp .4s ease}
+.pick-detail strong{color:var(--navy)}
+.pick-detail .verdict-pill{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.vp-good{background:var(--green-light);color:#2E7D32}
+.vp-mid{background:#FFF3CD;color:#856404}
+.vp-bad{background:#FEE;color:#C62828}
+
+/* ─── SCENARIO QUIZ ─── */
+.scenario-panel{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.scenario-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.scenario-q{font-size:1rem;color:var(--navy);margin-bottom:1rem;font-weight:600;line-height:1.5}
+.scenario-options{display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:1rem}
+.scenario-btn{padding:.75rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left;line-height:1.45}
+.scenario-btn:hover{border-color:var(--orange);color:var(--orange)}
+.scenario-btn.correct{background:var(--green-light);border-color:var(--green);color:#2E7D32}
+.scenario-btn.wrong{background:#FEE;border-color:var(--red);color:#C62828}
+.scenario-feedback{padding:.9rem;border-radius:8px;font-size:.83rem;line-height:1.55;display:none}
+.scenario-feedback.show{display:block;animation:fadeUp .4s ease}
+.scenario-feedback.success{background:var(--green-light);color:#2E7D32;border-left:3px solid var(--green)}
+.scenario-feedback.fail{background:#FEE;color:#C62828;border-left:3px solid var(--red)}
+.btn-action{padding:.55rem 1.1rem;border-radius:8px;background:var(--orange);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-action:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-secondary{background:transparent;color:var(--text-primary);border:1.5px solid var(--border);padding:.55rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── CHAT MOCK (prompt showdown) ─── */
+.chat-mock{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:1rem}
+.chat-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.chat-head .cdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-body{padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;min-height:150px}
+.chat-msg{max-width:88%;padding:.8rem 1rem;border-radius:12px;font-size:.83rem;line-height:1.55}
+.chat-msg.user{align-self:flex-end;background:var(--orange-glow);color:var(--text-primary);border:1px solid rgba(232,122,46,0.25);border-bottom-right-radius:3px}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-light);border:1px solid var(--border);border-bottom-left-radius:3px}
+.chat-msg.ai strong{color:var(--orange)}
+.chat-msg .who{display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem}
+.chat-msg code{font-family:ui-monospace,'Courier New',monospace;background:rgba(43,45,66,0.06);padding:.05rem .3rem;border-radius:4px;font-size:.78rem}
+
+/* ─── DECOMPOSE CARDS (reuses prod-grid) ─── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.prod-card{background:#fff;border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.prod-card.chosen{border-color:var(--orange)}
+.prod-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.prod-card:nth-child(1) .prod-img{background:linear-gradient(135deg,#FBE4D5,#F8C8A8)}
+.prod-card:nth-child(2) .prod-img{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.prod-card:nth-child(3) .prod-img{background:linear-gradient(135deg,#E3E4F5,#C9CBEE)}
+.prod-body{padding:1rem 1.1rem}
+.prod-body h4{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.5rem}
+.prod-stats{display:flex;flex-direction:column;gap:.3rem}
+.prod-stat{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-secondary)}
+.prod-stat b{color:var(--navy)}
+.prod-stat .good{color:#2E7D32;font-weight:700}
+.prod-stat .bad{color:#C62828;font-weight:700}
+.prod-stat .mid{color:#B8860B;font-weight:700}
+.prod-cta{margin-top:.7rem;font-size:.72rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em}
+
+/* review / two-column compare (reuses review-mine) */
+.review-mine{background:#fff;border-radius:var(--radius);padding:1.4rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.review-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.9rem}
+.review-col{border-radius:var(--radius-sm);padding:1rem 1.1rem}
+.review-col.love{background:var(--green-light)}
+.review-col.hate{background:#FEE}
+.review-col h5{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.review-col.love h5{color:#2E7D32}
+.review-col.hate h5{color:#C62828}
+.review-col li{font-size:.8rem;line-height:1.5;margin-left:1.1rem;margin-bottom:.35rem;color:var(--text-primary)}
+
+/* ─── SPEC METER (reuses calc) ─── */
+.calc{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.calc-field{margin-bottom:1rem}
+.calc-field label{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem}
+.calc-field label output{color:var(--orange);font-weight:800}
+.calc-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer}
+.calc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--orange);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.calc-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--orange);cursor:pointer}
+.calc-out{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-content:start}
+.calc-tile{padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent;transition:all .3s}
+.calc-tile.warn{border-color:var(--red);background:#FEE}
+.calc-tile.ok{border-color:var(--green);background:var(--green-light)}
+.calc-tile .cv{font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1}
+.calc-tile .cl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem}
+.calc-note{grid-column:1/-1;font-size:.8rem;line-height:1.55;padding:.8rem 1rem;border-radius:8px;background:var(--orange-glow);color:var(--text-primary)}
+.calc-note strong{color:var(--orange)}
+
+/* ─── VARIATION TABS + PREVIEW (reuses store) ─── */
+.voice-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.voice-tab{padding:.45rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-tab:hover{border-color:var(--orange);color:var(--orange)}
+.voice-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.store-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.store-chrome{background:#F5F5F7;padding:.55rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted)}
+.store-chrome .sdot{width:9px;height:9px;border-radius:50%}
+.store-url{margin-left:.6rem;background:#fff;border:1px solid var(--border);border-radius:50px;padding:.2rem .9rem;font-size:.7rem;color:var(--text-secondary)}
+.store-body{padding:1.4rem 1.6rem;font-family:ui-monospace,'Courier New',monospace}
+.store-brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;font-family:'Plus Jakarta Sans',sans-serif}
+.store-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;font-size:1rem}
+.store-brand b{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)}
+.store-hero-line{font-family:ui-monospace,'Courier New',monospace;font-size:.9rem;color:var(--navy);line-height:1.5;margin-bottom:.6rem;transition:opacity .3s;white-space:pre-wrap}
+.store-desc{font-size:.8rem;color:var(--text-secondary);line-height:1.7;transition:opacity .3s;white-space:pre-wrap;font-family:ui-monospace,'Courier New',monospace}
+.store-price-row{display:flex;align-items:center;gap:.8rem;margin-top:1rem;font-family:'Plus Jakarta Sans',sans-serif}
+.store-price{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--orange)}
+.store-buy{padding:.55rem 1.4rem;border-radius:8px;background:var(--navy);color:#fff;font-size:.8rem;font-weight:700;border:none;cursor:default}
+.copy-toggle{display:flex;gap:.5rem;margin:1.4rem 0 .8rem}
+.before-after{border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.85rem;line-height:1.6}
+.before-after.before{background:var(--bg-light);border:1.5px dashed var(--border);color:var(--text-muted)}
+.before-after.after{background:var(--orange-glow);border:1.5px solid rgba(232,122,46,0.35);color:var(--text-primary)}
+
+/* checklist + feed */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.build-card{background:#fff;border-radius:var(--radius);padding:1.3rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.build-card h4{font-size:.95rem;color:var(--navy);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.build-card h4::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:.6rem;padding:.42rem 0;font-size:.84rem;color:var(--text-primary);cursor:pointer;line-height:1.45}
+.checklist li .check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.checklist li.done .check{background:var(--green);border-color:var(--green)}
+.checklist li.done .check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:800}
+.checklist li.done{color:var(--text-muted);text-decoration:line-through}
+.feed{background:var(--navy-dark);border-radius:10px;padding:1rem 1.1rem;min-height:220px;max-height:280px;overflow-y:auto;font-family:ui-monospace,'Courier New',monospace}
+.feed-line{display:flex;gap:.6rem;font-size:.78rem;line-height:1.55;padding:.3rem 0;color:#D8DAE5;animation:fadeUp .4s ease}
+.feed-line .ft{color:var(--orange-light);font-weight:700;flex-shrink:0}
+.feed-line.hint-line{color:#8B8DA0;font-style:italic}
+.done-note{margin-top:1rem;padding:.8rem;background:var(--green-light);border-radius:7px;font-size:.78rem;color:#2E7D32;display:none}
+
+/* ─── TERMINAL / ERROR PANEL (reuses ad builder) ─── */
+.ad-builder-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.4rem;margin-top:1.4rem}
+.ad-controls .prompt-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.ad-controls label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.ad-controls select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:#fff}
+.ad-controls select:focus{outline:none;border-color:var(--orange)}
+.ad-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden;max-width:400px;margin:0 auto;width:100%}
+.adp-head{display:flex;align-items:center;gap:.6rem;padding:.7rem 1rem}
+.adp-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.adp-name{font-size:.78rem;font-weight:700;color:var(--navy)}
+.adp-sponsored{font-size:.64rem;color:var(--text-muted)}
+.adp-visual{min-height:190px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;font-size:2.6rem;background:linear-gradient(135deg,#2A2440,#4A3E68);color:#fff;text-align:center;padding:1rem;transition:all .3s}
+.adp-visual .adp-hook{font-family:ui-monospace,'Courier New',monospace;font-size:.82rem;line-height:1.5;max-width:320px;text-align:left;white-space:pre-wrap}
+.adp-caption{padding:.8rem 1rem;font-size:.8rem;color:var(--text-primary);line-height:1.5}
+.adp-cta{margin:0 1rem 1rem;padding:.6rem;border-radius:8px;background:var(--orange);color:#fff;font-size:.8rem;font-weight:700;text-align:center}
+
+/* ─── SHIP DASHBOARD (reuses eval) ─── */
+.eval-dashboard{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+.metric-card{padding:1rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent}
+.metric-card.highlight{border-color:var(--orange);background:var(--orange-glow)}
+.metric-value{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1}
+.metric-card.highlight .metric-value{color:var(--orange)}
+.metric-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.4rem}
+.adset{display:grid;grid-template-columns:1.2fr 1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.adset.decided-scale{border-color:var(--green);background:var(--green-light)}
+.adset.decided-kill{border-color:var(--red);background:#FEE}
+.adset.decided-watch{border-color:#E0A800;background:#FFF8E1}
+.adset-name{font-size:.86rem;font-weight:700;color:var(--navy);line-height:1.4}
+.adset-name span{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted)}
+.adset-nums{display:flex;gap:1rem;font-size:.75rem;color:var(--text-secondary);flex-wrap:wrap}
+.adset-nums b{display:block;font-size:.88rem;color:var(--navy)}
+.adset-actions{display:flex;gap:.4rem}
+.adset-btn{padding:.4rem .8rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.adset-btn:hover{border-color:var(--orange);color:var(--orange)}
+.adset-btn:disabled{opacity:.45;cursor:not-allowed}
+.adset-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.adset-feedback.show{display:block;animation:fadeUp .4s ease}
+.adset-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.adset-feedback.warn{background:#FFF3CD;color:#856404}
+.week-verdict{display:none;margin-top:1.4rem;background:var(--navy-dark);border-radius:var(--radius);padding:1.6rem;color:#fff;animation:popIn .5s ease}
+.week-verdict.show{display:block}
+.week-verdict h4{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.8rem}
+.week-verdict h4 em{font-style:normal;color:var(--orange-light)}
+.wv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
+.wv-tile{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:9px;padding:.8rem;text-align:center}
+.wv-tile .v{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--orange-light)}
+.wv-tile .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.55);font-weight:700;margin-top:.25rem}
+.week-verdict p{font-size:.87rem;line-height:1.65;color:rgba(255,255,255,0.85)}
+.week-verdict p strong{color:var(--orange-light)}
+
+/* ─── FOOTER / RECAP ─── */
+.footer-cta{text-align:center;padding:3rem 2rem 5.5rem;background:var(--navy-dark);color:#fff}
+.footer-cta h2{font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.6rem}
+.footer-cta h2 em{color:var(--orange);font-style:normal}
+.footer-cta>p{font-size:.92rem;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 1.8rem}
+.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;max-width:1050px;margin:0 auto 1.8rem;text-align:left}
+.recap-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.recap-card .rn{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.35rem}
+.recap-card h4{font-family:'DM Serif Display',serif;font-size:1.02rem;margin-bottom:.35rem;color:#fff}
+.recap-card p{font-size:.76rem;color:rgba(255,255,255,0.65);line-height:1.55}
+.footer-note{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:1.6rem;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ─── COMPLETION BAR ─── */
+.completion-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,0.05)}
+.completion-info{display:flex;align-items:center;gap:.8rem;font-size:.82rem;color:var(--text-primary);font-weight:600}
+.completion-track{flex:1;max-width:280px;height:8px;background:var(--bg-light);border-radius:4px;overflow:hidden;margin:0 1rem}
+.completion-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:4px;transition:width .5s ease}
+.completion-percent{font-family:'DM Serif Display',serif;color:var(--orange);font-size:1.15rem}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:880px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-mascot{width:170px;margin:0 auto}
+  .usecase-banner{text-align:left}
+  .budget-strip{grid-template-columns:repeat(2,1fr)}
+  .pick-grid,.prod-grid{grid-template-columns:1fr}
+  .calc-grid,.build-grid,.ad-builder-grid,.review-cols{grid-template-columns:1fr}
+  .eval-metrics{grid-template-columns:repeat(2,1fr)}
+  .adset{grid-template-columns:1fr}
+  .wv-grid,.recap-grid{grid-template-columns:repeat(2,1fr)}
+  .header{padding:.7rem 1rem}
+  .section{padding:2.2rem 1rem}
+  .hero{padding:2.5rem 1rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-left">
+    <svg class="logo-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="477" cy="380" rx="285" ry="324" fill="#EBE3D6"/>
+      <ellipse cx="477" cy="380" rx="240" ry="270" fill="#412C23"/>
+      <circle cx="389" cy="430" r="36" fill="#fff"/>
+      <circle cx="565" cy="430" r="36" fill="#fff"/>
+      <circle cx="389" cy="430" r="14" fill="#2B2D42"/>
+      <circle cx="565" cy="430" r="14" fill="#2B2D42"/>
+      <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="14" stroke-linecap="round" fill="none"/>
+      <ellipse cx="477" cy="1350" rx="430" ry="100" fill="#EF7F1A"/>
+      <ellipse cx="477" cy="1350" rx="380" ry="78" fill="#FF9429"/>
+    </svg>
+    <div>
+      <div class="header-title">AI Coding <span>&amp; Building</span></div>
+      <div class="header-tag">MokshPath · Week 1 · Fun While You Learn</div>
+    </div>
+  </div>
+  <div class="progress-pill"><span class="dot"></span> <span id="headerProgressText">0 of 6 stages explored</span></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block"></span> Story Project · Zero to Builder-Ready</div>
+      <h1>Build <em>ReceiptTidy</em> — Maya's First Real Tool, Made With AI (and No Coding Background)</h1>
+      <p class="hero-sub">Meet Maya. She runs a tiny weekend candle side-business, and every month her receipts pile up in one messy spreadsheet: mixed date formats, blank rows, prices typed as "Rs. 450" and "450/-". Adding it up by hand takes an hour and she still gets it wrong. This week she builds a small program that cleans the sheet and prints a monthly total — using AI as her pair-programmer. You'll make every decision with her, following the loop that every builder learns: <strong>Describe → Generate → Run → Read → Fix</strong>.</p>
+      <div class="usecase-banner">
+        <div class="usecase-icon">🧾</div>
+        <div class="usecase-text"><strong>The Mission:</strong> By the end of the story, ReceiptTidy exists as a reusable, tested, documented little tool that turns a chaotic spreadsheet into one honest number — and Maya understands every step well enough to build the <em>next</em> one alone. No prior coding. No memorising syntax. Just clear thinking and an AI that writes the code.</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBE3D6"/><stop offset="1" stop-color="#D1D0CC"/></linearGradient>
+          <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A6A48"/><stop offset="1" stop-color="#412C23"/></linearGradient>
+          <linearGradient id="feetGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9429"/><stop offset="1" stop-color="#EF7F1A"/></linearGradient>
+        </defs>
+        <ellipse cx="210" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="740" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="477" cy="380" rx="285" ry="324" fill="url(#bodyGrad)"/>
+        <ellipse cx="477" cy="392" rx="240" ry="225" fill="url(#faceGrad)"/>
+        <circle cx="389" cy="430" r="38" fill="#fff"/>
+        <circle cx="565" cy="430" r="38" fill="#fff"/>
+        <circle cx="389" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="565" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="395" cy="424" r="5" fill="#fff"/>
+        <circle cx="571" cy="424" r="5" fill="#fff"/>
+        <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <ellipse cx="477" cy="1350" rx="430" ry="105" fill="url(#feetGrad)"/>
+        <ellipse cx="477" cy="1320" rx="380" ry="78" fill="#FF9429"/>
+      </svg>
+    </div>
+  </div>
+  <div class="budget-strip">
+    <div class="budget-chip"><div class="bv">1 tool</div><div class="bl">Real problem, real fix</div></div>
+    <div class="budget-chip"><div class="bv">0 syntax</div><div class="bl">Memorised by Maya</div></div>
+    <div class="budget-chip"><div class="bv">1 loop</div><div class="bl">Describe→Run→Read→Fix</div></div>
+    <div class="budget-chip"><div class="bv">4 lessons</div><div class="bl">Woven into 1 story</div></div>
+  </div>
+</section>
+
+<!-- ─── TAB NAVIGATION ─── -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-target="s1">Beat 1 · Decide</button>
+  <button class="tab-btn" data-target="s2">Beat 2 · Spec</button>
+  <button class="tab-btn" data-target="s3">Beat 3 · First Run</button>
+  <button class="tab-btn" data-target="s4">Beat 3 · Debug</button>
+  <button class="tab-btn" data-target="s5">Beat 4 · Reuse</button>
+  <button class="tab-btn" data-target="s6">Beat 4 · Ship</button>
+</div>
+
+<!-- ═══════════ BEAT 1: PROGRAMMING IN THE AI ERA ═══════════ -->
+<section class="section" id="s1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">1</div> Beat One · Lesson 1 — Programming in the AI Era</div>
+      <h2 class="section-title">Is It Even Worth Building? And Where Do You Start?</h2>
+      <p class="section-sub">Programming used to mean memorising syntax before you could solve anything. Now the durable skill is different: describe a problem clearly, let AI generate code, then <strong>run it, read what happened, and fix it</strong>. Today Maya decides the receipt problem is worth a tool — and picks the lowest-friction place to build it.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Sunday, 8:10 p.m. Maya has just spent 55 minutes hand-totalling last month's candle receipts — and the number still feels wrong. She almost gives up. Then she reframes it: <em>this is a task a computer does perfectly and instantly, and I no longer need to learn a whole programming language to get one.</em> The question isn't "can I code?" It's "can I describe what I want clearly enough for AI to build it — and can I check the result?" First: where should she even type?
+    </div>
+
+    <div class="pick-grid">
+      <div class="pick-card" data-niche="browser" onclick="pickNiche('browser')">
+        <div class="pick-icon">🌐</div>
+        <div class="pc-tag">Zero setup · Beginner-first</div>
+        <h4>A Browser-Based Coding Sandbox</h4>
+        <p>An online environment where an AI assistant writes code and a "Run" button executes it in the same window. Nothing to install, nothing to configure — you can be running code in two minutes.</p>
+      </div>
+      <div class="pick-card" data-niche="ide" onclick="pickNiche('ide')">
+        <div class="pick-icon">💻</div>
+        <div class="pc-tag">Powerful · Some friction</div>
+        <h4>A Full Desktop Editor</h4>
+        <p>A professional code editor installed on your laptop, with an AI helper built in. Enormously capable — and enormously distracting when your only goal is "add up a spreadsheet" and you're on day one.</p>
+      </div>
+      <div class="pick-card" data-niche="chatonly" onclick="pickNiche('chatonly')">
+        <div class="pick-icon">💬</div>
+        <div class="pc-tag">Familiar · Half the loop</div>
+        <h4>A Chat Assistant Alone</h4>
+        <p>Just a chat window. Great for generating and explaining code — but it can't <em>run</em> it. You'd be copying code somewhere else to test, which breaks the fast feedback loop beginners need most.</p>
+      </div>
+    </div>
+    <div class="pick-detail" id="nicheDetail"></div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> AI Assistant · The prompt showdown — how you ask shapes what you get</div>
+      <div class="chat-body" id="promptChat">
+        <div class="chat-msg ai"><span class="who">Narrator</span>You get out of an AI coder exactly what you put in. Below are three ways Maya could open the conversation. <strong>Pick the one you think earns the most useful first draft</strong> — then see what comes back.</div>
+      </div>
+    </div>
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Pick Maya's opening prompt</div>
+      <div class="scenario-q">Which message does Maya send the AI first?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="pickPrompt(0)">"Write me a program."</button>
+        <button class="scenario-btn" onclick="pickPrompt(1)">"Make the perfect app that fixes all my accounting forever."</button>
+        <button class="scenario-btn" onclick="pickPrompt(2)">"I'm a beginner, no coding background. I have a spreadsheet of candle-business receipts with a Date column and an Amount column. Amounts are typed inconsistently (e.g. 'Rs. 450', '450/-', '450.00'). Write a small script that reads the file, cleans the amounts into plain numbers, ignores blank rows, and prints the total. Explain each part in plain English."</button>
+      </div>
+      <div class="scenario-feedback" id="promptFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · The AI-era mindset (3 rounds)</div>
+      <div class="scenario-q" id="nicheQ">Loading…</div>
+      <div class="scenario-options" id="nicheOpts"></div>
+      <div class="scenario-feedback" id="nicheFb"></div>
+      <button class="btn-secondary" id="nicheNext" onclick="nextNicheQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2: THINKING LIKE A PROGRAMMER ═══════════ -->
+<section class="section alt" id="s2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">2</div> Beat Two · Lesson 2 — Thinking Like a Programmer</div>
+      <h2 class="section-title">Decompose the Goal, Then Turn It Into a Spec</h2>
+      <p class="section-sub">"Clean my receipts" is a wish, not an instruction. Thinking like a programmer means breaking a fuzzy goal into small, ordered, checkable steps — and predicting what each one should produce. The clearer the spec, the better the AI's code. Today Maya decomposes ReceiptTidy into pieces and grades her own prompt.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Monday evening. Before typing a single prompt, Maya writes the job on paper: <em>what goes in, what should come out, and every messy step between.</em> This is decomposition — the same move whether you're adding up receipts or launching a rocket. Below are three ways to slice the problem. Inspect each; only one is a real, buildable breakdown.
+    </div>
+
+    <div class="prod-grid">
+      <div class="prod-card" onclick="chooseProduct('vague', this)">
+        <div class="prod-img">🌫️</div>
+        <div class="prod-body">
+          <h4>"Just fix the spreadsheet"</h4>
+          <div class="prod-stats">
+            <div class="prod-stat"><span>Clear steps</span><b class="bad">None</b></div>
+            <div class="prod-stat"><span>Testable</span><b class="bad">No</b></div>
+            <div class="prod-stat"><span>AI can act on it</span><b class="bad">Barely</b></div>
+            <div class="prod-stat"><span>Room to hide bugs</span><b class="bad">Enormous</b></div>
+            <div class="prod-stat"><span>Beginner-friendly</span><b class="mid">Feels easy, isn't</b></div>
+          </div>
+          <div class="prod-cta">Inspect this →</div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="chooseProduct('steps', this)">
+        <div class="prod-img">🪜</div>
+        <div class="prod-body">
+          <h4>Input → Steps → Output</h4>
+          <div class="prod-stats">
+            <div class="prod-stat"><span>Clear steps</span><b class="good">5 ordered ones</b></div>
+            <div class="prod-stat"><span>Testable</span><b class="good">Each step</b></div>
+            <div class="prod-stat"><span>AI can act on it</span><b class="good">Directly</b></div>
+            <div class="prod-stat"><span>Edge cases named</span><b class="good">Yes</b></div>
+            <div class="prod-stat"><span>Beginner-friendly</span><b class="good">Very</b></div>
+          </div>
+          <div class="prod-cta">Inspect this →</div>
+        </div>
+      </div>
+      <div class="prod-card" onclick="chooseProduct('everything', this)">
+        <div class="prod-img">🎛️</div>
+        <div class="prod-body">
+          <h4>"Do everything, all at once"</h4>
+          <div class="prod-stats">
+            <div class="prod-stat"><span>Clear steps</span><b class="mid">Too many</b></div>
+            <div class="prod-stat"><span>Testable</span><b class="bad">Not really</b></div>
+            <div class="prod-stat"><span>Scope</span><b class="bad">Ballooning</b></div>
+            <div class="prod-stat"><span>Finishes today</span><b class="bad">Never</b></div>
+            <div class="prod-stat"><span>Beginner-friendly</span><b class="bad">Overwhelming</b></div>
+          </div>
+          <div class="prod-cta">Inspect this →</div>
+        </div>
+      </div>
+    </div>
+    <div class="pick-detail" id="prodDetail"></div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">🔍 Maya's whiteboard — the vague ask vs. the real spec</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">She takes what she <em>felt</em> she wanted and rewrites it as something a machine can actually do. Notice how the right column names every edge case that would otherwise become a silent bug.</p>
+      <div class="review-cols">
+        <div class="review-col hate">
+          <h5>💭 The vague wish (in her head)</h5>
+          <ul>
+            <li>"Clean up the receipts"</li>
+            <li>"Add them up correctly"</li>
+            <li>"Skip the junk"</li>
+            <li>"Give me the monthly total"</li>
+          </ul>
+        </div>
+        <div class="review-col love">
+          <h5>✅ The buildable spec (on paper)</h5>
+          <ul>
+            <li><strong>Read</strong> the file's Date and Amount columns</li>
+            <li><strong>Strip</strong> "Rs.", "/-", spaces from each amount → a number</li>
+            <li><strong>Skip</strong> rows where Amount is blank or non-numeric</li>
+            <li><strong>Sum</strong> the remaining amounts and print one total</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🧮 The Spec-Quality Meter — will your prompt produce good code?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1.1rem">Drag the sliders to build a prompt and watch the quality react. Rule of thumb: the more <strong>context, concrete detail, and named edge cases</strong> you give, the less the AI has to guess — and the fewer bugs you inherit.</p>
+      <div class="calc-grid">
+        <div>
+          <div class="calc-field">
+            <label>Context (who you are, what the data looks like) <output id="oCost">Medium</output></label>
+            <input type="range" class="calc-slider" id="inCost" min="0" max="10" step="1" value="5">
+          </div>
+          <div class="calc-field">
+            <label>Concrete detail (exact columns, example values) <output id="oShip">Medium</output></label>
+            <input type="range" class="calc-slider" id="inShip" min="0" max="10" step="1" value="5">
+          </div>
+          <div class="calc-field">
+            <label>Edge cases named (blanks, weird formats) <output id="oPrice">Medium</output></label>
+            <input type="range" class="calc-slider" id="inPrice" min="0" max="10" step="1" value="5">
+          </div>
+        </div>
+        <div class="calc-out">
+          <div class="calc-tile" id="tProfit"><div class="cv" id="vProfit">15/30</div><div class="cl">Spec clarity score</div></div>
+          <div class="calc-tile" id="tMargin"><div class="cv" id="vMargin">50%</div><div class="cl">Chance of usable first draft</div></div>
+          <div class="calc-tile"><div class="cv" id="vMarkup">Some</div><div class="cl">Guesswork left to AI</div></div>
+          <div class="calc-tile"><div class="cv" id="vCPA">~2</div><div class="cl">Likely fix-up rounds</div></div>
+          <div class="calc-note" id="calcNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3a: YOUR FIRST PROGRAM — RUN IT ═══════════ -->
+<section class="section" id="s3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">3</div> Beat Three · Lesson 3 — Your First Program (Run It)</div>
+      <h2 class="section-title">Generate, Run, and Read — The Loop Begins</h2>
+      <p class="section-sub">A first draft of code is not a finished tool — it's a hypothesis you test by running it. The same request can be phrased three ways and produce very different code. Maya generates ReceiptTidy, picks how much to ask for at once, and hits Run for the first time.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday. Maya pastes her spec into the sandbox. The AI writes about 20 lines and explains each one. She resists the urge to ask for ten features at once — <em>get one small thing working, then grow it.</em> Switch the tabs below to see how the AI's generated script changes with the amount of guidance you give.
+    </div>
+
+    <div class="voice-tabs">
+      <button class="voice-tab active" data-voice="calm" onclick="setVoice('calm')">🎯 Tight spec</button>
+      <button class="voice-tab" data-voice="sci" onclick="setVoice('sci')">🧩 Step-by-step</button>
+      <button class="voice-tab" data-voice="fun" onclick="setVoice('fun')">💥 "Do it all"</button>
+    </div>
+
+    <div class="store-preview">
+      <div class="store-chrome">
+        <span class="sdot" style="background:#FF5F57"></span><span class="sdot" style="background:#FEBC2E"></span><span class="sdot" style="background:#28C840"></span>
+        <span class="store-url">🔒 sandbox.run / receipt_tidy.py</span>
+      </div>
+      <div class="store-body">
+        <div class="store-brand"><div class="store-logo">🧾</div><b>ReceiptTidy</b><span style="font-size:.7rem;color:var(--text-muted);margin-left:auto">Generated by AI · directed by Maya</span></div>
+        <div class="store-hero-line" id="storeHeadline"># Read receipts, clean amounts, print the total</div>
+        <div class="store-desc" id="storeDesc">rows = read_file("receipts.csv")
+total = 0
+for row in rows:
+    amount = clean(row["Amount"])   # strips "Rs." "/-" spaces
+    if amount is None:              # blank / junk row
+        continue
+    total = total + amount
+print("Monthly total:", total)</div>
+        <div class="store-price-row">
+          <div class="store-price">≈ 20 lines · runs in the browser</div>
+          <button class="store-buy">▶ Run</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toggle">
+      <button class="btn-secondary" id="beforeBtn" onclick="toggleCopy('before')">😬 Before: the raw wish</button>
+      <button class="btn-action" id="afterBtn" onclick="toggleCopy('after')">✨ After: code you can read &amp; check</button>
+    </div>
+    <div class="before-after before" id="copyBefore" style="display:none">
+      "Fix my receipts and give me the total."
+      <div style="margin-top:.5rem;font-size:.75rem">← A wish. The AI has to guess your file, your columns, your messy formats, and what "fixed" even means. You can't check code you never specified.</div>
+    </div>
+    <div class="before-after after" id="copyAfter">
+      "Read the Date and Amount columns, strip 'Rs.' / '/-' / spaces from each amount, skip blank or non-numeric rows, sum the rest, print one total — and explain each part."
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-secondary)">← Same tool. The difference is the <strong>spec</strong>: named columns, named edge cases, a plain-English explanation you can actually verify line by line.</div>
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Maya's first-run checklist</h4>
+        <ul class="checklist" id="buildList">
+          <li data-step="0" onclick="runBuildStep(0)"><span class="check"></span>Paste the spec &amp; let the AI <strong>&nbsp;generate&nbsp;</strong> the first draft</li>
+          <li data-step="1" onclick="runBuildStep(1)"><span class="check"></span>Read the AI's plain-English explanation before running</li>
+          <li data-step="2" onclick="runBuildStep(2)"><span class="check"></span>Upload a small sample receipts file (just 8 rows)</li>
+          <li data-step="3" onclick="runBuildStep(3)"><span class="check"></span>Press ▶ Run for the very first time</li>
+          <li data-step="4" onclick="runBuildStep(4)"><span class="check"></span>Predict the total by hand first, then compare</li>
+          <li data-step="5" onclick="runBuildStep(5)"><span class="check"></span>Read the output — number, or an error? Either is progress.</li>
+        </ul>
+        <div class="done-note" id="buildDone">✅ <strong>First run complete!</strong> It printed <em>something</em> — but the number looks off. That's not failure; that's the loop working. Debugging is next.</div>
+      </div>
+      <div class="build-card">
+        <h4>Run console (click checklist items)</h4>
+        <div class="feed" id="buildFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Waiting for Maya to run the script… tick items on the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Reading the AI's code</div>
+      <div class="scenario-q">Before running, Maya reads the generated code. Which habit actually protects her?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="headlineQ(0)">Trust it — the AI is smarter than her, so reading it is a waste of time.</button>
+        <button class="scenario-btn" onclick="headlineQ(1)">Read the plain-English explanation, check it matches her spec, then run it on a tiny sample she can verify by hand.</button>
+        <button class="scenario-btn" onclick="headlineQ(2)">Immediately run it on her entire year of receipts to save time.</button>
+      </div>
+      <div class="scenario-feedback" id="headlineFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3b: DEBUG WITH AI ═══════════ -->
+<section class="section alt" id="s4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">4</div> Beat Three · Lesson 3 — Your First Program (Debug It)</div>
+      <h2 class="section-title">Hit a Real Error — Read It, Then Fix It With AI</h2>
+      <p class="section-sub">Errors are not the enemy; they're the program telling you exactly where it got confused. The durable skill isn't avoiding errors — it's <strong>reading the message calmly</strong> and feeding it back to the AI with context. Maya's first run threw an error. Let's decode it together.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday, later. Maya hit Run and got a wall of red text ending in <code>ValueError: could not convert string to float: 'Rs. 450'</code>. Her instinct is to panic and delete everything. Instead she reads it: <em>the code tried to turn a price into a number, but one price still had "Rs." stuck to it.</em> The error even names the exact bad value. That's a clue, not a catastrophe.
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · The error appears</div>
+      <div class="scenario-q">The console shows: <code>ValueError: could not convert string to float: 'Rs. 450'</code>. What's the best first move?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="hookQ(0)">Delete the whole script and start over from scratch — clearly it's broken.</button>
+        <button class="scenario-btn" onclick="hookQ(1)">Read the error, then paste it back to the AI <em>with the code</em>: "This is the error and the line it points to — what does it mean and how do I fix it?"</button>
+        <button class="scenario-btn" onclick="hookQ(2)">Ignore the error and run it again, hoping it goes away this time.</button>
+      </div>
+      <div class="scenario-feedback" id="hookFb"></div>
+    </div>
+
+    <div class="ad-builder-grid">
+      <div class="ad-controls">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.8rem">🐞 Error Decoder — read it part by part</div>
+        <div class="prompt-field">
+          <label>Error type (the AI generated it — you decode it)</label>
+          <select id="adHook" onchange="renderAd()">
+            <option value="pov">ValueError — a value's the wrong shape</option>
+            <option value="pain">KeyError — a column name doesn't exist</option>
+            <option value="deal">FileNotFoundError — the file isn't where you said</option>
+          </select>
+        </div>
+        <div class="prompt-field">
+          <label>What you tell the AI alongside it</label>
+          <select id="adVisual" onchange="renderAd()">
+            <option value="night">The full error + the code + a sample row</option>
+            <option value="unbox">Just "it's broken, fix it" (no context)</option>
+            <option value="studio">A screenshot with the error cut off</option>
+          </select>
+        </div>
+        <div class="prompt-field">
+          <label>Your next action</label>
+          <select id="adCta" onchange="renderAd()">
+            <option value="calm">Apply the fix &amp; re-run on the sample</option>
+            <option value="shop">Ask the AI to explain <em>why</em> it happened</option>
+            <option value="off">Add a check so it can't happen again</option>
+          </select>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted);line-height:1.55;margin-top:.6rem">💡 A good debugging prompt = the exact error + the code + one example of the data that broke it. The preview shows what the AI "sees."</p>
+      </div>
+      <div>
+        <div class="ad-preview">
+          <div class="adp-head">
+            <div class="adp-avatar">🐞</div>
+            <div><div class="adp-name">Debug session</div><div class="adp-sponsored">ReceiptTidy · run #1</div></div>
+          </div>
+          <div class="adp-visual" id="adVisualBox">
+            <div id="adEmoji">⚠️</div>
+            <div class="adp-hook" id="adHookText">ValueError: could not convert
+string to float: 'Rs. 450'
+   ↳ line 6, in clean()</div>
+          </div>
+          <div class="adp-caption" id="adCaption">What it means: the cleaner missed one format ("Rs. 450") and tried to add text as a number. Fix: strip "Rs." too, then convert.</div>
+          <div class="adp-cta" id="adCtaBtn">Apply fix &amp; re-run →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">⚖️ Choice Point · The fix works on the sample — now what?</div>
+      <div class="scenario-q">The AI's fix makes the 8-row sample total correct. How does Maya proceed?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="budgetQ(0)">Assume it's perfect and run it on every receipt she's ever had, unattended.</button>
+        <button class="scenario-btn" onclick="budgetQ(1)">Test it on a slightly bigger, messier sample (blank rows, a "450/-", a typo) before trusting it with the real file.</button>
+        <button class="scenario-btn" onclick="budgetQ(2)">Stop debugging forever — one green run means the code is now bug-proof.</button>
+      </div>
+      <div class="scenario-feedback" id="budgetFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4a: FROM SCRIPT TO SHIPPED — REUSE ═══════════ -->
+<section class="section" id="s5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">5</div> Beat Four · Lesson 4 — From Script to Shipped (Make It Reusable)</div>
+      <h2 class="section-title">From "It Worked Once" to "I Can Use This Every Month"</h2>
+      <p class="section-sub">A script that runs once on one file is a demo. A <em>tool</em> works next month, on next month's file, without you rebuilding it. Shipping means making it reusable, saving a version, and testing it so future-you trusts it. It's a checklist, not a leap of faith.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday. ReceiptTidy gives the right total on the messy sample. Maya could stop here — but she remembers she'll face this same chore <em>every single month</em>. So she asks the AI to make it reusable: take any filename, handle an empty file gracefully, and print a clear message instead of crashing. Then she saves a copy she can come back to. Work through the ship-prep checklist.
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Make-it-reusable checklist</h4>
+        <ul class="checklist" id="launchList">
+          <li data-step="0" onclick="runLaunchStep(0)"><span class="check"></span>Ask AI to accept <strong>any filename</strong>, not just one hard-coded file</li>
+          <li data-step="1" onclick="runLaunchStep(1)"><span class="check"></span>Handle the empty-file case with a friendly message, not a crash</li>
+          <li data-step="2" onclick="runLaunchStep(2)"><span class="check"></span>Print the total <em>and</em> how many rows it skipped (so nothing hides)</li>
+          <li data-step="3" onclick="runLaunchStep(3)"><span class="check"></span>Save the working version (a dated copy she can return to)</li>
+          <li data-step="4" onclick="runLaunchStep(4)"><span class="check"></span>Run it once more on the real file, start to finish</li>
+          <li data-step="5" onclick="runLaunchStep(5)"><span class="check"></span>Note the one thing she'd improve next time (a to-do, not a crisis)</li>
+        </ul>
+        <div class="done-note" id="launchDone">🚀 <strong>ReceiptTidy is reusable.</strong> Next month is now a 10-second job. One trust-check left before she calls it shipped.</div>
+      </div>
+      <div class="build-card">
+        <h4>Build log</h4>
+        <div class="feed" id="launchFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Complete the checklist to make it reusable…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">⚖️ Choice Point · The polish trap</div>
+      <div class="scenario-q">ReceiptTidy works. Maya feels a pull to add charts, a login, and a fancy interface right now. What's the wise move?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="panicQ(0)">Delete it and rebuild from scratch as a "proper" full application before anyone sees it.</button>
+        <button class="scenario-btn" onclick="panicQ(1)">Bolt on every idea at once tonight — charts, login, colours — and hope it still runs tomorrow.</button>
+        <button class="scenario-btn" onclick="panicQ(2)">Ship the small tool that solves the real problem now; write the extra ideas on a to-do list for a future, separate version.</button>
+      </div>
+      <div class="scenario-feedback" id="panicFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4b: TRUST CHECK & SHIP ═══════════ -->
+<section class="section alt" id="s6">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">6</div> Beat Four · Lesson 4 — From Script to Shipped (Verify &amp; Ship)</div>
+      <h2 class="section-title">Trust, But Verify — Then Ship It</h2>
+      <p class="section-sub">AI writes confident code — including code with quiet mistakes, or that leans on a library that may not exist. The final builder skill is a <strong>trust check</strong>: does it match my spec, does it handle the edges, and can I explain what it does? Maya audits three parts of ReceiptTidy before she ships.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Thursday night. Before Maya relies on this number for her taxes, she does a final review — the way a professional reviews a pull request. Three parts of the AI's code sit in front of her. For each, she decides: <strong>Ship</strong> (verified and good), <strong>Fix</strong> (a real problem), or <strong>Check</strong> (needs one quick verification first). Judge each one.
+    </div>
+
+    <div class="eval-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)">ReceiptTidy · Final Trust-Check</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">3 parts reviewed · verified against Maya's spec &amp; a known-answer test</div>
+        </div>
+      </div>
+      <div class="eval-metrics">
+        <div class="metric-card"><div class="metric-value">8/8</div><div class="metric-label">Sample rows correct</div></div>
+        <div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Junk rows skipped</div></div>
+        <div class="metric-card"><div class="metric-value">₹9,240</div><div class="metric-label">Total ReceiptTidy printed</div></div>
+        <div class="metric-card highlight"><div class="metric-value">₹9,240</div><div class="metric-label">Maya's hand-count (match!)</div></div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1rem 0 .6rem">Judge each part (Ship · Fix · Check)</div>
+
+      <div class="adset" id="asA">
+        <div class="adset-name">Part A · The amount-cleaning function<span>Strips "Rs.", "/-", spaces — you tested it against a hand-count</span></div>
+        <div class="adset-nums"><span>Matches spec<b>Yes</b></span><span>Edge cases<b>Handled</b></span><span>You can explain it<b>Yes</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('A','kill',this)">Fix</button>
+          <button class="adset-btn" onclick="judge('A','watch',this)">Check</button>
+          <button class="adset-btn" onclick="judge('A','scale',this)">Ship</button>
+        </div>
+        <div class="adset-feedback" id="fbA"></div>
+      </div>
+
+      <div class="adset" id="asB">
+        <div class="adset-name">Part B · <code>import fancy_receipts</code> at the top<span>A library the AI suggested — you can't find it anywhere and it errors on install</span></div>
+        <div class="adset-nums"><span>Matches spec<b>Adds nothing</b></span><span>Exists?<b class="bad">Can't find it</b></span><span>Needed?<b>No</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('B','kill',this)">Fix</button>
+          <button class="adset-btn" onclick="judge('B','watch',this)">Check</button>
+          <button class="adset-btn" onclick="judge('B','scale',this)">Ship</button>
+        </div>
+        <div class="adset-feedback" id="fbB"></div>
+      </div>
+
+      <div class="adset" id="asC">
+        <div class="adset-name">Part C · A subtotal-rounding line<span>Looks fine, but you haven't tested it on prices with paise (e.g. ₹450.50)</span></div>
+        <div class="adset-nums"><span>Matches spec<b>Probably</b></span><span>Tested?<b class="mid">Not yet</b></span><span>Risk if wrong<b>Small but real</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('C','kill',this)">Fix</button>
+          <button class="adset-btn" onclick="judge('C','watch',this)">Check</button>
+          <button class="adset-btn" onclick="judge('C','scale',this)">Ship</button>
+        </div>
+        <div class="adset-feedback" id="fbC"></div>
+      </div>
+
+      <div class="week-verdict" id="weekVerdict">
+        <h4>📜 The Thursday-Night Verdict: <em>ReceiptTidy is shipped.</em></h4>
+        <div class="wv-grid">
+          <div class="wv-tile"><div class="v">55 min</div><div class="l">Old monthly chore</div></div>
+          <div class="wv-tile"><div class="v">~10 sec</div><div class="l">New monthly chore</div></div>
+          <div class="wv-tile"><div class="v">1 tool</div><div class="l">Reusable &amp; tested</div></div>
+          <div class="wv-tile"><div class="v">4 lessons</div><div class="l">Lived, not memorised</div></div>
+        </div>
+        <p>Maya shipped: she kept the verified cleaner, <strong>deleted the invented library</strong> the AI hallucinated, and quickly <strong>tested the rounding on a paise value</strong> before trusting it. Then she wrote three plain-English lines at the top of the file — what it does, how to run it, what to feed it — so next-month-Maya (and anyone she shares it with) isn't lost. That's the whole arc: <strong>describe, generate, run, read, fix — then verify and document.</strong> She never memorised syntax. She learned something more durable: how to <strong>think, direct AI, and check its work.</strong> 🎉</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER RECAP ─── -->
+<div class="footer-cta">
+  <h2>🎉 A week ago, <em>ReceiptTidy</em> didn't exist — and Maya "couldn't code."</h2>
+  <p>Now she's built, debugged, verified, and shipped a real tool. Here's what the story secretly taught you: the four lessons of Week 1.</p>
+  <div class="recap-grid">
+    <div class="recap-card">
+      <div class="rn">Lesson 1</div>
+      <h4>Programming in the AI Era</h4>
+      <p>The durable skill isn't memorising syntax — it's the loop: <strong>Describe → Generate → Run → Read → Fix</strong>. Pick a low-friction place to build, and start.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 2</div>
+      <h4>Thinking Like a Programmer</h4>
+      <p>Decompose a fuzzy goal into small, ordered, checkable steps. Turn a wish into a spec that names its edge cases — clarity in, fewer bugs out.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 3</div>
+      <h4>Your First Program</h4>
+      <p>Run it, meet a real error, read the message calmly, and debug <em>with</em> AI by feeding it the error, the code, and the data that broke it.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 4</div>
+      <h4>From Script to Shipped</h4>
+      <p>Make it reusable, save a version, test it, run a trust check on the AI's code (delete what it invents), then ship and document it.</p>
+    </div>
+  </div>
+  <button class="btn-action" style="font-size:.9rem;padding:.8rem 1.8rem" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">↻ Replay Maya's build</button>
+  <p style="font-size:.9rem;color:rgba(255,255,255,0.85);max-width:600px;margin:1.6rem auto 0">Next week — <strong style="color:var(--orange-light)">Week 2: AI App Development.</strong> Maya's tool works from a console; next she gives it buttons, a screen, and a way for other people to use it. Same loop, bigger canvas.</p>
+  <div class="footer-note">ReceiptTidy is a teaching scenario. AI-generated code can be wrong, can invent libraries that don't exist, and should always be read, tested, and verified before you rely on it — especially for anything involving money or important data. The goal of Week 1 is durable judgment, not blind trust.</div>
+</div>
+
+<!-- ─── COMPLETION BAR ─── -->
+<div class="completion-bar">
+  <div class="completion-info"><span style="font-size:1.1rem">🧾</span><span>ReceiptTidy Progress</span></div>
+  <div class="completion-track"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
+  <div class="completion-percent" id="completionPct">0%</div>
+</div>
+
+<script>
+/* ───────── PROGRESS TRACKING ───────── */
+const visited = new Set();
+function markVisited(id){
+  visited.add(id);
+  const pct = Math.round((visited.size / 6) * 100);
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = pct + '%';
+  document.getElementById('headerProgressText').textContent = `${visited.size} of 6 stages explored`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    markVisited(btn.dataset.target);
+  });
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.3) {
+      markVisited(e.target.id);
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.target === e.target.id));
+    }
+  });
+}, {threshold:[0.3]});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+/* ───────── BEAT 1: ENVIRONMENT PICK ───────── */
+const nicheInfo = {
+  browser: `<span class="verdict-pill vp-good">Strong choice</span><br><strong>A browser-based coding sandbox — this is where Maya builds.</strong> Zero install, an AI assistant that writes code, and a Run button in the same window — which means the whole loop (Describe → Generate → Run → Read → Fix) happens in one place with instant feedback. For a first project, the friction you remove is more valuable than the power you add. <em>The story continues here.</em>`,
+  ide: `<span class="verdict-pill vp-mid">Powerful, but premature</span><br><strong>A full desktop editor — the pro tool, one day.</strong> It can do everything, but on day one that's the problem: installs, settings, and a hundred buttons compete with your actual goal (add up a spreadsheet). Beginners who start here often spend their first evening fighting setup instead of solving the problem. <em>Maya bookmarks it for later and picks something lighter.</em>`,
+  chatonly: `<span class="verdict-pill vp-bad">Only half the loop</span><br><strong>A chat assistant alone — great at generating, can't run.</strong> It'll write and explain code beautifully, but it can't execute it, so you're copying code elsewhere just to test. That broken feedback loop is exactly what slows beginners down. Chat is a fine <em>ingredient</em>, but Maya wants generate <strong>and</strong> run in one place. <em>She passes on chat-only.</em>`
+};
+function pickNiche(k){
+  document.querySelectorAll('#s1 .pick-card').forEach(c => c.classList.toggle('active', c.dataset.niche === k));
+  const d = document.getElementById('nicheDetail');
+  d.innerHTML = nicheInfo[k];
+  d.classList.add('show');
+}
+
+/* prompt showdown */
+const promptResults = [
+  {ok:false, fb:'✗ Too vague. "Write me a program" gives the AI nothing to work with — it either asks a dozen questions back or invents a random program you never wanted. Vague prompt in, vague code out. Try the detailed one.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Write me a program.</div><div class="chat-msg ai"><span class="who">AI</span>Happy to help! A program to do… what, exactly? I can make almost anything, so I'll need to know the goal, the input, and the output. <strong>(Translation: you did the easy part; the AI still needs the whole spec before it can write a single useful line.)</strong></div>`},
+  {ok:false, fb:'✗ "Perfect app that fixes all accounting forever" is a wish, not a spec. The AI can\'t deliver "perfect" or "forever" — it will produce something huge, generic, and impossible to check. Big, vague asks create big, vague bugs. Give it your real, small task instead.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Make the perfect app that fixes all my accounting forever.</div><div class="chat-msg ai"><span class="who">AI</span>That's a big scope! I could sketch a full accounting suite… <strong>but "perfect" and "forever" aren't things I can guarantee, and a giant app is far harder to check than a small tool.</strong> What's the one specific task hurting you right now?</div>`},
+  {ok:true, fb:'✓ Exactly. Your background + the real data + exact columns + example messy values + named edge cases + a request to explain it. This prompt earns a small, readable first draft you can actually verify — the foundation of the whole build.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Beginner, no coding background. Spreadsheet of candle receipts: Date &amp; Amount columns. Amounts typed inconsistently ("Rs. 450", "450/-", "450.00"). Write a small script that reads the file, cleans amounts into numbers, skips blank rows, prints the total — and explain each part.</div><div class="chat-msg ai"><span class="who">AI</span>Clear spec — here's a ~20-line script. <code>read the file</code> → <code>clean each Amount (strip "Rs." "/-" spaces)</code> → <code>skip blanks</code> → <code>sum</code> → <code>print total</code>. I've added a comment on every line. <strong>← Small, readable, and matched exactly to what you asked.</strong></div>`}
+];
+let promptAnswered = false;
+function pickPrompt(i){
+  const r = promptResults[i];
+  const btns = document.querySelectorAll('#s1 .scenario-panel:first-of-type .scenario-btn');
+  if (!promptAnswered){
+    btns.forEach((b,j) => { if (j===2) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) promptAnswered = true;
+  }
+  const fb = document.getElementById('promptFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+  document.getElementById('promptChat').innerHTML = r.chat;
+}
+
+/* mindset quiz */
+const nicheQs = [
+  {q:"In the AI era, the most durable programming skill is…", opts:["Memorising the syntax of a language by heart","Describing a problem clearly, then running, reading, and fixing what the AI generates","Typing very fast without looking"], correct:1, explain:"Syntax is what AI is best at. Your edge is judgment: framing the problem, testing the result, and knowing when the code is actually right. That skill survives every new tool."},
+  {q:"What does the loop 'Describe → Generate → Run → Read → Fix' protect you from?", opts:["Ever seeing an error message","Blindly trusting code you never checked — you always run it and read what actually happened","Having to think at all"], correct:1, explain:"The loop bakes in a reality check. Generating code is a hypothesis; running and reading the result is how you find out if the hypothesis was true. Skipping that is how quiet bugs survive."},
+  {q:"The AI writes code that looks confident and correct. Best habit?", opts:["Ship it immediately — confidence means correctness","Never use AI code — it's always wrong","Read it, run it on a small case you can verify by hand, and only then trust it"], correct:2, explain:"Confident-sounding code can still be wrong (or invent a library that doesn't exist). A tiny verifiable test is cheap insurance and the core builder habit of the whole week."}
+];
+let nqIdx = 0;
+function renderNicheQ(){
+  const s = nicheQs[nqIdx];
+  document.getElementById('nicheQ').textContent = `Round ${nqIdx+1}/3 — ${s.q}`;
+  document.getElementById('nicheOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerNicheQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('nicheFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('nicheNext').style.display = 'none';
+}
+function answerNicheQ(i){
+  const s = nicheQs[nqIdx];
+  document.querySelectorAll('#nicheOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('nicheFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (nqIdx===nicheQs.length-1 ? '<br><br>🎉 Beat 1 complete — Maya has a place to build and the right mindset. Next: turn the goal into a spec.' : '');
+  document.getElementById('nicheNext').style.display = nqIdx < nicheQs.length-1 ? 'inline-block' : 'none';
+}
+function nextNicheQ(){ nqIdx++; if (nqIdx < nicheQs.length) renderNicheQ(); }
+renderNicheQ();
+
+/* ───────── BEAT 2: DECOMPOSITION CHOICE ───────── */
+const prodInfo = {
+  vague: `<span class="verdict-pill vp-bad">Not a plan — here's why</span><br><strong>"Just fix the spreadsheet":</strong> it feels efficient, but it hides every hard decision. What counts as "fixed"? Which column? What about blank rows? The AI has to guess all of it — and every guess is a place a silent bug can live. <strong>Consequence:</strong> the code might run and print a number that's simply wrong, and you'd never know. Vagueness isn't speed; it's deferred debugging. The middle card is the real breakdown.`,
+  steps: `<span class="verdict-pill vp-good">✓ This is thinking like a programmer</span><br><strong>Input → Steps → Output:</strong> read the file, clean each amount, skip the junk, sum, print. Five small steps, each one testable on its own, each edge case named out loud (blank rows, weird formats). This is exactly the shape a good prompt takes — and it's why the AI's first draft will be small, readable, and easy to verify. <em>Maya writes this on paper before typing a word. On to the Spec-Quality Meter below.</em>`,
+  everything: `<span class="verdict-pill vp-mid">Trap — scope creep on day one</span><br><strong>"Do everything, all at once":</strong> charts, login, tax filing, a mobile app… it sounds ambitious, but you can't test or finish any of it. A giant vague request produces a giant vague blob of code that's impossible to check and never quite works. <strong>Consequence:</strong> the tool that would've solved the real problem in an evening never ships. Start with the one small thing that hurts; grow later. The middle card wins.`
+};
+function chooseProduct(k, el){
+  document.querySelectorAll('.prod-card').forEach(c => c.classList.remove('chosen'));
+  el.classList.add('chosen');
+  const d = document.getElementById('prodDetail');
+  d.innerHTML = prodInfo[k];
+  d.classList.add('show');
+}
+
+/* spec-quality meter */
+const clarityWords = ['None','Barely any','Very little','A little','Some','Medium','Decent','Good','Strong','Very strong','Complete'];
+function calc(){
+  const ctx = +document.getElementById('inCost').value;
+  const detail = +document.getElementById('inShip').value;
+  const edge = +document.getElementById('inPrice').value;
+  document.getElementById('oCost').textContent = clarityWords[ctx];
+  document.getElementById('oShip').textContent = clarityWords[detail];
+  document.getElementById('oPrice').textContent = clarityWords[edge];
+  const score = ctx + detail + edge;              // 0..30
+  const chance = Math.round((score / 30) * 100);
+  const guess = score >= 24 ? 'Little' : score >= 15 ? 'Some' : 'A lot';
+  const rounds = score >= 24 ? '~1' : score >= 15 ? '~2' : '4+';
+  document.getElementById('vProfit').textContent = score + '/30';
+  document.getElementById('vMargin').textContent = chance + '%';
+  document.getElementById('vMarkup').textContent = guess;
+  document.getElementById('vCPA').textContent = rounds;
+  const tP = document.getElementById('tProfit'), tM = document.getElementById('tMargin');
+  tP.className = 'calc-tile ' + (score < 12 ? 'warn' : score >= 24 ? 'ok' : '');
+  tM.className = 'calc-tile ' + (chance < 45 ? 'warn' : chance >= 80 ? 'ok' : '');
+  const note = document.getElementById('calcNote');
+  if (score < 12){
+    note.innerHTML = '🚨 <strong>Too vague.</strong> The AI must guess your data, your columns, and your edge cases — so it will, and you\'ll inherit those guesses as bugs. Add context and concrete detail before you generate.';
+  } else if (score < 18){
+    note.innerHTML = '⚠️ <strong>Thin spec.</strong> You\'ll likely get a first draft that half-works, then spend several rounds discovering what you forgot to say. Naming your edge cases up front is the cheapest fix.';
+  } else if (score < 24){
+    note.innerHTML = '🟡 <strong>Workable.</strong> The AI has enough to produce a usable draft, though expect a round or two of "actually, blank rows should be skipped." Solid, beginner-realistic spec.';
+  } else {
+    note.innerHTML = '✅ <strong>Excellent spec!</strong> Context + concrete detail + named edge cases means the AI barely has to guess — you\'ll get a small, readable first draft you can verify line by line. This is exactly how Maya prompts ReceiptTidy.';
+  }
+}
+['inCost','inShip','inPrice'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+
+/* ───────── BEAT 3a: GENERATE VARIATIONS ───────── */
+const voices = {
+  calm: {h:'# Tight spec → small, focused script', d:`rows = read_file("receipts.csv")
+total = 0
+for row in rows:
+    amount = clean(row["Amount"])   # strips "Rs." "/-" spaces
+    if amount is None:              # blank / junk row
+        continue
+    total = total + amount
+print("Monthly total:", total)`},
+  sci: {h:'# Step-by-step → each stage is its own function', d:`def clean(value):        # step 2: text -> number
+    ...
+def is_blank(row):       # step 3: is this junk?
+    ...
+rows   = read_file("receipts.csv")   # step 1
+amounts = [clean(r["Amount"]) for r in rows if not is_blank(r)]
+print("Total:", sum(amounts))        # steps 4 + 5
+# Easy to test each step on its own.`},
+  fun: {h:'# "Do it all" → big, vague, hard to check', d:`# You asked for: charts + login + tax filing + a mobile app...
+# The AI produced 300 lines you can't read, wired to a
+# library it may have invented, that doesn't run yet, and
+# that you cannot verify against a hand-count.
+# Lesson: start with the ONE thing that hurts. Grow later.`}
+};
+function setVoice(v){
+  document.querySelectorAll('.voice-tab').forEach(t => t.classList.toggle('active', t.dataset.voice === v));
+  const h = document.getElementById('storeHeadline'), d = document.getElementById('storeDesc');
+  h.style.opacity = 0; d.style.opacity = 0;
+  setTimeout(()=>{ h.textContent = voices[v].h; d.textContent = voices[v].d; h.style.opacity = 1; d.style.opacity = 1; }, 250);
+}
+function toggleCopy(which){
+  document.getElementById('copyBefore').style.display = which==='before' ? 'block' : 'none';
+  document.getElementById('copyAfter').style.display = which==='after' ? 'block' : 'none';
+}
+
+/* first-run checklist + console */
+const buildEvents = [
+  {t:'run', msg:'AI generated receipt_tidy.py — ~20 lines, one comment per line. Small enough to read in a minute.'},
+  {t:'read', msg:'Explanation read: "reads the file, cleans each amount, skips blanks, sums, prints." Matches the spec. Good.'},
+  {t:'data', msg:'Uploaded sample_receipts.csv — 8 rows on purpose. Small data = mistakes you can catch by eye.'},
+  {t:'▶', msg:'Pressed Run. The console blinks… output appears. (Whether it\'s a number or an error, you\'re now in the loop.)'},
+  {t:'pred', msg:'Hand-count first: Maya adds the 8 rows herself = ₹9,240. Now she has a truth to compare against.'},
+  {t:'out', msg:'Output: "Monthly total: 8790". Off by ₹450 — one "Rs. 450" row didn\'t get cleaned. Not failure. A clue.'}
+];
+const buildSteps = new Set();
+function runBuildStep(i){
+  if (buildSteps.has(i)) return;
+  buildSteps.add(i);
+  document.querySelector(`#buildList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('buildFeed');
+  if (buildSteps.size === 1) feed.innerHTML = '';
+  const e = buildEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (buildSteps.size === buildEvents.length) document.getElementById('buildDone').style.display = 'block';
+}
+
+/* reading-the-code quiz */
+const headlineFbs = [
+  {ok:false, fb:'✗ "The AI is smarter, so don\'t read it" is exactly how quiet bugs ship. AI writes confident code that can still be wrong or use an invented library. If you can\'t read it, you can\'t trust it — and you certainly can\'t fix it later.'},
+  {ok:true, fb:'✓ Yes. Read the plain-English explanation, confirm it matches your spec, then run on a <strong>tiny sample you can verify by hand</strong>. This is the whole builder habit in one move: understand it, then prove it on a case where you already know the answer.'},
+  {ok:false, fb:'✗ Running unread code on a full year of real data is how a hidden bug becomes a wrong number you actually rely on. Test on 8 rows you can check by eye first — scale up only once it\'s proven.'}
+];
+function headlineQ(i){
+  const r = headlineFbs[i];
+  const btns = document.querySelectorAll('#s3 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (headlineFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('headlineFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb + (r.ok ? '' : '<br><br>The habit that protects you: <strong>read the explanation, match it to your spec, then test on a small verifiable sample.</strong>');
+}
+
+/* ───────── BEAT 3b: DEBUG ───────── */
+const hookFbs = [
+  {ok:false, fb:'✗ Deleting everything throws away a working script that has <em>one</em> small confusion. The error even tells you the exact bad value ("Rs. 450"). Starting over guarantees you\'ll hit the same wall again — you didn\'t learn what caused it.'},
+  {ok:true, fb:'✓ That\'s it. Read the error, then hand the AI the <strong>full message + the code + a sample of the data that broke it</strong>. Now it can see the real cause ("Rs." wasn\'t stripped) and fix that one thing. Errors are directions, not dead ends.'},
+  {ok:false, fb:'✗ Re-running unchanged code gives you the same error — computers are stubbornly consistent. The message isn\'t random noise; it\'s a precise report of where the code got confused. Read it, don\'t retry-and-pray.'}
+];
+function hookQ(i){
+  const r = hookFbs[i];
+  const btns = document.querySelectorAll('#s4 .scenario-panel:first-of-type .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (hookFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('hookFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* error decoder */
+const adData = {
+  hooks: {
+    pov:{txt:`ValueError: could not convert
+string to float: 'Rs. 450'
+   ↳ line 6, in clean()`, cap:'What it means: the cleaner missed one format ("Rs. 450") and tried to add text as a number. Fix: strip "Rs." too, then convert.'},
+    pain:{txt:`KeyError: 'Amount'
+   ↳ line 4, reading the row
+(the column is actually named "amount")`, cap:'What it means: your code asked for a column that doesn\'t exist by that exact name. Fix: match the real header ("amount" vs "Amount").'},
+    deal:{txt:`FileNotFoundError:
+'receipts.csv' — no such file
+   ↳ line 1, read_file()`, cap:'What it means: the code looked for a file that isn\'t where you said. Fix: check the filename/location, or upload the file first.'}
+  },
+  visuals: {night:{e:'🐞', bg:'linear-gradient(135deg,#2A2440,#4A3E68)'}, unbox:{e:'❓', bg:'linear-gradient(135deg,#5A4632,#8A6D4B)'}, studio:{e:'✂️', bg:'linear-gradient(135deg,#7A7E8C,#AEB2C0)'}},
+  ctas: {calm:'Apply fix &amp; re-run →', shop:'Ask AI: "why did this happen?" →', off:'Add a guard so it can\'t recur →'}
+};
+function renderAd(){
+  const h = document.getElementById('adHook').value;
+  const v = document.getElementById('adVisual').value;
+  const c = document.getElementById('adCta').value;
+  document.getElementById('adHookText').textContent = adData.hooks[h].txt;
+  document.getElementById('adCaption').textContent = adData.hooks[h].cap;
+  document.getElementById('adEmoji').textContent = adData.visuals[v].e;
+  document.getElementById('adVisualBox').style.background = adData.visuals[v].bg;
+  document.getElementById('adCtaBtn').innerHTML = adData.ctas[c];
+}
+
+/* post-fix choice */
+const budgetFbs = [
+  {cls:'fail', fb:'⚠️ <strong>The over-trust move.</strong> One green run on 8 tidy rows does not mean the code survives a year of real, messier data. Running it unattended on everything is how a hidden edge case (a "450/-", a blank, a typo) quietly corrupts your total. Test wider first.'},
+  {cls:'success', fb:'✓ <strong>The builder\'s move.</strong> A slightly bigger, messier sample — blank rows, "450/-", a stray typo — is where the <em>next</em> bug hides. Prove it survives the mess before you trust it with the real file. This is testing, and it\'s the difference between a demo and a tool. 🎯'},
+  {cls:'fail', fb:'⚠️ <strong>The false-finish.</strong> "One green run = bug-proof" is a comforting myth. Code isn\'t proven by a single happy case; it\'s proven by surviving the awkward ones. Keep a healthy suspicion — test the edges before you rely on the number.'}
+];
+function budgetQ(i){
+  const btns = document.querySelectorAll('#s4 .scenario-panel:last-of-type .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (j===1) b.classList.add('correct'); else if (j===i && i!==1) b.classList.add('wrong'); });
+  const fb = document.getElementById('budgetFb');
+  fb.className = 'scenario-feedback show ' + budgetFbs[i].cls;
+  fb.innerHTML = budgetFbs[i].fb;
+}
+
+/* ───────── BEAT 4a: MAKE REUSABLE ───────── */
+const launchEvents = [
+  {t:'ok', msg:'AI updated the script to take a filename as input. Now it works on receipts_july.csv, receipts_aug.csv — any month.'},
+  {t:'ok', msg:'Empty-file case handled: instead of a red crash, it now prints "No receipts found — is the file empty?" Friendly, not scary.'},
+  {t:'ok', msg:'Output upgraded: "Total: ₹9,240 (skipped 3 blank/invalid rows)." Now nothing hides — you see what it ignored.'},
+  {t:'save', msg:'Saved receipt_tidy_v1.py with a dated copy. If a future change breaks it, Maya can always return to this working version.'},
+  {t:'▶', msg:'Full run on the real file: total prints, matches her hand-count. Start-to-finish, no crash. It\'s a tool now, not a demo.'},
+  {t:'note', msg:'Next-time to-do noted: "handle receipts in USD too." Written down as a calm future task — not tonight\'s emergency.'}
+];
+const launchSteps = new Set();
+function runLaunchStep(i){
+  if (launchSteps.has(i)) return;
+  launchSteps.add(i);
+  document.querySelector(`#launchList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('launchFeed');
+  if (launchSteps.size === 1) feed.innerHTML = '';
+  const e = launchEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (launchSteps.size === launchEvents.length){
+    document.getElementById('launchDone').style.display = 'block';
+    feed.innerHTML += `<div class="feed-line"><span class="ft">done</span><span>ReceiptTidy is reusable, saved, and passes on the real file. One trust-check of the AI\'s code remains before Maya calls it shipped — that\'s the final beat.</span></div>`;
+    feed.scrollTop = feed.scrollHeight;
+  }
+}
+
+/* polish-trap choice */
+const panicFbs = [
+  {cls:'fail', fb:'✗ <strong>You just discarded a working tool.</strong> "Rebuild it properly from scratch" is how useful little programs die unshipped. The tool already solves the real problem; rebuilding it as a grand app before anyone uses it trades a real win for imaginary polish. Ship the working thing first.'},
+  {cls:'fail', fb:'✗ <strong>Now it might not run tomorrow.</strong> Bolting on charts, login, and colours all at once — untested, in one night — is scope creep in action. Each addition is a new place for a bug, and together they can break the one thing that already worked. Grow a tool one small, tested step at a time.'},
+  {cls:'success', fb:'✓ <strong>Ship small, list the rest.</strong> ReceiptTidy already turns an hour of pain into ten seconds — that\'s the win, so lock it in. Charts and logins are a <em>different, future</em> version; capture them on a to-do list and build them later, one tested step at a time. Done and useful beats grand and unfinished. 🎯'}
+];
+function panicQ(i){
+  const btns = document.querySelectorAll('#s5 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (j===2) b.classList.add('correct'); else if (j===i && i!==2) b.classList.add('wrong'); });
+  const fb = document.getElementById('panicFb');
+  fb.className = 'scenario-feedback show ' + panicFbs[i].cls;
+  fb.innerHTML = panicFbs[i].fb;
+}
+
+/* ───────── BEAT 4b: TRUST-CHECK & SHIP ───────── */
+const judgeKey = {
+  A: {right:'scale', fb:{
+    scale:'✓ Correct — <strong>SHIP.</strong> The cleaning function matches the spec, handles every messy format you named, and you tested it against a hand-count that matched exactly. You can explain what each line does. That\'s a verified part — ship it with confidence.',
+    kill:'✗ Nothing to fix here — it already matches the spec and passed a known-answer test. "Fixing" verified code just risks breaking what works. Verdict: <strong>SHIP</strong>.',
+    watch:'△ You already checked this one — it matched your hand-count exactly. Endless re-checking of proven code is just anxiety, not diligence. Verdict: <strong>SHIP</strong>.'}},
+  B: {right:'kill', fb:{
+    kill:'✓ Correct — <strong>FIX (delete it).</strong> The AI invented <code>fancy_receipts</code> — a library that doesn\'t exist and errors on install. This is a classic AI "hallucination." The code needs nothing it provides, so the fix is to delete the import entirely. Always verify that libraries the AI reaches for are real.',
+    scale:'✗ You can\'t ship an import for a library that doesn\'t exist — it crashes on the first run. AI sometimes invents plausible-sounding packages. Verdict: <strong>FIX</strong> — delete the bogus import.',
+    watch:'△ A quick check is how you caught it — but you already know the verdict: the library isn\'t real and isn\'t needed. Don\'t just watch it, remove it. Verdict: <strong>FIX</strong>.'}},
+  C: {right:'watch', fb:{
+    watch:'✓ Correct — <strong>CHECK.</strong> The rounding line looks fine but was never tested on a price with paise (₹450.50). Before you trust the total for taxes, run one quick known-answer test on a paise value. Not broken — just unverified. A 30-second check settles it.',
+    kill:'△ Maybe premature — you haven\'t confirmed it\'s actually wrong yet. Deleting untested code you might need is as risky as trusting it. First run the paise test, <em>then</em> decide. Verdict: <strong>CHECK</strong>.',
+    scale:'✗ Shipping a money calculation you haven\'t tested on paise values is trusting a hunch with real numbers. It might be right — but "might" isn\'t good enough for taxes. Verify first. Verdict: <strong>CHECK</strong>.'}}
+};
+const judged = {};
+function judge(set, verdict, btn){
+  const k = judgeKey[set];
+  judged[set] = true;
+  const row = document.getElementById('as'+set);
+  row.className = 'adset decided-' + k.right;
+  row.querySelectorAll('.adset-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('fb'+set);
+  fb.className = 'adset-feedback show ' + (verdict===k.right ? 'good' : 'warn');
+  fb.innerHTML = k.fb[verdict];
+  if (judged.A && judged.B && judged.C){
+    setTimeout(()=>{ document.getElementById('weekVerdict').classList.add('show'); document.getElementById('weekVerdict').scrollIntoView({behavior:'smooth', block:'center'}); }, 600);
+  }
+}
+</script>
+</body>
+</html>

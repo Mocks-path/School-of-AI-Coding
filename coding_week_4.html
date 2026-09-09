@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Week 4 — Build BookingBridge, Maya's First AI Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;
+  --green:#4CAF50;--green-light:#E8F5E9;
+  --blue:#3F88C5;--purple:#8B5CF6;--pink:#EC4899;--red:#E74C3C;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);
+  --shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.7rem}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);line-height:1.2}
+.header-title span{color:var(--orange)}
+.header-tag{font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.logo-mascot{width:44px;height:44px;flex-shrink:0}
+.progress-pill{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;background:var(--orange-glow);border-radius:50px;font-size:.72rem;color:var(--orange);font-weight:700}
+.progress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-light) 100%);position:relative;overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .7s ease}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;color:var(--navy);margin-bottom:.9rem;animation:fadeUp .7s ease .1s both}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.4rem;animation:fadeUp .7s ease .2s both}
+.usecase-banner{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:1rem;animation:fadeUp .7s ease .3s both}
+.usecase-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#EC4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem}
+.usecase-text{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.usecase-text strong{color:var(--navy);font-weight:700}
+.hero-visual{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s ease .2s both}
+.hero-mascot{width:230px;height:auto;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 40px rgba(232,122,46,0.22))}
+.budget-strip{max-width:1100px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;animation:fadeUp .8s ease .35s both}
+.budget-chip{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;text-align:center;box-shadow:var(--shadow-sm)}
+.budget-chip .bv{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--orange)}
+.budget-chip .bl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.15rem}
+
+/* ─── SECTION SHELL ─── */
+.section{padding:3rem 2rem;scroll-margin-top:80px}
+.section.alt{background:var(--bg-light)}
+.container{max-width:1100px;margin:0 auto}
+.section-header{margin-bottom:2rem}
+.section-num{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.5rem}
+.section-num .num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,2.8vw,2rem);color:var(--navy);line-height:1.25;margin-bottom:.4rem}
+.section-sub{font-size:.92rem;color:var(--text-secondary);line-height:1.65;max-width:720px}
+.story-beat{background:#fff;border-left:4px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.2rem;font-size:.88rem;color:var(--text-primary);line-height:1.65;box-shadow:var(--shadow-sm);margin-bottom:1.6rem}
+.story-beat .sb-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.3rem}
+.story-beat em{color:var(--text-secondary)}
+
+/* ─── TAB NAV ─── */
+.tab-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border-radius:50px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:72px;z-index:50;margin:0 auto 2rem;max-width:fit-content;flex-wrap:nowrap;-ms-overflow-style:none;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.55rem 1.1rem;border-radius:50px;border:none;background:transparent;color:var(--text-secondary);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--orange)}
+.tab-btn.active{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(232,122,46,0.35)}
+
+/* ─── GENERIC CARDS/GRIDS ─── */
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.pick-grid.two{grid-template-columns:repeat(2,1fr)}
+.pick-card{background:#fff;border-radius:var(--radius);padding:1.4rem;border:2px solid var(--border);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;transition:height .3s}
+.pick-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),#7BC67E)}
+.pick-card:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),#5DADE2)}
+.pick-card:nth-child(3)::before{background:linear-gradient(90deg,var(--pink),#F48FB1)}
+.pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.pick-card.active{border-color:var(--orange);box-shadow:var(--shadow-md)}
+.pick-card.active::before{height:6px}
+.pick-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:var(--bg-light)}
+.pick-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.pick-card .pc-tag{font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.pick-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+.pick-detail{background:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);font-size:.86rem;line-height:1.65;display:none}
+.pick-detail.show{display:block;animation:fadeUp .4s ease}
+.pick-detail strong{color:var(--navy)}
+.pick-detail .verdict-pill{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.vp-good{background:var(--green-light);color:#2E7D32}
+.vp-mid{background:#FFF3CD;color:#856404}
+.vp-bad{background:#FEE;color:#C62828}
+
+/* ─── SCENARIO QUIZ ─── */
+.scenario-panel{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.scenario-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.scenario-q{font-size:1rem;color:var(--navy);margin-bottom:1rem;font-weight:600;line-height:1.5}
+.scenario-options{display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:1rem}
+.scenario-btn{padding:.75rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left;line-height:1.45}
+.scenario-btn:hover{border-color:var(--orange);color:var(--orange)}
+.scenario-btn.correct{background:var(--green-light);border-color:var(--green);color:#2E7D32}
+.scenario-btn.wrong{background:#FEE;border-color:var(--red);color:#C62828}
+.scenario-feedback{padding:.9rem;border-radius:8px;font-size:.83rem;line-height:1.55;display:none}
+.scenario-feedback.show{display:block;animation:fadeUp .4s ease}
+.scenario-feedback.success{background:var(--green-light);color:#2E7D32;border-left:3px solid var(--green)}
+.scenario-feedback.fail{background:#FEE;color:#C62828;border-left:3px solid var(--red)}
+.btn-action{padding:.55rem 1.1rem;border-radius:8px;background:var(--orange);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-action:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-secondary{background:transparent;color:var(--text-primary);border:1.5px solid var(--border);padding:.55rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── CHAT MOCK ─── */
+.chat-mock{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:1rem}
+.chat-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.chat-head .cdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-body{padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;min-height:150px}
+.chat-msg{max-width:88%;padding:.8rem 1rem;border-radius:12px;font-size:.83rem;line-height:1.55}
+.chat-msg.user{align-self:flex-end;background:var(--orange-glow);color:var(--text-primary);border:1px solid rgba(232,122,46,0.25);border-bottom-right-radius:3px}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-light);border:1px solid var(--border);border-bottom-left-radius:3px}
+.chat-msg.ai strong{color:var(--orange)}
+.chat-msg .who{display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem}
+
+/* ─── OPTION / TRACE ─── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.prod-card{background:#fff;border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.prod-card.chosen{border-color:var(--orange)}
+.prod-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.prod-card:nth-child(1) .prod-img{background:linear-gradient(135deg,#EDE4F5,#D6C3EE)}
+.prod-card:nth-child(2) .prod-img{background:linear-gradient(135deg,#FBE4D5,#F8C8A8)}
+.prod-card:nth-child(3) .prod-img{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.prod-body{padding:1rem 1.1rem}
+.prod-body h4{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.5rem}
+.prod-stats{display:flex;flex-direction:column;gap:.3rem}
+.prod-stat{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-secondary)}
+.prod-stat b{color:var(--navy)}
+.prod-stat .good{color:#2E7D32;font-weight:700}
+.prod-stat .bad{color:#C62828;font-weight:700}
+.prod-stat .mid{color:#B8860B;font-weight:700}
+.prod-cta{margin-top:.7rem;font-size:.72rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em}
+
+/* two-col info box (durable/hype) */
+.review-mine{background:#fff;border-radius:var(--radius);padding:1.4rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.review-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.9rem}
+.review-col{border-radius:var(--radius-sm);padding:1rem 1.1rem}
+.review-col.love{background:var(--green-light)}
+.review-col.hate{background:#FEE}
+.review-col h5{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.review-col.love h5{color:#2E7D32}
+.review-col.hate h5{color:#C62828}
+.review-col li{font-size:.8rem;line-height:1.5;margin-left:1.1rem;margin-bottom:.35rem;color:var(--text-primary)}
+
+/* ─── BRIEF PREVIEW ─── */
+.voice-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.voice-tab{padding:.45rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-tab:hover{border-color:var(--orange);color:var(--orange)}
+.voice-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.store-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.store-chrome{background:#F5F5F7;padding:.55rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted)}
+.store-chrome .sdot{width:9px;height:9px;border-radius:50%}
+.store-url{margin-left:.6rem;background:#fff;border:1px solid var(--border);border-radius:50px;padding:.2rem .9rem;font-size:.7rem;color:var(--text-secondary)}
+.store-body{padding:1.4rem 1.6rem}
+.store-brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.store-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;font-size:1rem}
+.store-brand b{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)}
+.store-hero-line{font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--navy);line-height:1.3;margin-bottom:.6rem;transition:opacity .3s}
+.store-desc{font-size:.84rem;color:var(--text-secondary);line-height:1.65;transition:opacity .3s}
+.store-price-row{display:flex;align-items:center;gap:.8rem;margin-top:1rem}
+.store-price{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--orange);line-height:1.4}
+.store-buy{padding:.55rem 1.4rem;border-radius:8px;background:var(--navy);color:#fff;font-size:.8rem;font-weight:700;border:none;cursor:default}
+.copy-toggle{display:flex;gap:.5rem;margin:1.4rem 0 .8rem}
+.before-after{border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.85rem;line-height:1.6}
+.before-after.before{background:var(--bg-light);border:1.5px dashed var(--border);color:var(--text-muted)}
+.before-after.after{background:var(--orange-glow);border:1.5px solid rgba(232,122,46,0.35);color:var(--text-primary)}
+
+/* ─── AUTONOMY WIDGET ─── */
+.perso-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.4rem;margin-top:1.4rem;align-items:start}
+.perso-controls .prompt-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.perso-controls label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.perso-controls select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:#fff}
+.perso-controls select:focus{outline:none;border-color:var(--orange)}
+.perso-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.pp-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.74rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.pp-body{padding:1.1rem 1.2rem}
+.pp-greeting{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.7rem;transition:opacity .3s}
+.pp-recos{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.pp-reco{background:var(--bg-light);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;text-align:center;transition:opacity .3s}
+.pp-reco .ppe{font-size:1.5rem}
+.pp-reco .ppn{font-size:.66rem;font-weight:700;color:var(--navy);margin-top:.25rem;line-height:1.3}
+
+/* ─── CHECKLIST + FEED ─── */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.build-card{background:#fff;border-radius:var(--radius);padding:1.3rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.build-card h4{font-size:.95rem;color:var(--navy);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.build-card h4::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:.6rem;padding:.42rem 0;font-size:.84rem;color:var(--text-primary);cursor:pointer;line-height:1.45}
+.checklist li .check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.checklist li.done .check{background:var(--green);border-color:var(--green)}
+.checklist li.done .check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:800}
+.checklist li.done{color:var(--text-muted);text-decoration:line-through}
+.feed{background:var(--navy-dark);border-radius:10px;padding:1rem 1.1rem;min-height:220px;max-height:280px;overflow-y:auto}
+.feed-line{display:flex;gap:.6rem;font-size:.78rem;line-height:1.55;padding:.3rem 0;color:#D8DAE5;animation:fadeUp .4s ease}
+.feed-line .ft{color:var(--orange-light);font-weight:700;flex-shrink:0}
+.feed-line.hint-line{color:#8B8DA0;font-style:italic}
+.done-note{margin-top:1rem;padding:.8rem;background:var(--green-light);border-radius:7px;font-size:.78rem;color:#2E7D32;display:none}
+
+/* ─── TRACE TRIAGE ─── */
+.triage{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.ticket{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.ticket.decided-bot{border-color:var(--green);background:var(--green-light)}
+.ticket.decided-human{border-color:var(--blue);background:rgba(63,136,197,0.08)}
+.ticket.wrongdrop{border-color:var(--red);background:#FEE}
+.ticket-msg{font-size:.85rem;color:var(--text-primary);line-height:1.45}
+.ticket-msg span{display:block;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+.ticket-actions{display:flex;gap:.4rem}
+.ticket-btn{padding:.45rem .85rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.ticket-btn:hover{border-color:var(--orange);color:var(--orange)}
+.ticket-btn:disabled{opacity:.5;cursor:not-allowed}
+.ticket-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.ticket-feedback.show{display:block;animation:fadeUp .4s ease}
+.ticket-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.ticket-feedback.warn{background:#FFF3CD;color:#856404}
+
+/* ─── EVAL DASHBOARD ─── */
+.eval-dashboard{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+.metric-card{padding:1rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent}
+.metric-card.highlight{border-color:var(--orange);background:var(--orange-glow)}
+.metric-card.warn{border-color:var(--red);background:#FEE}
+.metric-value{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1}
+.metric-card.highlight .metric-value{color:var(--orange)}
+.metric-card.warn .metric-value{color:#C62828}
+.metric-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.4rem}
+.adset{display:grid;grid-template-columns:1.3fr 1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.adset.decided-scale{border-color:var(--green);background:var(--green-light)}
+.adset.decided-kill{border-color:var(--red);background:#FEE}
+.adset.decided-watch{border-color:#E0A800;background:#FFF8E1}
+.adset-name{font-size:.86rem;font-weight:700;color:var(--navy);line-height:1.4}
+.adset-name span{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted)}
+.adset-nums{display:flex;gap:1rem;font-size:.75rem;color:var(--text-secondary);flex-wrap:wrap}
+.adset-nums b{display:block;font-size:.88rem;color:var(--navy)}
+.adset-actions{display:flex;gap:.4rem}
+.adset-btn{padding:.4rem .8rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.adset-btn:hover{border-color:var(--orange);color:var(--orange)}
+.adset-btn:disabled{opacity:.45;cursor:not-allowed}
+.adset-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.adset-feedback.show{display:block;animation:fadeUp .4s ease}
+.adset-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.adset-feedback.warn{background:#FFF3CD;color:#856404}
+.week-verdict{display:none;margin-top:1.4rem;background:var(--navy-dark);border-radius:var(--radius);padding:1.6rem;color:#fff;animation:popIn .5s ease}
+.week-verdict.show{display:block}
+.week-verdict h4{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.8rem}
+.week-verdict h4 em{font-style:normal;color:var(--orange-light)}
+.wv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
+.wv-tile{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:9px;padding:.8rem;text-align:center}
+.wv-tile .v{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--orange-light)}
+.wv-tile .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.55);font-weight:700;margin-top:.25rem}
+.week-verdict p{font-size:.87rem;line-height:1.65;color:rgba(255,255,255,0.85)}
+.week-verdict p strong{color:var(--orange-light)}
+
+/* ─── FOOTER / RECAP ─── */
+.footer-cta{text-align:center;padding:3rem 2rem 5.5rem;background:var(--navy-dark);color:#fff}
+.footer-cta h2{font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.6rem}
+.footer-cta h2 em{color:var(--orange);font-style:normal}
+.footer-cta>p{font-size:.92rem;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 1.8rem}
+.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;max-width:1050px;margin:0 auto 1.8rem;text-align:left}
+.recap-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.recap-card .rn{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.35rem}
+.recap-card h4{font-family:'DM Serif Display',serif;font-size:1.02rem;margin-bottom:.35rem;color:#fff}
+.recap-card p{font-size:.76rem;color:rgba(255,255,255,0.65);line-height:1.55}
+.footer-note{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:1.6rem;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ─── COMPLETION BAR ─── */
+.completion-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,0.05)}
+.completion-info{display:flex;align-items:center;gap:.8rem;font-size:.82rem;color:var(--text-primary);font-weight:600}
+.completion-track{flex:1;max-width:280px;height:8px;background:var(--bg-light);border-radius:4px;overflow:hidden;margin:0 1rem}
+.completion-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:4px;transition:width .5s ease}
+.completion-percent{font-family:'DM Serif Display',serif;color:var(--orange);font-size:1.15rem}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:880px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-mascot{width:170px;margin:0 auto}
+  .usecase-banner{text-align:left}
+  .budget-strip{grid-template-columns:repeat(2,1fr)}
+  .pick-grid,.pick-grid.two,.prod-grid{grid-template-columns:1fr}
+  .build-grid,.review-cols,.perso-grid{grid-template-columns:1fr}
+  .eval-metrics{grid-template-columns:repeat(2,1fr)}
+  .adset,.ticket{grid-template-columns:1fr}
+  .pp-recos{grid-template-columns:repeat(3,1fr)}
+  .wv-grid,.recap-grid{grid-template-columns:repeat(2,1fr)}
+  .header{padding:.7rem 1rem}
+  .section{padding:2.2rem 1rem}
+  .hero{padding:2.5rem 1rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-left">
+    <svg class="logo-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="477" cy="380" rx="285" ry="324" fill="#EBE3D6"/>
+      <ellipse cx="477" cy="380" rx="240" ry="270" fill="#412C23"/>
+      <circle cx="389" cy="430" r="36" fill="#fff"/>
+      <circle cx="565" cy="430" r="36" fill="#fff"/>
+      <circle cx="389" cy="430" r="14" fill="#2B2D42"/>
+      <circle cx="565" cy="430" r="14" fill="#2B2D42"/>
+      <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="14" stroke-linecap="round" fill="none"/>
+      <ellipse cx="477" cy="1350" rx="430" ry="100" fill="#EF7F1A"/>
+      <ellipse cx="477" cy="1350" rx="380" ry="78" fill="#FF9429"/>
+    </svg>
+    <div>
+      <div class="header-title">AI Coding <span>&amp; Automation</span></div>
+      <div class="header-tag">MokshPath · Week 4 · Fun While You Learn</div>
+    </div>
+  </div>
+  <div class="progress-pill"><span class="dot"></span> <span id="headerProgressText">0 of 5 beats built</span></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block"></span> Story Project · Build an Automation</div>
+      <h1>From Agent to <em>Automation</em> — Maya Kills a Recurring Chore, Beat by Beat</h1>
+      <p class="hero-sub">Three weeks ago Maya wrote <strong>ReceiptTidy</strong>, a tiny script. Then <strong>ShiftSwap</strong>, a real app. Last week <strong>InboxScout</strong>, an agent that decides its own steps. This week's job is different: it happens the <em>same way every single time</em>. Every workshop booking that lands, she swivels between her inbox, her spreadsheet, and her chat app — copying the same fields by hand, then pinging the host. It's not a thinking job; it's a plumbing job. So Maya builds an <strong>automation</strong> called BookingBridge. You'll make every call with her, across the four beats every automation-builder learns: <strong>Think in Automations → Design It → Build It → Reliability</strong>.</p>
+      <div class="usecase-banner">
+        <div class="usecase-icon">⚙️</div>
+        <div class="usecase-text"><strong>The Mission:</strong> Take one repetitive, swivel-chair chore — every new workshop booking that has to be read, tidied into a spreadsheet, and passed to the right person — and turn it into a workflow that runs itself. A trigger fires, an AI step reads the messy details, a clean row is saved, the host gets pinged. Maya keeps a hand only on the moves that touch money. Not smarter — just tireless, dependable, and monitored.</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBE3D6"/><stop offset="1" stop-color="#D1D0CC"/></linearGradient>
+          <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A6A48"/><stop offset="1" stop-color="#412C23"/></linearGradient>
+          <linearGradient id="feetGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9429"/><stop offset="1" stop-color="#EF7F1A"/></linearGradient>
+        </defs>
+        <ellipse cx="210" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="740" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="477" cy="380" rx="285" ry="324" fill="url(#bodyGrad)"/>
+        <ellipse cx="477" cy="392" rx="240" ry="225" fill="url(#faceGrad)"/>
+        <circle cx="389" cy="430" r="38" fill="#fff"/>
+        <circle cx="565" cy="430" r="38" fill="#fff"/>
+        <circle cx="389" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="565" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="395" cy="424" r="5" fill="#fff"/>
+        <circle cx="571" cy="424" r="5" fill="#fff"/>
+        <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <ellipse cx="477" cy="1350" rx="430" ry="105" fill="url(#feetGrad)"/>
+        <ellipse cx="477" cy="1320" rx="380" ry="78" fill="#FF9429"/>
+      </svg>
+    </div>
+  </div>
+  <div class="budget-strip">
+    <div class="budget-chip"><div class="bv">4 beats</div><div class="bl">One automation, built</div></div>
+    <div class="budget-chip"><div class="bv">0 lines</div><div class="bl">Of code to start</div></div>
+    <div class="budget-chip"><div class="bv">Trigger → steps → notify</div><div class="bl">What an automation is</div></div>
+    <div class="budget-chip"><div class="bv">4 lessons</div><div class="bl">Woven into 1 build</div></div>
+  </div>
+</section>
+
+<!-- ─── TAB NAVIGATION ─── -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-target="s1">Beat 1 · Think in Automations</button>
+  <button class="tab-btn" data-target="s2">Beat 2 · Design It</button>
+  <button class="tab-btn" data-target="s3">Beat 3 · Build It</button>
+  <button class="tab-btn" data-target="s4">Beat 4 · Reliability</button>
+  <button class="tab-btn" data-target="s5">The Honest Beat</button>
+</div>
+
+<!-- ═══════════ BEAT 1: WHAT IS AN AGENT ═══════════ -->
+<section class="section" id="s1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">1</div> Beat One · Think in Automations</div>
+      <h2 class="section-title">The Chore That Repeats Itself — Meet the Automation</h2>
+      <p class="section-sub">Before Maya builds anything, one realisation reframes the whole week: last week's job needed judgment every time, so it needed an agent. This week's job is the opposite — it happens the <strong>exact same way</strong> on every booking. Spotting that a chore is a <strong>trigger → steps</strong> pipeline — and that an automation, not an agent, is the right tool — is the first beat.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Monday, 7:40 a.m. Another workshop booking lands overnight. Maya knows the drill by heart: open the booking, read who it's from, copy the name, date, party size and any notes into her workshop spreadsheet, then message the host to prep. Then the same again for the next booking, and the next. She's done this little three-app shuffle hundreds of times. Her instinct from Week 3 kicks in — <em>build an agent.</em> Then she stops: <em>an agent decides what to do; here I already know every step, and they never change.</em> This isn't an agent problem. It's her first <strong>automation</strong>.
+    </div>
+
+    <div class="pick-grid two">
+      <div class="pick-card" data-plat="agent" onclick="pickPlat('agent')">
+        <div class="pick-icon">🤖</div>
+        <div class="pc-tag">Decides its own steps · Judgment</div>
+        <h4>An AI agent</h4>
+        <p>Like InboxScout: a goal, some tools, and a loop where it figures out the next step each time. Brilliant when the job is different every run and needs judgment — but overkill, and harder to trust, when you already know the exact steps.</p>
+      </div>
+      <div class="pick-card" data-plat="auto" onclick="pickPlat('auto')">
+        <div class="pick-icon">⚙️</div>
+        <div class="pc-tag">A trigger + fixed steps · Repeatable</div>
+        <h4>An AI automation</h4>
+        <p>An event (a new booking) fires a fixed pipeline that runs the same way every time: fetch it, an AI step reads the messy part, save a tidy row, notify the host. Perfect when the <em>shape</em> of the job never changes and only the details do.</p>
+      </div>
+    </div>
+    <div class="pick-detail" id="platDetail"></div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> Maya's AI assistant · "Help me think about this the right way"</div>
+      <div class="chat-body" id="stackChat">
+        <div class="chat-msg ai"><span class="who">Narrator</span>An automation is really just three parts: a <strong>trigger</strong> (the event that starts it), a fixed set of <strong>steps</strong> that run in order, and sometimes a <strong>decision</strong> or an <strong>AI step</strong> in the middle to handle the messy bit. But you only get a useful answer if you ask a useful question. Below are three ways Maya could open the conversation. <strong>Pick the one that earns a real plan.</strong></div>
+      </div>
+    </div>
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Pick Maya's opening message</div>
+      <div class="scenario-q">Which prompt does Maya send her AI assistant?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="pickPrompt(0)">"Automate my whole business so I never do admin again."</button>
+        <button class="scenario-btn" onclick="pickPrompt(1)">"Just tell me the best automation app to buy."</button>
+        <button class="scenario-btn" onclick="pickPrompt(2)">"Act as an automation designer. I'm a beginner. Every time a workshop booking comes in, I copy the same details into a spreadsheet and message the host — same steps every time, only the details change. Is this a good automation candidate? If so, define the trigger, the steps in order, and where I'd want a human to approve before it acts."</button>
+      </div>
+      <div class="scenario-feedback" id="promptFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · Automation instincts (3 rounds)</div>
+      <div class="scenario-q" id="stackQ">Loading…</div>
+      <div class="scenario-options" id="stackOpts"></div>
+      <div class="scenario-feedback" id="stackFb"></div>
+      <button class="btn-secondary" id="stackNext" onclick="nextStackQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2: DESIGN THE JOB ═══════════ -->
+<section class="section alt" id="s2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">2</div> Beat Two · Design It</div>
+      <h2 class="section-title">Map It First — Trigger, Steps, Fields, and the Human Checkpoint</h2>
+      <p class="section-sub">An automation is only as good as the map you draw before you build. Maya writes a one-page <strong>blueprint</strong>: the trigger that starts it, the steps in order, the exact data fields she's moving, where an AI step handles the messy bit — and, most important, the error path and the one place a human approves. A vague map makes a fragile, silently-broken workflow.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday evening. Maya has decided: this chore is worth automating. But she remembers the lesson from InboxScout — <em>design is cheap on paper and expensive later.</em> So before she opens any builder, she writes BookingBridge's blueprint. The same workflow can be a dependable little machine or a fragile mess depending entirely on how clearly she maps it. Flip between three versions of the blueprint below and watch the whole thing change character.
+    </div>
+
+    <div class="voice-tabs">
+      <button class="voice-tab" data-voice="vague" onclick="setVoice('vague')">🌫️ Vague map</button>
+      <button class="voice-tab active" data-voice="tight" onclick="setVoice('tight')">🎯 Sharp map</button>
+      <button class="voice-tab" data-voice="over" onclick="setVoice('over')">🚀 Over-scoped map</button>
+    </div>
+
+    <div class="store-preview">
+      <div class="store-chrome">
+        <span class="sdot" style="background:#FF5F57"></span><span class="sdot" style="background:#FEBC2E"></span><span class="sdot" style="background:#28C840"></span>
+        <span class="store-url">📄 bookingbridge / blueprint.md</span>
+      </div>
+      <div class="store-body">
+        <div class="store-brand"><div class="store-logo">⚙️</div><b>BookingBridge</b><span style="font-size:.7rem;color:var(--text-muted);margin-left:auto">Automation blueprint · draft</span></div>
+        <div class="store-hero-line" id="storeHeadline">Trigger: a new workshop booking arrives → steps: read it, AI-extract the details, save a tidy row, notify the host — pause for me before anything charges money.</div>
+        <div class="store-desc" id="storeDesc">Fields: name, date, party size, notes → columns in the workshop sheet. AI step: turn the free-text booking into those clean fields. Error path: if a field is missing or the text can't be parsed, don't save a broken row — flag it for me. Approval: any booking that takes payment waits for my OK.</div>
+        <div class="store-price-row">
+          <div class="store-price">Scope: one chore · Steps: fixed · Human checkpoint: before any charge</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toggle">
+      <button class="btn-secondary" id="beforeBtn" onclick="toggleCopy('before')">😬 Before: the vague map</button>
+      <button class="btn-action" id="afterBtn" onclick="toggleCopy('after')">✨ After: the sharp map</button>
+    </div>
+    <div class="before-after before" id="copyBefore" style="display:none">
+      "When a booking comes in, just sort it out and put it wherever it needs to go. Handle whatever's needed."
+      <div style="margin-top:.5rem;font-size:.75rem">← This is a wish, not a blueprint. No named trigger, no ordered steps, no list of fields, and no plan for when something's missing — which is exactly how a workflow silently saves half-empty rows and nobody notices for a week. Vague map in, fragile automation out.</div>
+    </div>
+    <div class="before-after after" id="copyAfter">
+      "Trigger: new booking. Steps: 1) read the booking, 2) AI-extract name/date/party size/notes, 3) save one row to the sheet, 4) message the host. If a field is missing → don't save, flag me. If it takes payment → pause for my approval."
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-secondary)">← Same chore. The difference is <strong>the map</strong>: a concrete trigger, ordered steps, the exact fields being moved, an error path for the messy case, and one clear human checkpoint. This is what you design before you build anything.</div>
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Maya's design checklist</h4>
+        <ul class="checklist" id="buildList">
+          <li data-step="0" onclick="runBuildStep(0)"><span class="check"></span>Name the <strong>&nbsp;trigger&nbsp;</strong> and what "done well" looks like (success criteria)</li>
+          <li data-step="1" onclick="runBuildStep(1)"><span class="check"></span>List the <strong>&nbsp;steps&nbsp;</strong> in order — read → AI-extract → save → notify</li>
+          <li data-step="2" onclick="runBuildStep(2)"><span class="check"></span>Map the data fields (name, date, party size, notes → sheet columns)</li>
+          <li data-step="3" onclick="runBuildStep(3)"><span class="check"></span>Decide where the AI step goes (reading the messy free-text booking)</li>
+          <li data-step="4" onclick="runBuildStep(4)"><span class="check"></span>Design the error path (missing field or unreadable text → flag, don't save)</li>
+          <li data-step="5" onclick="runBuildStep(5)"><span class="check"></span>Add the human approval checkpoint (any step that takes money pauses for Maya)</li>
+        </ul>
+        <div class="done-note" id="buildDone">✅ <strong>BookingBridge's blueprint is written.</strong> One page: trigger, steps, fields, AI step, error path, approval checkpoint. Maya hasn't built a thing yet — and that's exactly why the build will go fast. Onto the workbench.</div>
+      </div>
+      <div class="build-card">
+        <h4>Design log (click checklist items)</h4>
+        <div class="feed" id="buildFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Waiting for Maya to start designing… tick items on the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">🎚️ The Approval Dial — which steps run alone, which pause for a human?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">The single most important design choice: not <em>what can the automation do</em>, but <em>which steps may run without a human</em>. The rule of thumb — let it act alone on cheap, reversible steps; keep a human checkpoint on anything that touches money or can't be undone. Pick a step and see where it lands.</p>
+      <div class="perso-grid">
+        <div class="perso-controls">
+          <div class="prompt-field">
+            <label>What might BookingBridge do?</label>
+            <select id="persoWho" onchange="renderPerso()">
+              <option value="read">Save a normal booking to the spreadsheet</option>
+              <option value="draft">Message the host to prep for the workshop</option>
+              <option value="send">Auto-confirm &amp; take payment from the customer</option>
+              <option value="sensitive">Cancel or refund an existing booking</option>
+            </select>
+          </div>
+          <p style="font-size:.78rem;color:var(--text-muted);line-height:1.55;margin-top:.6rem">💡 Approval isn't all-or-nothing — you set it step by step. A saved row you can edit; a charged card you can't quietly take back. Start tight: let it run alone only where a mistake is cheap and reversible, and widen the leash later once the numbers say it's earned it.</p>
+        </div>
+        <div class="perso-preview">
+          <div class="pp-head">⚙️ BookingBridge — approval check</div>
+          <div class="pp-body">
+            <div class="pp-greeting" id="ppGreeting">✅ Let it run this step alone — writing a row is low-stakes and easy to correct.</div>
+            <div class="pp-recos" id="ppRecos">
+              <div class="pp-reco"><div class="ppe">📊</div><div class="ppn">Writes a row</div></div>
+              <div class="pp-reco"><div class="ppe">🪶</div><div class="ppn">Low stakes</div></div>
+              <div class="pp-reco"><div class="ppe">↩️</div><div class="ppn">Easy to fix</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · The safer blueprint</div>
+      <div class="scenario-q">Three versions of BookingBridge's goal line are on the table. Which one does Maya put at the top of the blueprint?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="headlineQ(0)">"Goal: when a booking comes in, just handle everything however works — full auto, save me as much time as possible."</button>
+        <button class="scenario-btn" onclick="headlineQ(1)">"Goal: on a new booking, extract the details, save a row, notify the host; if a field's missing, flag me; pause before any payment."</button>
+        <button class="scenario-btn" onclick="headlineQ(2)">"Goal: fully resolve every booking automatically — confirm, charge the card, issue refunds, and cancel, all with no human in the loop."</button>
+      </div>
+      <div class="scenario-feedback" id="headlineFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3: BUILD IT ═══════════ -->
+<section class="section" id="s3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">3</div> Beat Three · Build It</div>
+      <h2 class="section-title">One Step at a Time — Test With Real Sample Data</h2>
+      <p class="section-sub">Now Maya builds — but not all at once. She picks a low-friction builder, adds <strong>one step at a time</strong>, and tests each with a real past booking before adding the next. The tricky part is the AI step: it must return the details in a <strong>required format</strong> the next step can actually use. The superpower here is the <strong>run log</strong>: every step shows its input and output, so when something breaks — a bad field mapping, junk from the AI — you can see exactly where.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday. Maya opens a low-code automation builder — the kind where you drag steps into a row and connect a trigger without installing anything. She resists wiring up all four steps at once. Instead: <em>get the trigger firing first, test; add the AI-extract step, test; add the save-to-sheet step, test; then the notify step.</em> After each step she runs it on a real booking from last month and reads the output line by line. Because that's the whole game — an automation that isn't tested on real data fails on the first weird booking. Below is one test run's log. Judge each step.
+    </div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> BookingBridge · test run log (replaying a real past booking)</div>
+      <div class="chat-body">
+        <div class="chat-msg user"><span class="who">Trigger fired</span>New booking (raw text): "Hi! Would love to book the candle workshop for Feb 14, there'll be 6 of us, one's vegan if that matters for the wax. — Ria"</div>
+        <div class="chat-msg ai"><span class="who">BookingBridge · step 1</span><strong>Read step:</strong> grabbed the raw booking text and passed it to the AI-extract step. Clean hand-off, nothing dropped. Looks right.</div>
+        <div class="chat-msg ai"><span class="who">Narrator</span>That first step was correct — the trigger fired and the text moved cleanly to the next step. But the steps after it aren't always this tidy. Watch the log unfold below and call each one: <strong>looks right, or a bug to fix?</strong></div>
+      </div>
+    </div>
+
+    <div class="triage">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🔬 Read the run log — good step or bug?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1rem">For each step BookingBridge takes, decide: <strong>ship it</strong> (the step is working) or <strong>debug it</strong> (something's wrong and needs fixing). Reading the log against real data like this <em>is</em> the skill of building an automation.</p>
+
+      <div class="ticket" id="tk1">
+        <div class="ticket-msg"><span>Step 2</span>The <b>AI-extract</b> step returns exactly the required format: <code>{name:"Ria", date:"Feb 14", party_size:6, notes:"one vegan — check wax"}</code> — clean fields, ready for the sheet.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(1,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(1,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf1"></div>
+      </div>
+
+      <div class="ticket" id="tk2">
+        <div class="ticket-msg"><span>Step 3</span>The <b>save-to-sheet</b> step writes the row — but the party size "6" lands in the <b>Date</b> column and "Feb 14" lands in <b>Notes</b>. The fields are wired to the wrong columns.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(2,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(2,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf2"></div>
+      </div>
+
+      <div class="ticket" id="tk3">
+        <div class="ticket-msg"><span>Step 4</span>On the next booking, the AI step replies <b>"Sure! Here are the details you asked for: the booking is for…"</b> — a chatty paragraph, not the clean fields. The save step can't parse it and errors out.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(3,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(3,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf3"></div>
+      </div>
+
+      <div class="ticket" id="tk4">
+        <div class="ticket-msg"><span>Step 5</span>A booking with <b>no date at all</b> ("can I book sometime soon?") → BookingBridge follows the error path: it doesn't save a half-empty row, and flags it for Maya to reply and get a date.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(4,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(4,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf4"></div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🐞 Debug · The AI step keeps returning junk the next step can't use</div>
+      <div class="scenario-q">Half the time the AI-extract step answers in a tidy structure and half the time it writes a chatty sentence, so the save-to-sheet step randomly errors. Which fix do you ship?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="reviewQ(0)">Add "please answer nicely and neatly" to the AI step's instructions and hope it's consistent.</button>
+        <button class="scenario-btn" onclick="reviewQ(1)">Pin down a required output format — ask for a strict structure (the exact fields, nothing else), give it one worked example, and validate the output before the save; if it doesn't match, send it to the error path instead of saving garbage.</button>
+        <button class="scenario-btn" onclick="reviewQ(2)">Leave it — it works often enough, and a few broken rows now and then are fine.</button>
+      </div>
+      <div class="scenario-feedback" id="reviewFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4: TRUST & SHIP ═══════════ -->
+<section class="section alt" id="s4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">4</div> Beat Four · Reliability</div>
+      <h2 class="section-title">It Has to Run Unattended — De-dup, Alert, Monitor, Then Ship</h2>
+      <p class="section-sub">An automation that worked in the demo hasn't earned the right to run while you sleep. Maya runs BookingBridge on many bookings, hunts for the <strong>silent</strong> failure — the run that quietly did nothing, or fired twice — then adds the three things every unattended workflow needs: a <strong>de-dup key</strong>, an <strong>error alert</strong>, and <strong>monitoring</strong>. Only then does she ship it — documented, with a human on anything that touches money.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Thursday. BookingBridge runs. But Maya doesn't trust it because one demo looked clean — she remembers that a workflow which works <em>once</em> isn't shipped. Two things scare her most: the run that fails <em>silently</em> (a booking never reached the sheet and nobody noticed for days), and the trigger that <em>double-fires</em> (the same booking saved twice). So she replays 30 real bookings, counts what slipped, and decides — for each behaviour — retry, alert a human, or fix it first. Play with the reliability numbers, then judge each behaviour.
+    </div>
+
+    <div class="calc" style="background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:1.4rem">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🧮 The Reliability Meter — is BookingBridge ready to run unattended?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1.1rem">Reliability isn't a feeling — it's how often it runs cleanly across enough bookings, weighed against how bad one silent failure would be. Drag the sliders and watch where "let it run unattended" turns into "keep a human checkpoint."</p>
+      <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+        <div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Bookings replayed in testing <output id="oCost" style="color:var(--orange);font-weight:800">20</output></label>
+            <input type="range" class="calc-slider" id="inCost" min="3" max="60" step="1" value="20" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Runs that failed or duplicated <output id="oPrice" style="color:var(--orange);font-weight:800">2</output></label>
+            <input type="range" class="calc-slider" id="inPrice" min="0" max="20" step="1" value="2" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Damage if a bad run slips through unnoticed <output id="oUnits" style="color:var(--orange);font-weight:800">3 / 5</output></label>
+            <input type="range" class="calc-slider" id="inUnits" min="1" max="5" step="1" value="3" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+        </div>
+        <div class="calc-out" style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-content:start">
+          <div class="calc-tile" id="tProfit" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vProfit" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">90%</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Reliability</div></div>
+          <div class="calc-tile" id="tMargin" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vMargin" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">20</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Sample size</div></div>
+          <div class="calc-note" id="calcNote" style="grid-column:1/-1;font-size:.8rem;line-height:1.55;padding:.8rem 1rem;border-radius:8px;background:var(--orange-glow);color:var(--text-primary)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eval-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)">BookingBridge · 30-Booking Evaluation</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">Measured, not assumed. Each behaviour below is a decision: retry, alert a human, or fix it first.</div>
+        </div>
+      </div>
+      <div class="eval-metrics">
+        <div class="metric-card"><div class="metric-value">30</div><div class="metric-label">Bookings replayed</div></div>
+        <div class="metric-card"><div class="metric-value">93%</div><div class="metric-label">Ran cleanly</div></div>
+        <div class="metric-card warn"><div class="metric-value">2</div><div class="metric-label">Silent double-saves</div></div>
+        <div class="metric-card highlight"><div class="metric-value">4</div><div class="metric-label">Steps wired in</div></div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1rem 0 .6rem">For each behaviour — Run unattended, Require approval, or Fix first</div>
+
+      <div class="adset" id="opA">
+        <div class="adset-name">📊 Saving a normal booking to the sheet<span>30/30 correct · a wrong row is easy to edit · nobody gets hurt</span></div>
+        <div class="adset-nums"><span>Correct<b>30/30</b></span><span>Reversible<b>yes</b></span><span>Damage<b>tiny</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('A','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('A','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('A','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbA"></div>
+      </div>
+
+      <div class="adset" id="opB">
+        <div class="adset-name">💳 Auto-confirming &amp; charging the customer<span>Works, but a charge can't be quietly un-charged · touches real money</span></div>
+        <div class="adset-nums"><span>Ran<b>30/30 ok</b></span><span>Reversible<b>no</b></span><span>Damage<b>high</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('B','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('B','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('B','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbB"></div>
+      </div>
+
+      <div class="adset" id="opC">
+        <div class="adset-name">🔁 The trigger sometimes double-fires<span>Same booking saved twice on 2/30 · silent · no de-dup key, no alert</span></div>
+        <div class="adset-nums"><span>Duplicated<b>2/30 silent</b></span><span>Noticed?<b>no</b></span><span>Damage<b>growing</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('C','act',this)">Run unattended</button>
+          <button class="adset-btn" onclick="judge('C','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('C','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbC"></div>
+      </div>
+
+      <div class="week-verdict" id="weekVerdict">
+        <h4>📜 The Builder's Verdict: <em>Maya shipped a real automation.</em></h4>
+        <div class="wv-grid">
+          <div class="wv-tile"><div class="v">1</div><div class="l">Chore it kills</div></div>
+          <div class="wv-tile"><div class="v">4</div><div class="l">Steps, added one by one</div></div>
+          <div class="wv-tile"><div class="v">93%</div><div class="l">Clean runs, measured</div></div>
+          <div class="wv-tile"><div class="v">3</div><div class="l">Reliability nets added</div></div>
+        </div>
+        <p>BookingBridge ships — but on Maya's terms. It saves and notifies on its own, because that's cheap and easy to fix. It <strong>never charges a card</strong> without her nod, because that can't be undone. And before it went live she added the three nets every unattended workflow needs: a <strong>de-dup key</strong> so a double-fire can't save the same booking twice, an <strong>error alert</strong> to her phone the instant a run fails, and a <strong>monitoring log</strong> she can glance at. Transient hiccup? It retries, then alerts. She didn't build a magic robot — she built a boring, dependable, documented workflow that gives her back the swivel-chair hour and pings her only when a human is actually needed. That's the difference between hype and a shipped automation. 🎉</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ THE HONEST BEAT ═══════════ -->
+<section class="section" id="s5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">5</div> The Honest Beat</div>
+      <h2 class="section-title">Hype vs Durable — What an Automation Actually Is</h2>
+      <p class="section-sub">Before you celebrate, the slide most courses skip. The internet is loud with "set it and forget it, fully hands-off." Know exactly what automations genuinely changed — and what they never will.</p>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">⚖️ The Durable / Hype Split</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">Build your instincts on the left column. Ignore anyone selling you the right one.</p>
+      <div class="review-cols">
+        <div class="review-col love">
+          <h5>✓ What automations genuinely changed</h5>
+          <ul>
+            <li>A repetitive, same-shape chore can now run itself, tirelessly, on every trigger</li>
+            <li>An AI step can read the messy free-text part that used to need a human</li>
+            <li>The three-app swivel-chair shuffle collapses into one reliable pipeline</li>
+            <li>One person can hand off real busywork — and monitor it instead of doing it</li>
+          </ul>
+        </div>
+        <div class="review-col hate">
+          <h5>✕ What automations did NOT change (the hype)</h5>
+          <ul>
+            <li>They still fail — often silently, until someone notices the missing rows</li>
+            <li>"Set it and forget it, never check it" is marketing, not reality</li>
+            <li>A vague map still produces a fragile, half-broken workflow</li>
+            <li>Nothing replaces your judgment on the money-touching, irreversible step</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Final Checkpoint · The builder's mindset</div>
+      <div class="scenario-q">An ad promises: "Our platform fully automates your entire business end-to-end — set it and forget it, zero monitoring, runs itself forever while you sleep." Having just built BookingBridge, what's your read?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="finalQ(0)">Sounds amazing — buy it. The more hands-off, the better.</button>
+        <button class="scenario-btn" onclick="finalQ(1)">Skeptical. Automations genuinely kill real busywork, but they fail silently and can't own the money-touching step. "Zero monitoring, forever" is the hype tell — I'd ship narrow, add de-dup + alerts + monitoring, and keep approval on anything that can't be undone.</button>
+        <button class="scenario-btn" onclick="finalQ(2)">Automations are useless hype — nobody can really rely on them for anything.</button>
+      </div>
+      <div class="scenario-feedback" id="finalFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · Automation-builder instincts (3 rounds)</div>
+      <div class="scenario-q" id="opsQ">Loading…</div>
+      <div class="scenario-options" id="opsOpts"></div>
+      <div class="scenario-feedback" id="opsFb"></div>
+      <button class="btn-secondary" id="opsNext" onclick="nextOpsQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER RECAP ─── -->
+<div class="footer-cta">
+  <h2>🎉 On Monday, every booking stole ten minutes of <em>Maya's</em> day.</h2>
+  <p>By Thursday she'd handed that swivel-chair chore to BookingBridge — an automation she mapped, built one step at a time, tested on 30 real bookings, and shipped with de-dup, alerts, monitoring, and a human on the money moves. Here's what the story secretly taught you: the four lessons of Week 4.</p>
+  <div class="recap-grid">
+    <div class="recap-card">
+      <div class="rn">Lesson 1</div>
+      <h4>Think in Automations</h4>
+      <p>A trigger fires a fixed set of steps. It shines when the chore repeats the same way — and an agent is overkill when you already know every step. Beat 1.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 2</div>
+      <h4>Design It</h4>
+      <p>Map before you build: trigger, ordered steps, the exact data fields, where the AI step goes, an error path — and the one human checkpoint. Beat 2.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 3</div>
+      <h4>Build It</h4>
+      <p>Add one step at a time, test each on real sample data, and pin the AI step to a required output format so the next step can actually use it. Beat 3.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 4</div>
+      <h4>Reliability</h4>
+      <p>Hunt the silent failure and the double-fire; add a de-dup key, an error alert, and monitoring; retry vs. alert-a-human — ship it monitored. Beat 4.</p>
+    </div>
+  </div>
+  <button class="btn-action" style="font-size:.9rem;padding:.8rem 1.8rem" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">↻ Replay the four beats</button>
+  <div class="footer-note">BookingBridge is a teaching scenario. Real automations vary widely and most need a few rounds of testing and a couple of live near-misses before they're dependable — the goal of Week 4 is to walk every beat once so your first workflow starts as a builder's, not a gambler's. An automation is tireless, not magic; it gives a careful person their busywork hour back, never a careless one a free pass. Next up — Week 5: <strong>AI APIs</strong>, where you learn to call an AI model directly from your own code and wire it into anything you build.</div>
+</div>
+
+<!-- ─── COMPLETION BAR ─── -->
+<div class="completion-bar">
+  <div class="completion-info"><span style="font-size:1.1rem">⚙️</span><span>BookingBridge Build Progress</span></div>
+  <div class="completion-track"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
+  <div class="completion-percent" id="completionPct">0%</div>
+</div>
+
+<script>
+/* ───────── PROGRESS TRACKING ───────── */
+const visited = new Set();
+function markVisited(id){
+  visited.add(id);
+  const pct = Math.round((visited.size / 5) * 100);
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = pct + '%';
+  document.getElementById('headerProgressText').textContent = `${visited.size} of 5 beats built`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    markVisited(btn.dataset.target);
+  });
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.3) {
+      markVisited(e.target.id);
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.target === e.target.id));
+    }
+  });
+}, {threshold:[0.3]});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+/* ───────── BEAT 1: AGENT vs AUTOMATION ───────── */
+const platInfo = {
+  agent: `<span class="verdict-pill vp-mid">Right tool — for a different job</span><br><strong>An AI agent:</strong> a model given a goal, some tools, and a loop where it decides the next step each run. It's the right call when the job is genuinely different every time and needs judgment — triaging a messy inbox, like InboxScout last week. The catch: because it <em>decides</em>, it can decide wrong, and it's harder to test and trust. <em>Maya's booking chore isn't like that — she already knows every step, and they never change. Handing a fixed, repetitive job to an agent is paying for judgment you don't need.</em>`,
+  auto: `<span class="verdict-pill vp-good">✓ The right fit for this job</span><br><strong>An AI automation:</strong> a <strong>trigger</strong> (a new booking arrives) fires a <strong>fixed set of steps</strong> that run the same way every time — read it, an AI step extracts the messy details, save a tidy row, notify the host. The shape never changes; only the data does. That makes it easy to test, cheap to run, and dependable. <em>BookingBridge lives here. Notice the honest boundary: a good builder still reaches for an agent when the steps really do vary each run.</em>`
+};
+function pickPlat(k){
+  document.querySelectorAll('#s1 .pick-card').forEach(c => c.classList.toggle('active', c.dataset.plat === k));
+  const d = document.getElementById('platDetail');
+  d.innerHTML = platInfo[k];
+  d.classList.add('show');
+}
+
+/* prompt showdown */
+const promptResults = [
+  {ok:false, fb:'✗ Too vague. "Automate my whole business" gives the AI no trigger, no steps, and no idea what "done" means. You get an enthusiastic, generic reply — and later, a tangle of half-built workflows that break silently. Vague prompt in, vague plan out. Automate one clear chore first.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Automate my whole business so I never do admin again.</div><div class="chat-msg ai"><span class="who">Assistant</span>Sure! Here are lots of things you <em>could</em> automate… <strong>(…a generic listicle with no trigger, no ordered steps, and no sense of which single chore is worth starting with — the same answer anyone gets.)</strong></div>`},
+  {ok:false, fb:'✗ Tool-first, problem-never. Picking an app before you\'ve mapped the chore is how beginners end up forcing a messy job into whatever the tool does easily. The right question defines the trigger, the steps, and the human checkpoint <em>first</em> — the builder is the last decision, not the first.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Just tell me the best automation app to buy.</div><div class="chat-msg ai"><span class="who">Assistant</span>Before a tool — what\'s the chore? The best builder depends entirely on your trigger, your steps, and where a human needs to approve. Map that first; almost any low-code builder can run a simple, well-designed workflow. Lead with the problem, not the product.</div>`},
+  {ok:true, fb:'✓ Exactly. Role + your real situation + an honest question about fit + a request to define the trigger, the ordered steps, and the approval line. This earns a genuine plan — and it becomes the blueprint for the whole week: what fires BookingBridge, what it does in order, and where Maya stays in the loop.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Act as an automation designer. Beginner. Every workshop booking, I copy the same details into a sheet and message the host — same steps, only the details change. Good automation candidate? If so, define the trigger, the steps in order, and where I\'d approve before it acts.</div><div class="chat-msg ai"><span class="who">Assistant</span>Great candidate — the steps are identical, only the data varies, which is exactly what automations are for. <strong>Trigger:</strong> new booking. <strong>Steps:</strong> read → AI-extract details → save row → notify host. <strong>Human checkpoint:</strong> anything that charges money. <strong>Error path:</strong> missing field → flag, don\'t save. <strong>← Your whole Week 4, mapped.</strong></div>`}
+];
+let promptAnswered = false;
+function pickPrompt(i){
+  const r = promptResults[i];
+  const btns = document.querySelectorAll('#s1 .scenario-panel:first-of-type .scenario-btn');
+  if (!promptAnswered){
+    btns.forEach((b,j) => { if (j===2) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) promptAnswered = true;
+  }
+  const fb = document.getElementById('promptFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+  document.getElementById('stackChat').innerHTML = r.chat;
+}
+
+/* automation-instincts quiz */
+const stackQs = [
+  {q:"An automation is best described as…", opts:["A chatbot you type questions into","A trigger that kicks off a fixed set of steps, running the same way every time","A model that decides its own steps from scratch on every run"], correct:1, explain:"That's the heart of it: an event (the trigger) fires a known sequence of steps. Because the shape never changes, it's easy to test and dependable. The last option describes an agent, not an automation."},
+  {q:"You do a task once a year and it's a bit different each time. Automating it is…", opts:["Always worth it — automate everything","Probably not worth it — automations pay off on frequent, repetitive, same-shape chores","Impossible — automations can't run yearly"], correct:1, explain:"The payoff comes from frequency and sameness. A rare, ever-changing task costs more to automate than to just do. Reaching for automation everywhere is a beginner tell — pick the chore you repeat constantly."},
+  {q:"The 'trigger' in an automation is…", opts:["The final step that saves your data","The event that starts the workflow — a new form, an incoming email, a set time of day","A person clicking 'run' by hand every time"], correct:1, explain:"The trigger is what makes it run itself. A new booking, an email arriving, or 'every Monday at 9am' — the workflow wakes up on the event so you don't have to remember to start it."}
+];
+let sqIdx = 0;
+function renderStackQ(){
+  const s = stackQs[sqIdx];
+  document.getElementById('stackQ').textContent = `Round ${sqIdx+1}/3 — ${s.q}`;
+  document.getElementById('stackOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerStackQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('stackNext').style.display = 'none';
+}
+function answerStackQ(i){
+  const s = stackQs[sqIdx];
+  document.querySelectorAll('#stackOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (sqIdx===stackQs.length-1 ? '<br><br>🎉 Beat 1 complete — you can tell an automation from an agent, and you know when each one is the right tool. Onto designing it.' : '');
+  document.getElementById('stackNext').style.display = sqIdx < stackQs.length-1 ? 'inline-block' : 'none';
+}
+function nextStackQ(){ sqIdx++; if (sqIdx < stackQs.length) renderStackQ(); }
+renderStackQ();
+
+/* ───────── BEAT 2: DESIGN THE JOB ───────── */
+const voices = {
+  vague: {h:'Trigger: um, a booking? Steps: just sort it out somehow.', d:'Fields: whatever\'s in there. Error path: none. Approval: none really — let it handle everything. Result: a workflow with no idea what "done" means, quietly saving half-empty rows nobody catches for a week. This is a wish, not a blueprint.'},
+  tight: {h:'Trigger: a new workshop booking arrives → steps: read it, AI-extract the details, save a tidy row, notify the host — pause for me before anything charges money.', d:'Fields: name, date, party size, notes → columns in the workshop sheet. AI step: turn the free-text booking into those clean fields. Error path: if a field is missing or the text can\'t be parsed, don\'t save a broken row — flag it for me. Approval: any booking that takes payment waits for my OK.'},
+  over: {h:'Trigger: any booking → steps: confirm, charge the card, book staff, refund, cancel, message suppliers — all automatically, no human, ever.', d:'Fields: all of them. Error path: none. Approval: none. Result: a huge blast radius pointed at money and cancellations with nobody watching — the fastest way to turn one silent bug into a pile of wrong charges. Over-scoped is just fragile with ambition.'}
+};
+function setVoice(v){
+  document.querySelectorAll('.voice-tab').forEach(t => t.classList.toggle('active', t.dataset.voice === v));
+  const h = document.getElementById('storeHeadline'), d = document.getElementById('storeDesc');
+  h.style.opacity = 0; d.style.opacity = 0;
+  setTimeout(()=>{ h.textContent = voices[v].h; d.textContent = voices[v].d; h.style.opacity = 1; d.style.opacity = 1; }, 250);
+}
+function toggleCopy(which){
+  document.getElementById('copyBefore').style.display = which==='before' ? 'block' : 'none';
+  document.getElementById('copyAfter').style.display = which==='after' ? 'block' : 'none';
+}
+
+/* design checklist + log */
+const buildEvents = [
+  {t:'Tue 20:05', msg:'Trigger named: "a new workshop booking arrives." Success defined: a tidy, complete row in the sheet and the host notified — or a clear flag if something\'s missing. Now the workflow knows what "done well" means.'},
+  {t:'Tue 20:20', msg:'Steps listed in order: 1) read the booking, 2) AI-extract the details, 3) save one row, 4) notify the host. Four steps, no more. A short, ordered pipeline is far easier to test than a sprawling one.'},
+  {t:'Tue 20:35', msg:'Fields mapped: name → col A, date → col B, party size → col C, notes → col D. Knowing exactly which value goes in which column now is how you avoid the classic "data landed in the wrong place" bug later.'},
+  {t:'Tue 20:50', msg:'AI step placed: it sits at step 2, and its only job is turning the messy free-text booking into those four clean fields — nothing else. One narrow AI step in a mostly-plumbing workflow is the sweet spot.'},
+  {t:'Tue 21:05', msg:'Error path designed: if a field is missing or the text can\'t be parsed, don\'t save a broken row — flag it for Maya. Deciding what happens when things go wrong is half of good design.'},
+  {t:'Tue 21:20', msg:'Approval checkpoint set: any step that charges money pauses for Maya\'s OK; save & notify run on their own. The whole thing is now a one-page blueprint she could hand to anyone — which means the builder will follow it too.'}
+];
+const buildSteps = new Set();
+function runBuildStep(i){
+  if (buildSteps.has(i)) return;
+  buildSteps.add(i);
+  document.querySelector(`#buildList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('buildFeed');
+  if (buildSteps.size === 1) feed.innerHTML = '';
+  const e = buildEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (buildSteps.size === buildEvents.length) document.getElementById('buildDone').style.display = 'block';
+}
+
+/* autonomy dial */
+const persoData = {
+  read: {g:'✅ Let it run this step alone — writing a row is low-stakes and easy to correct.', r:[['📊','Writes a row'],['🪶','Low stakes'],['↩️','Easy to fix']]},
+  draft: {g:'✅ Fine on its own — pinging the host to prep is an internal, reversible heads-up.', r:[['💬','Internal ping'],['🧑‍🍳','Host preps'],['↩️','Easy to redo']]},
+  send: {g:'⏸️ Needs your approval — a charge and a confirmation to the customer can\'t be quietly undone.', r:[['💳','Takes payment'],['🙅','Irreversible'],['✔️','Approve first']]},
+  sensitive: {g:'⛔ Never unattended — cancelling or refunding touches money and a real customer, always human.', r:[['💸','Moves money'],['🗑️','Cancels a booking'],['🧑','Always you']]}
+};
+function renderPerso(){
+  const who = document.getElementById('persoWho').value;
+  const d = persoData[who];
+  const g = document.getElementById('ppGreeting'), r = document.getElementById('ppRecos');
+  g.style.opacity = 0; r.style.opacity = 0;
+  setTimeout(()=>{
+    g.textContent = d.g;
+    r.innerHTML = d.r.map(x=>`<div class="pp-reco"><div class="ppe">${x[0]}</div><div class="ppn">${x[1]}</div></div>`).join('');
+    g.style.opacity = 1; r.style.opacity = 1;
+  }, 200);
+}
+
+/* safer-blueprint quiz */
+const headlineFbs = [
+  {ok:false, fb:'✗ "Just handle everything however works — full auto" hands an untested workflow the keys with no defined steps, no error path, and no line it can\'t cross. This is the vague, over-scoped map that produces a fragile, silently-broken automation.'},
+  {ok:true, fb:'✓ Yes. It names the steps (<strong>extract → save → notify</strong>), builds in the error path (<strong>missing field → flag me</strong>), and draws the one line that matters most: <strong>pause before any payment</strong>. Narrow, testable, and safe — the automation can be useful without being trusted with anything irreversible yet.'},
+  {ok:false, fb:'✗ "Fully resolve every booking — confirm, charge, refund, cancel, no human" points a brand-new workflow at the highest-stakes, least-reversible steps with nobody watching. This is the maximum-blast-radius map — exactly what a careful builder never ships.'}
+];
+function headlineQ(i){
+  const r = headlineFbs[i];
+  const btns = document.querySelectorAll('#s2 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (headlineFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('headlineFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb + (r.ok ? '' : '<br><br>The safe blueprint: <strong>"extract → save → notify, flag missing fields, pause before any payment."</strong>');
+}
+
+/* ───────── BEAT 3: BUILD IT (trace) ───────── */
+const triageKey = {
+  1: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> The AI step returned exactly the required structure — the four named fields, nothing extra — so the save step can drop each value straight into its column. A predictable output format is what makes the next step reliable. Ship it.',
+    human:'△ This one\'s actually fine. The output matches the format you required, field for field. Nothing to debug here. Verdict: <strong>LOOKS RIGHT</strong>.'}},
+  2: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> Classic <em>field-mapping</em> error: the values are right but they\'re wired to the wrong columns, so party size lands under Date. The fix is in the save step, not the AI — point each field at the correct column (name→A, date→B, size→C, notes→D) and re-test on the same booking.',
+    bot:'✗ Look again — "6" is sitting in the Date column and "Feb 14" in Notes. The data is fine; the wiring between fields and columns is crossed. That\'s a field-mapping bug. Verdict: <strong>BUG</strong>.'}},
+  3: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> The AI step drifted into a chatty paragraph instead of the required structure, so the save step gets something it can\'t parse and errors. The fix: pin the output format hard — require the exact fields only, give one example, and validate before saving. Unparseable AI output is the number-one automation bug.',
+    bot:'✗ A friendly paragraph reads fine to a human, but the save step needs a fixed structure and can\'t parse prose — so it crashes. Free-form AI output feeding a rigid next step is a bug waiting to happen. Verdict: <strong>BUG</strong>.'}},
+  4: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> A booking with no date is exactly the case your error path was designed for. It refused to save a half-empty, useless row and flagged it for Maya instead. That\'s the error path working as designed — good data stays clean.',
+    human:'△ This is the behaviour you want. It correctly caught the missing field, skipped the broken save, and handed it to Maya. No bug — the error path is doing its job. Verdict: <strong>LOOKS RIGHT</strong>.'}}
+};
+function triage(n, choice, btn){
+  const k = triageKey[n];
+  const row = document.getElementById('tk'+n);
+  row.querySelectorAll('.ticket-btn').forEach(b => b.disabled = true);
+  const correct = choice === k.right;
+  row.className = 'ticket ' + (correct ? 'decided-'+(k.right==='bot'?'bot':'human') : 'wrongdrop');
+  if (!correct){ setTimeout(()=>{ row.className = 'ticket decided-'+(k.right==='bot'?'bot':'human'); }, 900); }
+  const fb = document.getElementById('tf'+n);
+  fb.className = 'ticket-feedback show ' + (correct ? 'good' : 'warn');
+  fb.innerHTML = k.fb[choice];
+}
+
+/* AI-output-format quiz */
+const reviewFbs = [
+  {ok:false, fb:'✗ "Answer nicely and neatly" is a wish, not a spec. A vague instruction leaves the model free to be chatty half the time, so the save step keeps randomly breaking. You have to <em>constrain the shape</em> of the output, not politely request it.'},
+  {ok:true, fb:'✓ That\'s the fix. You give the AI step a <strong>required output format</strong> — the exact fields, nothing else — plus one worked example, and you <strong>validate before the save</strong>. If the output doesn\'t match, it goes to the error path instead of poisoning the sheet. A pinned-down format is what makes an AI step safe to build on.'},
+  {ok:false, fb:'✗ "Works often enough" is exactly the trap. Every unparseable output is a booking that silently fails to save — and on an unattended workflow, nobody notices until the sheet has holes in it. A step you can\'t rely on needs a fixed format, not a shrug.'}
+];
+function reviewQ(i){
+  const r = reviewFbs[i];
+  const btns = document.querySelectorAll('#s3 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (reviewFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('reviewFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 4: TRUST METER ───────── */
+function calc(){
+  const runs = +document.getElementById('inCost').value;
+  let wrong = +document.getElementById('inPrice').value;
+  const blast = +document.getElementById('inUnits').value;
+  if (wrong > runs) wrong = runs;
+  const reliability = runs > 0 ? ((runs - wrong) / runs) * 100 : 0;
+  document.getElementById('oCost').textContent = runs;
+  document.getElementById('oPrice').textContent = wrong;
+  document.getElementById('oUnits').textContent = blast + ' / 5';
+  document.getElementById('vProfit').textContent = Math.round(reliability) + '%';
+  document.getElementById('vMargin').textContent = runs;
+  const tP = document.getElementById('tProfit'), tM = document.getElementById('tMargin');
+  tP.style.borderColor = reliability < 80 ? 'var(--red)' : (reliability >= 95 ? 'var(--green)' : 'transparent');
+  tP.style.background = reliability < 80 ? '#FEE' : (reliability >= 95 ? 'var(--green-light)' : 'var(--bg-light)');
+  tM.style.borderColor = runs < 10 ? 'var(--red)' : (runs >= 30 ? 'var(--green)' : 'transparent');
+  tM.style.background = runs < 10 ? '#FEE' : (runs >= 30 ? 'var(--green-light)' : 'var(--bg-light)');
+  const note = document.getElementById('calcNote');
+  if (runs < 10){
+    note.innerHTML = '🟡 <strong>Too few bookings to trust anything.</strong> A handful of clean runs isn\'t evidence — a shaky workflow can pass 5 and fail the 11th on a weird booking. Replay more before you let it run unattended.';
+  } else if (reliability < 80){
+    note.innerHTML = '🚨 <strong>Fails too often.</strong> Below 80% means roughly one in five bookings breaks or duplicates — nowhere near shippable. Find the failure pattern (bad parse? double-fire?) and fix it before trusting it.';
+  } else if (reliability >= 95 && blast <= 2){
+    note.innerHTML = '✅ <strong>Ship it — narrow and unattended.</strong> High reliability on a low-damage, easily-fixed step (like saving a row) is exactly where an automation earns its keep. Let it run, but still add the error alert so you hear about the rare miss.';
+  } else if (blast >= 4){
+    note.innerHTML = '⚠️ <strong>Reliable, but the stakes are high.</strong> Even at this accuracy, one silent slip on a money-touching, irreversible step is costly. Ship it, but keep a human approval checkpoint on that step — unattended on the rest.';
+  } else {
+    note.innerHTML = '🟢 <strong>Getting there.</strong> Reliable enough for low-stakes, unattended steps. For anything you can\'t undo, keep the approval checkpoint until the numbers are higher and you\'ve replayed more bookings.';
+  }
+}
+['inCost','inPrice','inUnits'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+
+const judgeKey = {
+  A: {right:'act', fb:{
+    act:'✓ Correct — <strong>RUN UNATTENDED.</strong> 30/30 correct, and a wrong row is trivial to edit. Cheap and easily-fixed is precisely where you let an automation run on its own. This is the step that earns back Maya\'s swivel-chair hour.',
+    watch:'△ You <em>could</em> require approval, but saving a row is so cheap and easy to correct that gating it just recreates the manual copying you\'re trying to remove. Let it run. Verdict: <strong>RUN UNATTENDED</strong>.',
+    ignore:'✗ Nothing to fix — it\'s perfect on this step and a wrong row costs nothing. Blocking it here means typing every booking into the sheet yourself forever. Verdict: <strong>RUN UNATTENDED</strong>.'}},
+  B: {right:'watch', fb:{
+    watch:'✓ Correct — <strong>REQUIRE APPROVAL.</strong> It runs fine, but a charge can\'t be quietly un-charged and it hits a real customer\'s card. Even a reliable automation keeps a human checkpoint on the money step — at least until it\'s earned far more trust. Save & notify freely; charge on Maya\'s nod.',
+    act:'△ Tempting — it ran 30/30. But "can\'t be un-charged" is the line. One wrong auto-charge to a customer is exactly the failure an approval checkpoint exists to catch. Verdict: <strong>REQUIRE APPROVAL</strong>.',
+    ignore:'△ The step itself works — you don\'t need to fix it. You just don\'t let it move money unsupervised yet. Verdict: <strong>REQUIRE APPROVAL</strong>.'}},
+  C: {right:'ignore', fb:{
+    ignore:'✓ Correct — <strong>FIX FIRST.</strong> A trigger that double-fires and silently saves the same booking twice, with no de-dup key and no alert, is the dangerous silent failure — the sheet quietly fills with duplicates. Don\'t ship this until you add a <strong>de-dup key</strong> (ignore a booking ID you\'ve already saved) and an <strong>error alert</strong>. Then re-test.',
+    act:'✗ Shipping a workflow that silently duplicates bookings is how an automation quietly makes a mess at scale — nobody notices until the host preps twice. This one isn\'t ready. Verdict: <strong>FIX FIRST</strong>.',
+    watch:'△ Approval would slow you down without fixing the cause — the trigger firing twice. Add a de-dup key so a repeat booking ID is ignored, plus an alert when it happens. Fix the root cause first. Verdict: <strong>FIX FIRST</strong>.'}}
+};
+const judged = {};
+function judge(set, verdict, btn){
+  const k = judgeKey[set];
+  judged[set] = true;
+  const row = document.getElementById('op'+set);
+  const cls = k.right==='act' ? 'scale' : (k.right==='ignore' ? 'kill' : 'watch');
+  row.className = 'adset decided-' + cls;
+  row.querySelectorAll('.adset-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('fb'+set);
+  fb.className = 'adset-feedback show ' + (verdict===k.right ? 'good' : 'warn');
+  fb.innerHTML = k.fb[verdict];
+  if (judged.A && judged.B && judged.C){
+    setTimeout(()=>{ document.getElementById('weekVerdict').classList.add('show'); document.getElementById('weekVerdict').scrollIntoView({behavior:'smooth', block:'center'}); }, 600);
+  }
+}
+
+/* ───────── HONEST BEAT / FINAL ───────── */
+const finalFbs = [
+  {ok:false, fb:'✗ "The more hands-off, the better" is the reflex that gets beginners burned. A workflow that charges, refunds, and cancels with zero monitoring will quietly make expensive messes at scale — silently, and with nobody watching the missing rows.'},
+  {ok:true, fb:'✓ That\'s the builder\'s read. Automations genuinely kill real, repetitive busywork — that\'s durable. But they fail silently and can\'t own the money-touching step. <strong>"Zero monitoring, forever" is the reliable tell of hype.</strong> You ship narrow, add de-dup + alerts + monitoring, and keep a human on anything that can\'t be undone.'},
+  {ok:false, fb:'✗ Too far the other way. Automations aren\'t useless — you just spent four beats watching one trigger, extract, save, and notify on real bookings. The honest position isn\'t "magic" OR "fake" — it\'s "genuine leverage that still needs monitoring and a human on the risky step."'}
+];
+function finalQ(i){
+  const r = finalFbs[i];
+  const btns = document.querySelectorAll('#s5 .scenario-panel:first-of-type .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (finalFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('finalFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* automation-builder instincts quiz */
+const opsQs = [
+  {q:"The safest way to build your first automation is to…", opts:["Wire up all the steps at once and hit run","Add one step at a time and test each on a real past example","Skip testing — if it ran once in the demo, ship it"], correct:1, explain:"One step at a time, tested on real data, means when something breaks you know exactly which step caused it. Wiring everything at once turns debugging into a guessing game — and real bookings are always messier than you expect."},
+  {q:"A run failed silently — a booking never reached the sheet and nobody noticed for days. The real fix is to…", opts:["Check the sheet manually every hour, forever","Add an error alert that pings you the moment a run fails, plus a monitoring log you can glance at","Assume it won't happen again"], correct:1, explain:"Silent failure is the signature danger of unattended workflows. You beat it by making failures loud — an alert on error and a log you can scan — not by babysitting it or hoping."},
+  {q:"Your trigger sometimes double-fires and saves the same booking twice. The fix is…", opts:["Delete duplicates by hand each week","A de-dup key — ignore any booking ID you've already processed","Turn the automation off"], correct:1, explain:"A de-dup key (a unique ID you record and check) means a repeat trigger for the same booking is quietly ignored. It's the standard net for the double-fire — cheap to add, and it saves you from a sheet full of duplicates."}
+];
+let oqIdx = 0;
+function renderOpsQ(){
+  const s = opsQs[oqIdx];
+  document.getElementById('opsQ').textContent = `Round ${oqIdx+1}/3 — ${s.q}`;
+  document.getElementById('opsOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerOpsQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('opsNext').style.display = 'none';
+}
+function answerOpsQ(i){
+  const s = opsQs[oqIdx];
+  document.querySelectorAll('#opsOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (oqIdx===opsQs.length-1 ? '<br><br>🎉 That\'s the whole build — knowing an automation from an agent, mapping it, building one step at a time on real data, and making it reliable before you trust it unattended. You didn\'t just read about automations. You <strong>built one.</strong>' : '');
+  document.getElementById('opsNext').style.display = oqIdx < opsQs.length-1 ? 'inline-block' : 'none';
+}
+function nextOpsQ(){ oqIdx++; if (oqIdx < opsQs.length) renderOpsQ(); }
+renderOpsQ();
+</script>
+</body>
+</html>

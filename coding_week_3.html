@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Coding Week 3 — Build InboxScout, Maya's First AI Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;
+  --green:#4CAF50;--green-light:#E8F5E9;
+  --blue:#3F88C5;--purple:#8B5CF6;--pink:#EC4899;--red:#E74C3C;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);
+  --shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.7rem}
+.header-title{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy);line-height:1.2}
+.header-title span{color:var(--orange)}
+.header-tag{font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.logo-mascot{width:44px;height:44px;flex-shrink:0}
+.progress-pill{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;background:var(--orange-glow);border-radius:50px;font-size:.72rem;color:var(--orange);font-weight:700}
+.progress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* ─── HERO ─── */
+.hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--bg) 0%,var(--bg-light) 100%);position:relative;overflow:hidden}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;animation:fadeUp .7s ease}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.15;color:var(--navy);margin-bottom:.9rem;animation:fadeUp .7s ease .1s both}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:.95rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.4rem;animation:fadeUp .7s ease .2s both}
+.usecase-banner{background:#fff;border-radius:var(--radius);padding:1rem 1.2rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:1rem;animation:fadeUp .7s ease .3s both}
+.usecase-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#EC4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem}
+.usecase-text{font-size:.82rem;color:var(--text-secondary);line-height:1.5}
+.usecase-text strong{color:var(--navy);font-weight:700}
+.hero-visual{display:flex;justify-content:center;align-items:center;animation:fadeUp .8s ease .2s both}
+.hero-mascot{width:230px;height:auto;animation:float 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 40px rgba(232,122,46,0.22))}
+.budget-strip{max-width:1100px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;animation:fadeUp .8s ease .35s both}
+.budget-chip{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;text-align:center;box-shadow:var(--shadow-sm)}
+.budget-chip .bv{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--orange)}
+.budget-chip .bl{font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.15rem}
+
+/* ─── SECTION SHELL ─── */
+.section{padding:3rem 2rem;scroll-margin-top:80px}
+.section.alt{background:var(--bg-light)}
+.container{max-width:1100px;margin:0 auto}
+.section-header{margin-bottom:2rem}
+.section-num{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:.5rem}
+.section-num .num{width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(1.5rem,2.8vw,2rem);color:var(--navy);line-height:1.25;margin-bottom:.4rem}
+.section-sub{font-size:.92rem;color:var(--text-secondary);line-height:1.65;max-width:720px}
+.story-beat{background:#fff;border-left:4px solid var(--orange);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:1rem 1.2rem;font-size:.88rem;color:var(--text-primary);line-height:1.65;box-shadow:var(--shadow-sm);margin-bottom:1.6rem}
+.story-beat .sb-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:.3rem}
+.story-beat em{color:var(--text-secondary)}
+
+/* ─── TAB NAV ─── */
+.tab-nav{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem;background:rgba(255,255,255,0.7);backdrop-filter:blur(8px);border-radius:50px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:sticky;top:72px;z-index:50;margin:0 auto 2rem;max-width:fit-content;flex-wrap:nowrap;-ms-overflow-style:none;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:.55rem 1.1rem;border-radius:50px;border:none;background:transparent;color:var(--text-secondary);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab-btn:hover{color:var(--orange)}
+.tab-btn.active{background:var(--orange);color:#fff;box-shadow:0 3px 12px rgba(232,122,46,0.35)}
+
+/* ─── GENERIC CARDS/GRIDS ─── */
+.pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.pick-grid.two{grid-template-columns:repeat(2,1fr)}
+.pick-card{background:#fff;border-radius:var(--radius);padding:1.4rem;border:2px solid var(--border);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;transition:height .3s}
+.pick-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),#7BC67E)}
+.pick-card:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),#5DADE2)}
+.pick-card:nth-child(3)::before{background:linear-gradient(90deg,var(--pink),#F48FB1)}
+.pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.pick-card.active{border-color:var(--orange);box-shadow:var(--shadow-md)}
+.pick-card.active::before{height:6px}
+.pick-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem;background:var(--bg-light)}
+.pick-card h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem}
+.pick-card .pc-tag{font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.pick-card p{font-size:.8rem;color:var(--text-secondary);line-height:1.55}
+.pick-detail{background:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);font-size:.86rem;line-height:1.65;display:none}
+.pick-detail.show{display:block;animation:fadeUp .4s ease}
+.pick-detail strong{color:var(--navy)}
+.pick-detail .verdict-pill{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+.vp-good{background:var(--green-light);color:#2E7D32}
+.vp-mid{background:#FFF3CD;color:#856404}
+.vp-bad{background:#FEE;color:#C62828}
+
+/* ─── SCENARIO QUIZ ─── */
+.scenario-panel{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.scenario-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.6rem}
+.scenario-q{font-size:1rem;color:var(--navy);margin-bottom:1rem;font-weight:600;line-height:1.5}
+.scenario-options{display:grid;grid-template-columns:1fr;gap:.6rem;margin-bottom:1rem}
+.scenario-btn{padding:.75rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:.82rem;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit;transition:all .2s;text-align:left;line-height:1.45}
+.scenario-btn:hover{border-color:var(--orange);color:var(--orange)}
+.scenario-btn.correct{background:var(--green-light);border-color:var(--green);color:#2E7D32}
+.scenario-btn.wrong{background:#FEE;border-color:var(--red);color:#C62828}
+.scenario-feedback{padding:.9rem;border-radius:8px;font-size:.83rem;line-height:1.55;display:none}
+.scenario-feedback.show{display:block;animation:fadeUp .4s ease}
+.scenario-feedback.success{background:var(--green-light);color:#2E7D32;border-left:3px solid var(--green)}
+.scenario-feedback.fail{background:#FEE;color:#C62828;border-left:3px solid var(--red)}
+.btn-action{padding:.55rem 1.1rem;border-radius:8px;background:var(--orange);color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-action:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-secondary{background:transparent;color:var(--text-primary);border:1.5px solid var(--border);padding:.55rem 1.1rem;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── CHAT MOCK ─── */
+.chat-mock{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:1rem}
+.chat-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.chat-head .cdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-body{padding:1.1rem;display:flex;flex-direction:column;gap:.8rem;min-height:150px}
+.chat-msg{max-width:88%;padding:.8rem 1rem;border-radius:12px;font-size:.83rem;line-height:1.55}
+.chat-msg.user{align-self:flex-end;background:var(--orange-glow);color:var(--text-primary);border:1px solid rgba(232,122,46,0.25);border-bottom-right-radius:3px}
+.chat-msg.ai{align-self:flex-start;background:var(--bg-light);border:1px solid var(--border);border-bottom-left-radius:3px}
+.chat-msg.ai strong{color:var(--orange)}
+.chat-msg .who{display:block;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem}
+
+/* ─── OPTION / TRACE ─── */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.prod-card{background:#fff;border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+.prod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.prod-card.chosen{border-color:var(--orange)}
+.prod-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.prod-card:nth-child(1) .prod-img{background:linear-gradient(135deg,#EDE4F5,#D6C3EE)}
+.prod-card:nth-child(2) .prod-img{background:linear-gradient(135deg,#FBE4D5,#F8C8A8)}
+.prod-card:nth-child(3) .prod-img{background:linear-gradient(135deg,#DCEFE3,#BBDFC9)}
+.prod-body{padding:1rem 1.1rem}
+.prod-body h4{font-family:'DM Serif Display',serif;font-size:1.02rem;color:var(--navy);margin-bottom:.5rem}
+.prod-stats{display:flex;flex-direction:column;gap:.3rem}
+.prod-stat{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-secondary)}
+.prod-stat b{color:var(--navy)}
+.prod-stat .good{color:#2E7D32;font-weight:700}
+.prod-stat .bad{color:#C62828;font-weight:700}
+.prod-stat .mid{color:#B8860B;font-weight:700}
+.prod-cta{margin-top:.7rem;font-size:.72rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em}
+
+/* two-col info box (durable/hype) */
+.review-mine{background:#fff;border-radius:var(--radius);padding:1.4rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.review-cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.9rem}
+.review-col{border-radius:var(--radius-sm);padding:1rem 1.1rem}
+.review-col.love{background:var(--green-light)}
+.review-col.hate{background:#FEE}
+.review-col h5{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.review-col.love h5{color:#2E7D32}
+.review-col.hate h5{color:#C62828}
+.review-col li{font-size:.8rem;line-height:1.5;margin-left:1.1rem;margin-bottom:.35rem;color:var(--text-primary)}
+
+/* ─── BRIEF PREVIEW ─── */
+.voice-tabs{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.voice-tab{padding:.45rem .9rem;border-radius:50px;border:1.5px solid var(--border);background:#fff;font-size:.75rem;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .2s}
+.voice-tab:hover{border-color:var(--orange);color:var(--orange)}
+.voice-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.store-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.store-chrome{background:#F5F5F7;padding:.55rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted)}
+.store-chrome .sdot{width:9px;height:9px;border-radius:50%}
+.store-url{margin-left:.6rem;background:#fff;border:1px solid var(--border);border-radius:50px;padding:.2rem .9rem;font-size:.7rem;color:var(--text-secondary)}
+.store-body{padding:1.4rem 1.6rem}
+.store-brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.store-logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--orange-light));display:flex;align-items:center;justify-content:center;font-size:1rem}
+.store-brand b{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)}
+.store-hero-line{font-family:'DM Serif Display',serif;font-size:1.35rem;color:var(--navy);line-height:1.3;margin-bottom:.6rem;transition:opacity .3s}
+.store-desc{font-size:.84rem;color:var(--text-secondary);line-height:1.65;transition:opacity .3s}
+.store-price-row{display:flex;align-items:center;gap:.8rem;margin-top:1rem}
+.store-price{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--orange);line-height:1.4}
+.store-buy{padding:.55rem 1.4rem;border-radius:8px;background:var(--navy);color:#fff;font-size:.8rem;font-weight:700;border:none;cursor:default}
+.copy-toggle{display:flex;gap:.5rem;margin:1.4rem 0 .8rem}
+.before-after{border-radius:var(--radius-sm);padding:1rem 1.1rem;font-size:.85rem;line-height:1.6}
+.before-after.before{background:var(--bg-light);border:1.5px dashed var(--border);color:var(--text-muted)}
+.before-after.after{background:var(--orange-glow);border:1.5px solid rgba(232,122,46,0.35);color:var(--text-primary)}
+
+/* ─── AUTONOMY WIDGET ─── */
+.perso-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.4rem;margin-top:1.4rem;align-items:start}
+.perso-controls .prompt-field{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.9rem}
+.perso-controls label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.perso-controls select{padding:.6rem .8rem;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:.83rem;color:var(--text-primary);background:#fff}
+.perso-controls select:focus{outline:none;border-color:var(--orange)}
+.perso-preview{background:#fff;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden}
+.pp-head{background:var(--navy-dark);color:#fff;padding:.6rem 1rem;font-size:.74rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
+.pp-body{padding:1.1rem 1.2rem}
+.pp-greeting{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.7rem;transition:opacity .3s}
+.pp-recos{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+.pp-reco{background:var(--bg-light);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;text-align:center;transition:opacity .3s}
+.pp-reco .ppe{font-size:1.5rem}
+.pp-reco .ppn{font-size:.66rem;font-weight:700;color:var(--navy);margin-top:.25rem;line-height:1.3}
+
+/* ─── CHECKLIST + FEED ─── */
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.build-card{background:#fff;border-radius:var(--radius);padding:1.3rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.build-card h4{font-size:.95rem;color:var(--navy);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.build-card h4::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:.6rem;padding:.42rem 0;font-size:.84rem;color:var(--text-primary);cursor:pointer;line-height:1.45}
+.checklist li .check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .2s}
+.checklist li.done .check{background:var(--green);border-color:var(--green)}
+.checklist li.done .check::after{content:'✓';color:#fff;font-size:.7rem;font-weight:800}
+.checklist li.done{color:var(--text-muted);text-decoration:line-through}
+.feed{background:var(--navy-dark);border-radius:10px;padding:1rem 1.1rem;min-height:220px;max-height:280px;overflow-y:auto}
+.feed-line{display:flex;gap:.6rem;font-size:.78rem;line-height:1.55;padding:.3rem 0;color:#D8DAE5;animation:fadeUp .4s ease}
+.feed-line .ft{color:var(--orange-light);font-weight:700;flex-shrink:0}
+.feed-line.hint-line{color:#8B8DA0;font-style:italic}
+.done-note{margin-top:1rem;padding:.8rem;background:var(--green-light);border-radius:7px;font-size:.78rem;color:#2E7D32;display:none}
+
+/* ─── TRACE TRIAGE ─── */
+.triage{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:1.4rem}
+.ticket{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.ticket.decided-bot{border-color:var(--green);background:var(--green-light)}
+.ticket.decided-human{border-color:var(--blue);background:rgba(63,136,197,0.08)}
+.ticket.wrongdrop{border-color:var(--red);background:#FEE}
+.ticket-msg{font-size:.85rem;color:var(--text-primary);line-height:1.45}
+.ticket-msg span{display:block;font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+.ticket-actions{display:flex;gap:.4rem}
+.ticket-btn{padding:.45rem .85rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.ticket-btn:hover{border-color:var(--orange);color:var(--orange)}
+.ticket-btn:disabled{opacity:.5;cursor:not-allowed}
+.ticket-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.ticket-feedback.show{display:block;animation:fadeUp .4s ease}
+.ticket-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.ticket-feedback.warn{background:#FFF3CD;color:#856404}
+
+/* ─── EVAL DASHBOARD ─── */
+.eval-dashboard{background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+.metric-card{padding:1rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent}
+.metric-card.highlight{border-color:var(--orange);background:var(--orange-glow)}
+.metric-card.warn{border-color:var(--red);background:#FEE}
+.metric-value{font-family:'DM Serif Display',serif;font-size:1.65rem;color:var(--navy);line-height:1}
+.metric-card.highlight .metric-value{color:var(--orange)}
+.metric-card.warn .metric-value{color:#C62828}
+.metric-label{font-size:.66rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:.4rem}
+.adset{display:grid;grid-template-columns:1.3fr 1fr auto;gap:1rem;align-items:center;padding:1rem 1.1rem;background:var(--bg-light);border-radius:10px;margin-bottom:.7rem;border:1.5px solid transparent;transition:all .3s}
+.adset.decided-scale{border-color:var(--green);background:var(--green-light)}
+.adset.decided-kill{border-color:var(--red);background:#FEE}
+.adset.decided-watch{border-color:#E0A800;background:#FFF8E1}
+.adset-name{font-size:.86rem;font-weight:700;color:var(--navy);line-height:1.4}
+.adset-name span{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted)}
+.adset-nums{display:flex;gap:1rem;font-size:.75rem;color:var(--text-secondary);flex-wrap:wrap}
+.adset-nums b{display:block;font-size:.88rem;color:var(--navy)}
+.adset-actions{display:flex;gap:.4rem}
+.adset-btn{padding:.4rem .8rem;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.adset-btn:hover{border-color:var(--orange);color:var(--orange)}
+.adset-btn:disabled{opacity:.45;cursor:not-allowed}
+.adset-feedback{grid-column:1/-1;font-size:.78rem;line-height:1.5;padding:.6rem .8rem;border-radius:7px;display:none}
+.adset-feedback.show{display:block;animation:fadeUp .4s ease}
+.adset-feedback.good{background:rgba(76,175,80,0.12);color:#2E7D32}
+.adset-feedback.warn{background:#FFF3CD;color:#856404}
+.week-verdict{display:none;margin-top:1.4rem;background:var(--navy-dark);border-radius:var(--radius);padding:1.6rem;color:#fff;animation:popIn .5s ease}
+.week-verdict.show{display:block}
+.week-verdict h4{font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:.8rem}
+.week-verdict h4 em{font-style:normal;color:var(--orange-light)}
+.wv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem}
+.wv-tile{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:9px;padding:.8rem;text-align:center}
+.wv-tile .v{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--orange-light)}
+.wv-tile .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.55);font-weight:700;margin-top:.25rem}
+.week-verdict p{font-size:.87rem;line-height:1.65;color:rgba(255,255,255,0.85)}
+.week-verdict p strong{color:var(--orange-light)}
+
+/* ─── FOOTER / RECAP ─── */
+.footer-cta{text-align:center;padding:3rem 2rem 5.5rem;background:var(--navy-dark);color:#fff}
+.footer-cta h2{font-family:'DM Serif Display',serif;font-size:1.9rem;margin-bottom:.6rem}
+.footer-cta h2 em{color:var(--orange);font-style:normal}
+.footer-cta>p{font-size:.92rem;color:rgba(255,255,255,0.7);max-width:600px;margin:0 auto 1.8rem}
+.recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;max-width:1050px;margin:0 auto 1.8rem;text-align:left}
+.recap-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);border-radius:var(--radius);padding:1.2rem 1.3rem}
+.recap-card .rn{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-light);margin-bottom:.35rem}
+.recap-card h4{font-family:'DM Serif Display',serif;font-size:1.02rem;margin-bottom:.35rem;color:#fff}
+.recap-card p{font-size:.76rem;color:rgba(255,255,255,0.65);line-height:1.55}
+.footer-note{font-size:.72rem;color:rgba(255,255,255,0.4);margin-top:1.6rem;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+/* ─── COMPLETION BAR ─── */
+.completion-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;z-index:90;box-shadow:0 -2px 12px rgba(0,0,0,0.05)}
+.completion-info{display:flex;align-items:center;gap:.8rem;font-size:.82rem;color:var(--text-primary);font-weight:600}
+.completion-track{flex:1;max-width:280px;height:8px;background:var(--bg-light);border-radius:4px;overflow:hidden;margin:0 1rem}
+.completion-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange-light));border-radius:4px;transition:width .5s ease}
+.completion-percent{font-family:'DM Serif Display',serif;color:var(--orange);font-size:1.15rem}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:880px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-mascot{width:170px;margin:0 auto}
+  .usecase-banner{text-align:left}
+  .budget-strip{grid-template-columns:repeat(2,1fr)}
+  .pick-grid,.pick-grid.two,.prod-grid{grid-template-columns:1fr}
+  .build-grid,.review-cols,.perso-grid{grid-template-columns:1fr}
+  .eval-metrics{grid-template-columns:repeat(2,1fr)}
+  .adset,.ticket{grid-template-columns:1fr}
+  .pp-recos{grid-template-columns:repeat(3,1fr)}
+  .wv-grid,.recap-grid{grid-template-columns:repeat(2,1fr)}
+  .header{padding:.7rem 1rem}
+  .section{padding:2.2rem 1rem}
+  .hero{padding:2.5rem 1rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <div class="header-left">
+    <svg class="logo-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="477" cy="380" rx="285" ry="324" fill="#EBE3D6"/>
+      <ellipse cx="477" cy="380" rx="240" ry="270" fill="#412C23"/>
+      <circle cx="389" cy="430" r="36" fill="#fff"/>
+      <circle cx="565" cy="430" r="36" fill="#fff"/>
+      <circle cx="389" cy="430" r="14" fill="#2B2D42"/>
+      <circle cx="565" cy="430" r="14" fill="#2B2D42"/>
+      <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="14" stroke-linecap="round" fill="none"/>
+      <ellipse cx="477" cy="1350" rx="430" ry="100" fill="#EF7F1A"/>
+      <ellipse cx="477" cy="1350" rx="380" ry="78" fill="#FF9429"/>
+    </svg>
+    <div>
+      <div class="header-title">AI Coding <span>&amp; Agents</span></div>
+      <div class="header-tag">MokshPath · Week 3 · Fun While You Learn</div>
+    </div>
+  </div>
+  <div class="progress-pill"><span class="dot"></span> <span id="headerProgressText">0 of 5 beats built</span></div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block"></span> Story Project · Build an Agent</div>
+      <h1>From App to <em>Agent</em> — Maya Builds Her First AI Worker, Beat by Beat</h1>
+      <p class="hero-sub">Two weeks ago Maya wrote <strong>ReceiptTidy</strong>, a tiny script that did one thing on command. Last week she shipped <strong>ShiftSwap</strong>, a real app her helpers open on their phones. Both did exactly what she told them, step by step. But now a new job is eating her mornings — and its steps are never the same twice. This week Maya builds something that can <em>figure out the steps itself</em>: an AI <strong>agent</strong> called InboxScout. You'll make every call with her, across the four beats every agent-builder learns: <strong>What Is an Agent → Design the Job → Build It → Trust &amp; Ship</strong>.</p>
+      <div class="usecase-banner">
+        <div class="usecase-icon">🤖</div>
+        <div class="usecase-text"><strong>The Mission:</strong> Take one recurring, messy job — the hour Maya loses every morning sorting and answering her inbox — and hand it to an agent that reads, decides, uses tools, and drafts replies, while Maya keeps her hand on the risky moves. Not a script that follows orders. A worker that pursues a goal — narrow, tested, and trusted only where it's earned it.</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-mascot" viewBox="0 0 955 1486" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EBE3D6"/><stop offset="1" stop-color="#D1D0CC"/></linearGradient>
+          <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A6A48"/><stop offset="1" stop-color="#412C23"/></linearGradient>
+          <linearGradient id="feetGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9429"/><stop offset="1" stop-color="#EF7F1A"/></linearGradient>
+        </defs>
+        <ellipse cx="210" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="740" cy="408" rx="68" ry="82" fill="#D9DADA"/>
+        <ellipse cx="477" cy="380" rx="285" ry="324" fill="url(#bodyGrad)"/>
+        <ellipse cx="477" cy="392" rx="240" ry="225" fill="url(#faceGrad)"/>
+        <circle cx="389" cy="430" r="38" fill="#fff"/>
+        <circle cx="565" cy="430" r="38" fill="#fff"/>
+        <circle cx="389" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="565" cy="430" r="15" fill="#2B2D42"/>
+        <circle cx="395" cy="424" r="5" fill="#fff"/>
+        <circle cx="571" cy="424" r="5" fill="#fff"/>
+        <path d="M380 1180c30 28 65 42 97 42s67-14 97-42" stroke="#A34E1C" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <ellipse cx="477" cy="1350" rx="430" ry="105" fill="url(#feetGrad)"/>
+        <ellipse cx="477" cy="1320" rx="380" ry="78" fill="#FF9429"/>
+      </svg>
+    </div>
+  </div>
+  <div class="budget-strip">
+    <div class="budget-chip"><div class="bv">4 beats</div><div class="bl">One agent, built</div></div>
+    <div class="budget-chip"><div class="bv">0 lines</div><div class="bl">Of code to start</div></div>
+    <div class="budget-chip"><div class="bv">Model + tools + loop</div><div class="bl">What an agent is</div></div>
+    <div class="budget-chip"><div class="bv">4 lessons</div><div class="bl">Woven into 1 build</div></div>
+  </div>
+</section>
+
+<!-- ─── TAB NAVIGATION ─── -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-target="s1">Beat 1 · What's an Agent</button>
+  <button class="tab-btn" data-target="s2">Beat 2 · Design the Job</button>
+  <button class="tab-btn" data-target="s3">Beat 3 · Build It</button>
+  <button class="tab-btn" data-target="s4">Beat 4 · Trust &amp; Ship</button>
+  <button class="tab-btn" data-target="s5">The Honest Beat</button>
+</div>
+
+<!-- ═══════════ BEAT 1: WHAT IS AN AGENT ═══════════ -->
+<section class="section" id="s1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">1</div> Beat One · What Is an Agent</div>
+      <h2 class="section-title">The Job a Script Can't Do — Meet the Agent</h2>
+      <p class="section-sub">Before Maya builds anything, one realisation reframes the whole week: her old tools follow steps she writes down in advance. This new job has no fixed steps. Understanding <strong>why</strong> that needs an agent — and where an agent would be overkill — is the first beat.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Monday, 7:40 a.m. Maya opens her laptop and there they are again: 14 overnight messages. A helper asking to swap a Saturday. Two people asking if the fig &amp; cedar candle is back. Someone asking about a bulk order for an office. A supplier note. A "just checking you got my last email?" She's spent an hour on this every morning for months. Her instinct from Week 1 kicks in — <em>write a script.</em> Then she stops: <em>a script needs me to know the steps in advance, and these messages are never the same twice.</em> This isn't a script problem. It might be her first <strong>agent</strong>.
+    </div>
+
+    <div class="pick-grid two">
+      <div class="pick-card" data-plat="market" onclick="pickPlat('market')">
+        <div class="pick-icon">📜</div>
+        <div class="pc-tag">Fixed steps · Rock-solid, rigid</div>
+        <h4>A script / fixed workflow</h4>
+        <p>Like ReceiptTidy: you write the exact steps once, and it runs them the same way every time. Perfect when the task is identical each run — brittle the moment reality varies from the plan you wrote.</p>
+      </div>
+      <div class="pick-card" data-plat="own" onclick="pickPlat('own')">
+        <div class="pick-icon">🤖</div>
+        <div class="pc-tag">A goal + a loop · Adapts</div>
+        <h4>An AI agent</h4>
+        <p>A model given a goal, some tools, and a loop: it reads the situation, decides the next step, does it, checks the result, and repeats. It handles jobs where the steps change — but it needs guardrails, because it decides.</p>
+      </div>
+    </div>
+    <div class="pick-detail" id="platDetail"></div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> Maya's AI assistant · "Help me think about this the right way"</div>
+      <div class="chat-body" id="stackChat">
+        <div class="chat-msg ai"><span class="who">Narrator</span>An agent is really just four parts: a <strong>model</strong> that reasons, <strong>tools</strong> it can use, a <strong>loop</strong> that lets it take a step and react to the result, and a <strong>goal</strong> to aim at. But you only get a useful answer if you ask a useful question. Below are three ways Maya could open the conversation. <strong>Pick the one that earns a real plan.</strong></div>
+      </div>
+    </div>
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · Pick Maya's opening message</div>
+      <div class="scenario-q">Which prompt does Maya send her AI assistant?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="pickPrompt(0)">"Build me an AI agent that does everything and saves me time."</button>
+        <button class="scenario-btn" onclick="pickPrompt(1)">"Just write me a script that auto-replies to all my emails for me."</button>
+        <button class="scenario-btn" onclick="pickPrompt(2)">"Act as an agent designer. I'm a beginner. Every morning I spend an hour triaging a messy inbox — the messages vary every day. Help me decide whether an agent fits here, and if it does, define its goal, the tools it would need, and which actions it may take on its own vs. only with my approval."</button>
+      </div>
+      <div class="scenario-feedback" id="promptFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · Agent instincts (3 rounds)</div>
+      <div class="scenario-q" id="stackQ">Loading…</div>
+      <div class="scenario-options" id="stackOpts"></div>
+      <div class="scenario-feedback" id="stackFb"></div>
+      <button class="btn-secondary" id="stackNext" onclick="nextStackQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 2: DESIGN THE JOB ═══════════ -->
+<section class="section alt" id="s2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">2</div> Beat Two · Design the Job</div>
+      <h2 class="section-title">The Brief Comes First — Goal, Tools, Guardrails</h2>
+      <p class="section-sub">An agent is only as good as the job you hand it. Before building, Maya writes a one-page <strong>brief</strong>: the goal and what "done well" means, the tools it may use, the role and house rules, and — most important — what it may do on its own vs. what needs her approval. A vague brief makes a vague, wandering agent.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Tuesday evening. Maya has decided: this job is worth an agent. But she remembers the lesson from ShiftSwap — <em>design is cheap on paper and expensive later.</em> So before she opens any builder, she writes InboxScout's brief. The same agent can be a careful assistant or a loose cannon depending entirely on how tightly she scopes it. Flip between three versions of the brief below and watch the agent's whole personality change.
+    </div>
+
+    <div class="voice-tabs">
+      <button class="voice-tab" data-voice="vague" onclick="setVoice('vague')">🌫️ Vague brief</button>
+      <button class="voice-tab active" data-voice="tight" onclick="setVoice('tight')">🎯 Tight brief</button>
+      <button class="voice-tab" data-voice="over" onclick="setVoice('over')">🚀 Over-scoped brief</button>
+    </div>
+
+    <div class="store-preview">
+      <div class="store-chrome">
+        <span class="sdot" style="background:#FF5F57"></span><span class="sdot" style="background:#FEBC2E"></span><span class="sdot" style="background:#28C840"></span>
+        <span class="store-url">📄 inboxscout / brief.md</span>
+      </div>
+      <div class="store-body">
+        <div class="store-brand"><div class="store-logo">🤖</div><b>InboxScout</b><span style="font-size:.7rem;color:var(--text-muted);margin-left:auto">Agent brief · draft</span></div>
+        <div class="store-hero-line" id="storeHeadline">Goal: every morning, sort the overnight inbox and draft replies to the routine ones — never send without Maya's OK.</div>
+        <div class="store-desc" id="storeDesc">Tools: read inbox, search my notes &amp; FAQ doc, check my calendar, write a draft. Success: routine messages get an accurate draft; anything unusual is flagged for me. Boundaries: never sends, never touches money, never invents an answer — if unsure, it says so and asks.</div>
+        <div class="store-price-row">
+          <div class="store-price">Scope: narrow · Autonomy: draft-only · Approval: before any send</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copy-toggle">
+      <button class="btn-secondary" id="beforeBtn" onclick="toggleCopy('before')">😬 Before: the vague brief</button>
+      <button class="btn-action" id="afterBtn" onclick="toggleCopy('after')">✨ After: the sharp brief</button>
+    </div>
+    <div class="before-after before" id="copyBefore" style="display:none">
+      "Goal: help me with my email. Tools: whatever it needs. It can go ahead and do anything that saves me time."
+      <div style="margin-top:.5rem;font-size:.75rem">← This is a wish, not a brief. No definition of "done," no boundaries, and "do anything that saves time" is exactly how an agent ends up sending a confident wrong reply at 2 a.m. Vague brief in, unpredictable agent out.</div>
+    </div>
+    <div class="before-after after" id="copyAfter">
+      "Goal: each morning, label the overnight inbox and draft replies to routine messages; flag anything unusual for me. Tools: read inbox, search my notes/FAQ, check calendar, write a draft. Never send without my approval. If it isn't sure, it says 'I don't know' and asks — it never guesses."
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-secondary)">← Same job. The difference is <strong>the brief</strong>: a concrete goal, a named tool list, a clear line between draft (allowed) and send (needs Maya), and an honest rule for uncertainty. This is what you design before you build anything.</div>
+    </div>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <h4>Maya's design checklist</h4>
+        <ul class="checklist" id="buildList">
+          <li data-step="0" onclick="runBuildStep(0)"><span class="check"></span>Write the <strong>&nbsp;goal&nbsp;</strong> and what "done well" looks like (success criteria)</li>
+          <li data-step="1" onclick="runBuildStep(1)"><span class="check"></span>List the <strong>&nbsp;tools&nbsp;</strong> it may use — read inbox, search notes, check calendar, draft</li>
+          <li data-step="2" onclick="runBuildStep(2)"><span class="check"></span>Write the role + instructions (who it is, its house rules)</li>
+          <li data-step="3" onclick="runBuildStep(3)"><span class="check"></span>Set the guardrails (never send unasked, never touch money, no guessing)</li>
+          <li data-step="4" onclick="runBuildStep(4)"><span class="check"></span>Decide autonomous vs. approval for each kind of action</li>
+          <li data-step="5" onclick="runBuildStep(5)"><span class="check"></span>Write it all as a one-page brief you could hand to anyone</li>
+        </ul>
+        <div class="done-note" id="buildDone">✅ <strong>InboxScout's brief is written.</strong> One page: goal, tools, role, guardrails, approval rules. Maya hasn't built a thing yet — and that's exactly why the build will go fast. Onto the workbench.</div>
+      </div>
+      <div class="build-card">
+        <h4>Design log (click checklist items)</h4>
+        <div class="feed" id="buildFeed">
+          <div class="feed-line hint-line"><span class="ft">--:--</span>Waiting for Maya to start designing… tick items on the left.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">🎚️ The Autonomy Dial — what may it do alone?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">The single most important design choice: not <em>what can the agent do</em>, but <em>what may it do without asking you first</em>. The rule of thumb — let it act alone on cheap, reversible things; keep a human on anything costly or impossible to undo. Pick an action and see where it lands.</p>
+      <div class="perso-grid">
+        <div class="perso-controls">
+          <div class="prompt-field">
+            <label>What might InboxScout do?</label>
+            <select id="persoWho" onchange="renderPerso()">
+              <option value="read">Read &amp; label incoming messages</option>
+              <option value="draft">Write a draft reply (doesn't send)</option>
+              <option value="send">Send the reply to the person</option>
+              <option value="sensitive">Issue a refund / share a password</option>
+            </select>
+          </div>
+          <p style="font-size:.78rem;color:var(--text-muted);line-height:1.55;margin-top:.6rem">💡 Autonomy isn't all-or-nothing — you set it action by action. A draft is a suggestion you can bin; a sent email can't be un-sent. Start tight: let it act alone only where a mistake is cheap and reversible, and widen the leash later once it's earned trust.</p>
+        </div>
+        <div class="perso-preview">
+          <div class="pp-head">🤖 InboxScout — permission check</div>
+          <div class="pp-body">
+            <div class="pp-greeting" id="ppGreeting">✅ Let it do this alone — reading and labelling is safe and undo-able.</div>
+            <div class="pp-recos" id="ppRecos">
+              <div class="pp-reco"><div class="ppe">👀</div><div class="ppn">Just reads</div></div>
+              <div class="pp-reco"><div class="ppe">🏷️</div><div class="ppn">Adds a label</div></div>
+              <div class="pp-reco"><div class="ppe">↩️</div><div class="ppn">Fully reversible</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Checkpoint · The safer brief</div>
+      <div class="scenario-q">Three versions of InboxScout's goal line are on the table. Which one does Maya put at the top of the brief?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="headlineQ(0)">"Goal: handle all my email however you think is best — full autonomy, save me as much time as possible."</button>
+        <button class="scenario-btn" onclick="headlineQ(1)">"Goal: label overnight messages and draft replies to routine ones; flag the rest for me; never send without my OK."</button>
+        <button class="scenario-btn" onclick="headlineQ(2)">"Goal: reply to and fully resolve every message automatically, including refunds, payments, and account changes."</button>
+      </div>
+      <div class="scenario-feedback" id="headlineFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 3: BUILD IT ═══════════ -->
+<section class="section" id="s3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">3</div> Beat Three · Build It</div>
+      <h2 class="section-title">One Tool at a Time — and Read the Reasoning Trace</h2>
+      <p class="section-sub">Now Maya builds — but not all at once. She picks a low-friction approach, adds <strong>one tool at a time</strong>, and tests after each. The superpower here is the <strong>reasoning trace</strong>: the agent shows its thinking and every tool it calls, so when it misbehaves — wrong tool, endless loop, an invented answer — you can see exactly where and fix it.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Wednesday. Maya opens an agent builder — the kind where you write the brief in plain language and wire in tools without installing anything. She resists giving it all four tools at once. Instead: <em>read the inbox first, test, then add search, test, then calendar, then draft.</em> After each tool she runs it on yesterday's real messages and reads the trace line by line. Because that's the whole game now — an agent that can't be watched can't be trusted. Below is one morning's trace. Judge each step.
+    </div>
+
+    <div class="chat-mock">
+      <div class="chat-head"><span class="cdot"></span> InboxScout · reasoning trace (test run on yesterday's inbox)</div>
+      <div class="chat-body">
+        <div class="chat-msg user"><span class="who">Goal given</span>Sort the 14 overnight messages. Draft replies to routine ones. Flag anything unusual. Don't send.</div>
+        <div class="chat-msg ai"><span class="who">InboxScout · step 1</span><strong>Thinking:</strong> First I'll read all 14 and label them. <strong>Tool call → read_inbox.</strong> Labelled 9 routine, 3 need-a-human, 2 unsure. Looks clean.</div>
+        <div class="chat-msg ai"><span class="who">Narrator</span>That first step was correct — a good tool call, right on the goal. But an agent's next steps aren't always this tidy. Watch the trace unfold below and call each one: <strong>looks right, or a bug to fix?</strong></div>
+      </div>
+    </div>
+
+    <div class="triage">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🔬 Read the trace — good step or bug?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1rem">For each step InboxScout takes, decide: <strong>ship it</strong> (the behaviour is correct) or <strong>debug it</strong> (something's wrong and needs fixing). Reading the trace like this <em>is</em> the skill of building an agent.</p>
+
+      <div class="ticket" id="tk1">
+        <div class="ticket-msg"><span>Step 2</span>A routine "is the fig &amp; cedar candle back?" message → InboxScout calls <b>search_notes</b>, finds the restock date, drafts an accurate reply, and stops for approval.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(1,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(1,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf1"></div>
+      </div>
+
+      <div class="ticket" id="tk2">
+        <div class="ticket-msg"><span>Step 3</span>A helper asks "am I free to cover next Saturday?" → InboxScout answers "Yes, you're free!" <b>without ever calling the calendar tool</b> it was given.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(2,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(2,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf2"></div>
+      </div>
+
+      <div class="ticket" id="tk3">
+        <div class="ticket-msg"><span>Step 4</span>One message it can't classify → InboxScout runs the same <b>search_notes</b> query, gets nothing, runs it again, and again… 30 times, going nowhere.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(3,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(3,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf3"></div>
+      </div>
+
+      <div class="ticket" id="tk4">
+        <div class="ticket-msg"><span>Step 5</span>An angry "this is the SECOND broken candle" message → InboxScout labels it <b>needs-a-human</b>, writes no reply, and flags it at the top for Maya.</div>
+        <div class="ticket-actions">
+          <button class="ticket-btn" onclick="triage(4,'bot',this)">✓ Looks right</button>
+          <button class="ticket-btn" onclick="triage(4,'human',this)">🐞 Bug</button>
+        </div>
+        <div class="ticket-feedback" id="tf4"></div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🐞 Debug · It answered confidently and wrong</div>
+      <div class="scenario-q">On a test run, InboxScout drafted: <em>"Our workshops are ₹500 per person."</em> They're actually ₹1,500 — it invented the number. It <strong>hallucinated</strong>. Which fix do you ship?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="reviewQ(0)">Add "please don't make mistakes and always be accurate" to its instructions.</button>
+        <button class="scenario-btn" onclick="reviewQ(1)">Give it a source-of-truth tool (your prices/notes doc) and instruct it to answer price questions ONLY from that doc — if the doc doesn't say, reply "I don't know" and flag it. Keep the approval step so you'd catch it anyway.</button>
+        <button class="scenario-btn" onclick="reviewQ(2)">Leave it — it's usually right, and one wrong number now and then is fine.</button>
+      </div>
+      <div class="scenario-feedback" id="reviewFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BEAT 4: TRUST & SHIP ═══════════ -->
+<section class="section alt" id="s4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">4</div> Beat Four · Evaluate, Trust &amp; Ship</div>
+      <h2 class="section-title">Reliability Is Measured, Not Assumed — Then You Ship Narrow</h2>
+      <p class="section-sub">An agent that worked once hasn't earned your trust. Maya runs InboxScout many times, counts how often it's right, hunts for the <strong>silent</strong> wrong answers, adds the guardrail that fixes the worst failure, and only then ships — narrow, documented, and with a human on anything irreversible. "It looked fine" is not evidence.</p>
+    </div>
+
+    <div class="story-beat">
+      <span class="sb-tag">📖 The story so far</span>
+      Thursday. InboxScout runs. But Maya doesn't hand it the keys because one demo went well — she remembers that a build that works for <em>you</em> isn't shipped. So she runs it on 20 past mornings, tallies the results, and reads every draft looking for the dangerous kind of failure: the answer that's wrong but <em>confident</em>, the one nobody would catch. Then she decides, for each behaviour, how much rope it gets. Play with the trust numbers first, then judge each behaviour.
+    </div>
+
+    <div class="calc" style="background:#fff;border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:1.4rem">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.3rem">🧮 The Trust Meter — is InboxScout ready to run on its own?</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:1.1rem">Trust isn't a feeling — it's reliability across enough runs, weighed against how bad one slip-through would be. Drag the sliders and watch where "ship it autonomously" turns into "keep a human in the loop."</p>
+      <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+        <div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Test runs completed <output id="oCost" style="color:var(--orange);font-weight:800">20</output></label>
+            <input type="range" class="calc-slider" id="inCost" min="3" max="60" step="1" value="20" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field" style="margin-bottom:1rem">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Runs it got wrong <output id="oPrice" style="color:var(--orange);font-weight:800">2</output></label>
+            <input type="range" class="calc-slider" id="inPrice" min="0" max="20" step="1" value="2" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+          <div class="calc-field">
+            <label style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem">Damage if a wrong answer slips through <output id="oUnits" style="color:var(--orange);font-weight:800">3 / 5</output></label>
+            <input type="range" class="calc-slider" id="inUnits" min="1" max="5" step="1" value="3" style="-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer">
+          </div>
+        </div>
+        <div class="calc-out" style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-content:start">
+          <div class="calc-tile" id="tProfit" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vProfit" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">90%</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Reliability</div></div>
+          <div class="calc-tile" id="tMargin" style="padding:.95rem;background:var(--bg-light);border-radius:10px;text-align:center;border:1.5px solid transparent"><div class="cv" id="vMargin" style="font-family:'DM Serif Display',serif;font-size:1.45rem;color:var(--navy);line-height:1.1">20</div><div class="cl" style="font-size:.64rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-top:.3rem">Sample size</div></div>
+          <div class="calc-note" id="calcNote" style="grid-column:1/-1;font-size:.8rem;line-height:1.55;padding:.8rem 1rem;border-radius:8px;background:var(--orange-glow);color:var(--text-primary)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eval-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.6rem">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--navy)">InboxScout · 20-Run Evaluation</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">Measured, not assumed. Each behaviour below is a decision about how much rope to give it.</div>
+        </div>
+      </div>
+      <div class="eval-metrics">
+        <div class="metric-card"><div class="metric-value">20</div><div class="metric-label">Test runs logged</div></div>
+        <div class="metric-card"><div class="metric-value">90%</div><div class="metric-label">Answers correct</div></div>
+        <div class="metric-card warn"><div class="metric-value">2</div><div class="metric-label">Silent wrong answers</div></div>
+        <div class="metric-card highlight"><div class="metric-value">3</div><div class="metric-label">Tools wired in</div></div>
+      </div>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1rem 0 .6rem">For each behaviour — Ship autonomous, Require approval, or Fix first</div>
+
+      <div class="adset" id="opA">
+        <div class="adset-name">✉️ Reading &amp; labelling incoming messages<span>20/20 correct · fully reversible · nobody gets hurt by a wrong label</span></div>
+        <div class="adset-nums"><span>Correct<b>20/20</b></span><span>Reversible<b>yes</b></span><span>Damage<b>tiny</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('A','act',this)">Ship autonomous</button>
+          <button class="adset-btn" onclick="judge('A','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('A','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbA"></div>
+      </div>
+
+      <div class="adset" id="opB">
+        <div class="adset-name">📤 Actually sending the drafted reply<span>Drafts are great, but a sent message can't be un-sent · goes to a real person</span></div>
+        <div class="adset-nums"><span>Drafts<b>20/20 good</b></span><span>Reversible<b>no</b></span><span>Damage<b>high</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('B','act',this)">Ship autonomous</button>
+          <button class="adset-btn" onclick="judge('B','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('B','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbB"></div>
+      </div>
+
+      <div class="adset" id="opC">
+        <div class="adset-name">💬 Answering price &amp; policy questions<span>Wrong but confident on 2/20 · invented a number, no flag · a customer would act on it</span></div>
+        <div class="adset-nums"><span>Wrong<b>2/20 silent</b></span><span>Confident<b>yes</b></span><span>Damage<b>high</b></span></div>
+        <div class="adset-actions">
+          <button class="adset-btn" onclick="judge('C','act',this)">Ship autonomous</button>
+          <button class="adset-btn" onclick="judge('C','watch',this)">Require approval</button>
+          <button class="adset-btn" onclick="judge('C','ignore',this)">Fix first</button>
+        </div>
+        <div class="adset-feedback" id="fbC"></div>
+      </div>
+
+      <div class="week-verdict" id="weekVerdict">
+        <h4>📜 The Builder's Verdict: <em>Maya shipped a real agent.</em></h4>
+        <div class="wv-grid">
+          <div class="wv-tile"><div class="v">1</div><div class="l">Job it does well</div></div>
+          <div class="wv-tile"><div class="v">3</div><div class="l">Tools, added one by one</div></div>
+          <div class="wv-tile"><div class="v">90%</div><div class="l">Reliability, measured</div></div>
+          <div class="wv-tile"><div class="v">1</div><div class="l">Guardrail that saved her</div></div>
+        </div>
+        <p>InboxScout ships — but on Maya's terms. It labels and drafts on its own, because that's cheap and reversible. It <strong>never sends</strong> without her nod, because that can't be undone. And it answers price questions <strong>only from the doc</strong>, because the one time it guessed, it guessed wrong and confidently. She didn't build a robot that runs her business — she built a narrow, tested worker that gives her an hour back every morning and hands her exactly the messages a human should touch. That's the difference between hype and a shipped agent. 🎉</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ THE HONEST BEAT ═══════════ -->
+<section class="section" id="s5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-num"><div class="num">5</div> The Honest Beat</div>
+      <h2 class="section-title">Hype vs Durable — What an Agent Actually Is</h2>
+      <p class="section-sub">Before you celebrate, the slide most courses skip. The internet is loud with "fully autonomous AI employees." Know exactly what agents genuinely changed — and what they never will.</p>
+    </div>
+
+    <div class="review-mine">
+      <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy)">⚖️ The Durable / Hype Split</div>
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-top:.3rem">Build your instincts on the left column. Ignore anyone selling you the right one.</p>
+      <div class="review-cols">
+        <div class="review-col love">
+          <h5>✓ What agents genuinely changed</h5>
+          <ul>
+            <li>A recurring, multi-step job can now run without you doing each step</li>
+            <li>The model can use tools and act, not just chat back</li>
+            <li>It can reason through steps you never scripted in advance</li>
+            <li>One person can hand off real work — and read the trace to check it</li>
+          </ul>
+        </div>
+        <div class="review-col hate">
+          <h5>✕ What agents did NOT change (the hype)</h5>
+          <ul>
+            <li>They still fail — often silently and confidently</li>
+            <li>"Fully autonomous employee, zero oversight" is marketing, not reality</li>
+            <li>A vague goal still produces a vague, wandering agent</li>
+            <li>Nothing replaces your judgment on the risky, irreversible call</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🎯 Final Checkpoint · The builder's mindset</div>
+      <div class="scenario-q">An ad promises: "Our AI agent runs your whole business end-to-end — answers everyone, makes every decision, zero oversight, while you sleep." Having just built InboxScout, what's your read?</div>
+      <div class="scenario-options">
+        <button class="scenario-btn" onclick="finalQ(0)">Sounds amazing — buy it. More autonomy is always better.</button>
+        <button class="scenario-btn" onclick="finalQ(1)">Skeptical. Agents genuinely offload real work, but they fail silently and can't own the risky, irreversible calls. "Zero oversight, while you sleep" is the hype tell — I'd ship narrow, keep approval on anything that can't be undone.</button>
+        <button class="scenario-btn" onclick="finalQ(2)">Agents are useless hype — nobody can really use them for anything.</button>
+      </div>
+      <div class="scenario-feedback" id="finalFb"></div>
+    </div>
+
+    <div class="scenario-panel">
+      <div class="scenario-title">🧠 Pop Quiz · Agent-builder instincts (3 rounds)</div>
+      <div class="scenario-q" id="opsQ">Loading…</div>
+      <div class="scenario-options" id="opsOpts"></div>
+      <div class="scenario-feedback" id="opsFb"></div>
+      <button class="btn-secondary" id="opsNext" onclick="nextOpsQ()" style="margin-top:.5rem;display:none">Next round →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER RECAP ─── -->
+<div class="footer-cta">
+  <h2>🎉 On Monday, the inbox owned <em>Maya's</em> mornings.</h2>
+  <p>By Thursday she'd handed that hour to InboxScout — an agent she designed, built one tool at a time, tested 20 ways, and shipped with a human on the risky moves. Here's what the story secretly taught you: the four lessons of Week 3.</p>
+  <div class="recap-grid">
+    <div class="recap-card">
+      <div class="rn">Lesson 1</div>
+      <h4>What Is an Agent</h4>
+      <p>A model + tools + a loop + a goal. It shines when the steps vary each time — and is overkill when a fixed script would do. Beat 1.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 2</div>
+      <h4>Design the Job</h4>
+      <p>Write the brief before you build: goal, success, tools, role, guardrails — and the line between what it may do alone and what needs you. Beat 2.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 3</div>
+      <h4>Build It</h4>
+      <p>Add one tool at a time, test after each, and read the reasoning trace so you can catch the wrong tool, the loop, the invented answer. Beat 3.</p>
+    </div>
+    <div class="recap-card">
+      <div class="rn">Lesson 4</div>
+      <h4>Evaluate, Trust &amp; Ship</h4>
+      <p>Measure reliability across many runs, hunt the silent wrong answer, add the guardrail, keep a human on the irreversible — ship narrow. Beat 4.</p>
+    </div>
+  </div>
+  <button class="btn-action" style="font-size:.9rem;padding:.8rem 1.8rem" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})">↻ Replay the four beats</button>
+  <div class="footer-note">InboxScout is a teaching scenario. Real agents vary widely and most take several rounds of testing before they're trustworthy — the goal of Week 3 is to walk every beat once so your first agent starts as a builder's, not a gambler's. An agent is leverage, not magic; it gives a careful person real time back, never a careless one a free pass. Next up — Week 4: <strong>AI Automation</strong>, where you connect agents and tools into workflows that run on their own.</div>
+</div>
+
+<!-- ─── COMPLETION BAR ─── -->
+<div class="completion-bar">
+  <div class="completion-info"><span style="font-size:1.1rem">🤖</span><span>InboxScout Build Progress</span></div>
+  <div class="completion-track"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
+  <div class="completion-percent" id="completionPct">0%</div>
+</div>
+
+<script>
+/* ───────── PROGRESS TRACKING ───────── */
+const visited = new Set();
+function markVisited(id){
+  visited.add(id);
+  const pct = Math.round((visited.size / 5) * 100);
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = pct + '%';
+  document.getElementById('headerProgressText').textContent = `${visited.size} of 5 beats built`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).scrollIntoView({behavior:'smooth', block:'start'});
+    markVisited(btn.dataset.target);
+  });
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.3) {
+      markVisited(e.target.id);
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.target === e.target.id));
+    }
+  });
+}, {threshold:[0.3]});
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+/* ───────── BEAT 1: SCRIPT vs AGENT ───────── */
+const platInfo = {
+  market: `<span class="verdict-pill vp-mid">Right tool — for a different job</span><br><strong>A script / fixed workflow:</strong> you write the steps once and it repeats them flawlessly. For an identical, predictable task — "rename these 500 files," "clean this receipt file the same way every time" — a script is simpler, cheaper, and more reliable than any agent. The catch: it only does what you spelled out. The moment the input varies from your plan, it breaks or does the wrong thing. <em>Maya's inbox is different every morning — so a pure script would need endless if-this-then-that rules she can't possibly finish writing.</em>`,
+  own: `<span class="verdict-pill vp-good">✓ The right fit for this job</span><br><strong>An AI agent:</strong> a model given a goal, a set of tools, and a loop — read the situation, decide the next step, act, check the result, repeat. That loop is what lets it handle a job whose steps change every time, like triaging a messy inbox. The honest trade-off: because it <em>decides</em>, it can decide wrong — so it needs a clear brief, guardrails, and a human on the risky moves. <em>InboxScout lives here. But notice: a good builder still reaches for a plain script when the steps never change.</em>`
+};
+function pickPlat(k){
+  document.querySelectorAll('#s1 .pick-card').forEach(c => c.classList.toggle('active', c.dataset.plat === k));
+  const d = document.getElementById('platDetail');
+  d.innerHTML = platInfo[k];
+  d.classList.add('show');
+}
+
+/* prompt showdown */
+const promptResults = [
+  {ok:false, fb:'✗ Too vague. "Does everything and saves me time" gives the AI no goal, no boundaries, and no idea what "done" means. You get an enthusiastic, generic reply — and later, an agent that wanders. Vague prompt in, vague plan out.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Build me an AI agent that does everything and saves me time.</div><div class="chat-msg ai"><span class="who">Assistant</span>Sure! Here are some general ideas for AI agents you could build… <strong>(…a generic listicle with no goal, no tool list, and no line between what it may and may not do — the same answer anyone gets.)</strong></div>`},
+  {ok:false, fb:'✗ Wrong tool for this job. Auto-replying to ALL emails with a fixed script means it fires canned answers at messages it doesn\'t understand — including the angry and unusual ones. Maya\'s inbox varies too much for a blind auto-responder, and "reply to everything" removes the human exactly where she\'s needed most.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Just write me a script that auto-replies to all my emails for me.</div><div class="chat-msg ai"><span class="who">Assistant</span>I can — but be careful: a script that auto-sends to <em>every</em> message will confidently reply to the ones it misreads, with no human check. For a mixed, varying inbox you probably want an agent that <em>drafts</em> and escalates, not a blind auto-sender.</div>`},
+  {ok:true, fb:'✓ Exactly. Role + your real situation + an honest question about fit + a request to define goal, tools, and the autonomy line. This earns a genuine plan — and it becomes the brief for the whole week: what InboxScout is for, what it may touch, and where you stay in the loop.',
+   chat:`<div class="chat-msg user"><span class="who">Maya</span>Act as an agent designer. Beginner. I lose an hour each morning triaging a messy, ever-changing inbox. Does an agent fit? If so, define its goal, tools, and what it may do alone vs. with my approval.</div><div class="chat-msg ai"><span class="who">Assistant</span>Good fit — the steps vary, which is where agents earn their keep. <strong>Goal:</strong> sort overnight mail, draft routine replies, flag the rest. <strong>Tools:</strong> read inbox, search notes, check calendar, draft. <strong>Alone:</strong> read, label, draft. <strong>Approval:</strong> anything that sends or can\'t be undone. <strong>← Your whole Week 3, mapped.</strong></div>`}
+];
+let promptAnswered = false;
+function pickPrompt(i){
+  const r = promptResults[i];
+  const btns = document.querySelectorAll('#s1 .scenario-panel:first-of-type .scenario-btn');
+  if (!promptAnswered){
+    btns.forEach((b,j) => { if (j===2) b.classList.add('correct'); else if (j===i && !r.ok) b.classList.add('wrong'); });
+    if (r.ok) promptAnswered = true;
+  }
+  const fb = document.getElementById('promptFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+  document.getElementById('stackChat').innerHTML = r.chat;
+}
+
+/* agent-instincts quiz */
+const stackQs = [
+  {q:"An AI agent is best described as…", opts:["A chatbot that answers one question and stops","A model given tools, a goal, and a loop — it takes a step, sees the result, and decides the next one","A website that stores your data"], correct:1, explain:"The loop is the key. A plain chatbot answers once. An agent can act, observe what happened, and choose its next move — repeating until the goal is met or it should stop."},
+  {q:"You need to rename 500 files the exact same way every time. For that, an agent is…", opts:["Overkill — a fixed script does identical steps more simply and reliably","The only correct choice, always","Too weak — only an agent can rename files"], correct:0, explain:"Agents earn their keep when the steps vary. For an identical, predictable task, a plain script is simpler, cheaper, and more dependable. Reaching for an agent everywhere is a beginner tell."},
+  {q:"The 'loop' in an agent means it can…", opts:["Repeat the same answer forever","Take a step, look at the result, and decide the next step — until the goal is met or it stops","Run only once and never check its work"], correct:1, explain:"That act-observe-decide loop is exactly what lets an agent handle a job whose steps change each time — and exactly why it needs a stopping condition so it doesn't loop forever."}
+];
+let sqIdx = 0;
+function renderStackQ(){
+  const s = stackQs[sqIdx];
+  document.getElementById('stackQ').textContent = `Round ${sqIdx+1}/3 — ${s.q}`;
+  document.getElementById('stackOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerStackQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('stackNext').style.display = 'none';
+}
+function answerStackQ(i){
+  const s = stackQs[sqIdx];
+  document.querySelectorAll('#stackOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('stackFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (sqIdx===stackQs.length-1 ? '<br><br>🎉 Beat 1 complete — you can tell an agent from a script, and you know when each one is the right tool. Onto designing the job.' : '');
+  document.getElementById('stackNext').style.display = sqIdx < stackQs.length-1 ? 'inline-block' : 'none';
+}
+function nextStackQ(){ sqIdx++; if (sqIdx < stackQs.length) renderStackQ(); }
+renderStackQ();
+
+/* ───────── BEAT 2: DESIGN THE JOB ───────── */
+const voices = {
+  vague: {h:'Goal: help me with my email, I guess.', d:'Tools: whatever it needs. Success: um, less email? Boundaries: none really — it can do whatever saves time. Result: an agent with no idea what "done" means, free to send confident nonsense at 2 a.m. This is a wish, not a brief.'},
+  tight: {h:'Goal: every morning, sort the overnight inbox and draft replies to the routine ones — never send without Maya\'s OK.', d:'Tools: read inbox, search my notes & FAQ doc, check my calendar, write a draft. Success: routine messages get an accurate draft; anything unusual is flagged for me. Boundaries: never sends, never touches money, never invents an answer — if unsure, it says so and asks.'},
+  over: {h:'Goal: run my entire business communication and make every decision for me, automatically.', d:'Tools: everything — send, refund, edit orders, change my calendar, message suppliers. Success: I never touch my inbox again. Boundaries: none. Result: enormous blast radius, no human on anything irreversible — the fastest way to turn one silent mistake into a very public one.'}
+};
+function setVoice(v){
+  document.querySelectorAll('.voice-tab').forEach(t => t.classList.toggle('active', t.dataset.voice === v));
+  const h = document.getElementById('storeHeadline'), d = document.getElementById('storeDesc');
+  h.style.opacity = 0; d.style.opacity = 0;
+  setTimeout(()=>{ h.textContent = voices[v].h; d.textContent = voices[v].d; h.style.opacity = 1; d.style.opacity = 1; }, 250);
+}
+function toggleCopy(which){
+  document.getElementById('copyBefore').style.display = which==='before' ? 'block' : 'none';
+  document.getElementById('copyAfter').style.display = which==='after' ? 'block' : 'none';
+}
+
+/* design checklist + log */
+const buildEvents = [
+  {t:'Tue 20:05', msg:'Goal written: "Each morning, sort overnight inbox, draft routine replies, flag the rest." Success defined: an accurate draft for routine mail, a clear flag for anything unusual. Now the agent knows what "done well" means.'},
+  {t:'Tue 20:20', msg:'Tool list set: read_inbox, search_notes, check_calendar, write_draft. Four tools, no more. An agent with fewer, clearer tools is easier to trust than one that can touch everything.'},
+  {t:'Tue 20:35', msg:'Role + instructions written: "You are Maya\'s careful morning assistant. Be brief, warm, accurate. When unsure, say so." The agent now has a personality and house rules, not just a task.'},
+  {t:'Tue 20:50', msg:'Guardrails added: never send without approval, never touch money or accounts, never invent facts. These are the lines it must not cross even if it "thinks" it should.'},
+  {t:'Tue 21:05', msg:'Autonomy mapped action by action: read & label & draft = on its own; send = approval; refunds/passwords = never. Trust is set per action, not all-or-nothing.'},
+  {t:'Tue 21:20', msg:'Whole thing written as a one-page brief. Maya could hand it to a stranger and they\'d know exactly what InboxScout is for — which means the AI builder will too.'}
+];
+const buildSteps = new Set();
+function runBuildStep(i){
+  if (buildSteps.has(i)) return;
+  buildSteps.add(i);
+  document.querySelector(`#buildList li[data-step="${i}"]`).classList.add('done');
+  const feed = document.getElementById('buildFeed');
+  if (buildSteps.size === 1) feed.innerHTML = '';
+  const e = buildEvents[i];
+  feed.innerHTML += `<div class="feed-line"><span class="ft">${e.t}</span><span>${e.msg}</span></div>`;
+  feed.scrollTop = feed.scrollHeight;
+  if (buildSteps.size === buildEvents.length) document.getElementById('buildDone').style.display = 'block';
+}
+
+/* autonomy dial */
+const persoData = {
+  read: {g:'✅ Let it do this alone — reading and labelling is safe and undo-able.', r:[['👀','Just reads'],['🏷️','Adds a label'],['↩️','Fully reversible']]},
+  draft: {g:'✅ Fine on its own — a draft is only a suggestion until you approve it.', r:[['📝','Draft only'],['🚫','Never sends'],['👍','You review']]},
+  send: {g:'⏸️ Needs your approval — a sent message can\'t be un-sent.', r:[['✉️','Actually sends'],['🙅','Irreversible'],['✔️','Approve first']]},
+  sensitive: {g:'⛔ Never autonomous — money and secrets stay human, always.', r:[['💸','Moves money'],['🔐','Shares secrets'],['🧑','Always you']]}
+};
+function renderPerso(){
+  const who = document.getElementById('persoWho').value;
+  const d = persoData[who];
+  const g = document.getElementById('ppGreeting'), r = document.getElementById('ppRecos');
+  g.style.opacity = 0; r.style.opacity = 0;
+  setTimeout(()=>{
+    g.textContent = d.g;
+    r.innerHTML = d.r.map(x=>`<div class="pp-reco"><div class="ppe">${x[0]}</div><div class="ppn">${x[1]}</div></div>`).join('');
+    g.style.opacity = 1; r.style.opacity = 1;
+  }, 200);
+}
+
+/* safer-brief quiz */
+const headlineFbs = [
+  {ok:false, fb:'✗ "Handle all my email however you think is best — full autonomy" hands an untested agent the keys with no line it can\'t cross. This is the vague, over-scoped brief that produces a wandering, occasionally dangerous agent.'},
+  {ok:true, fb:'✓ Yes. It names the job (<strong>label + draft routine, flag the rest</strong>), and draws the one line that matters most: <strong>never send without my OK</strong>. Narrow, testable, and safe — the agent can be useful without being trusted with anything irreversible yet.'},
+  {ok:false, fb:'✗ "Fully resolve every message including refunds, payments, and account changes" points a brand-new agent at the highest-stakes, least-reversible actions with no human in the loop. This is the maximum-blast-radius brief — exactly what a careful builder never ships.'}
+];
+function headlineQ(i){
+  const r = headlineFbs[i];
+  const btns = document.querySelectorAll('#s2 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (headlineFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('headlineFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb + (r.ok ? '' : '<br><br>The safe brief: <strong>"label + draft routine, flag the rest, never send without my OK."</strong>');
+}
+
+/* ───────── BEAT 3: BUILD IT (trace) ───────── */
+const triageKey = {
+  1: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> Right tool (search_notes) for a facts question, an accurate draft built from your real doc, and it stops for approval instead of sending. This is textbook good agent behaviour — ship it.',
+    human:'△ This one\'s actually fine. It used the correct tool, grounded its answer in your notes, and paused for approval. Nothing to debug here. Verdict: <strong>LOOKS RIGHT</strong>.'}},
+  2: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> It answered a calendar question <em>without checking the calendar</em> — it guessed. That\'s a classic failure: skipping the tool it was given and hallucinating instead. The fix: instruct it to always call check_calendar before any availability answer, and never guess.',
+    bot:'✗ Look again — it said "you\'re free" without ever calling the calendar tool. That answer is a guess, and a guess about a real date will double-book someone. Skipping an available tool is a bug. Verdict: <strong>BUG</strong>.'}},
+  3: {right:'human', fb:{
+    human:'✓ Correct — <strong>BUG.</strong> Same query, no new result, 30 times — a runaway loop. The agent has no stopping condition. The fix: cap retries and tell it to give up and flag for a human when a search comes back empty. Without a stop rule, an agent can spin forever.',
+    bot:'✗ Running the identical failing search 30 times is the definition of a stuck loop, not correct behaviour. It needs a retry limit and a "give up and flag" rule. Verdict: <strong>BUG</strong>.'}},
+  4: {right:'bot', fb:{
+    bot:'✓ Correct — <strong>LOOKS RIGHT.</strong> An angry, emotional message is exactly what should be escalated, not auto-answered. It wrote no reply, labelled it needs-a-human, and surfaced it for Maya. That\'s the guardrail working as designed.',
+    human:'△ This is the behaviour you want. It correctly refused to auto-reply to an emotional complaint and handed it to Maya. No bug — this is the escalation rule doing its job. Verdict: <strong>LOOKS RIGHT</strong>.'}}
+};
+function triage(n, choice, btn){
+  const k = triageKey[n];
+  const row = document.getElementById('tk'+n);
+  row.querySelectorAll('.ticket-btn').forEach(b => b.disabled = true);
+  const correct = choice === k.right;
+  row.className = 'ticket ' + (correct ? 'decided-'+(k.right==='bot'?'bot':'human') : 'wrongdrop');
+  if (!correct){ setTimeout(()=>{ row.className = 'ticket decided-'+(k.right==='bot'?'bot':'human'); }, 900); }
+  const fb = document.getElementById('tf'+n);
+  fb.className = 'ticket-feedback show ' + (correct ? 'good' : 'warn');
+  fb.innerHTML = k.fb[choice];
+}
+
+/* hallucination-fix quiz */
+const reviewFbs = [
+  {ok:false, fb:'✗ "Please be accurate" is a wish, not a fix. Telling a model not to make mistakes doesn\'t give it the facts it was missing — it\'ll keep confidently inventing numbers. You have to change what it can <em>ground</em> its answer in, not just scold it.'},
+  {ok:true, fb:'✓ That\'s the fix. You give it a <strong>source of truth</strong> and a rule: answer price questions only from the doc, and say "I don\'t know" if it isn\'t there. That removes the room to hallucinate — and the approval step stays as a second net. This is how you turn a confident guesser into a reliable one.'},
+  {ok:false, fb:'✗ "Usually right" is exactly the trap. A silent wrong price goes straight to a customer who acts on it — the most expensive kind of failure precisely because nobody notices. An agent you can\'t trust on facts needs a guardrail, not a shrug.'}
+];
+function reviewQ(i){
+  const r = reviewFbs[i];
+  const btns = document.querySelectorAll('#s3 .scenario-panel .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (reviewFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('reviewFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* ───────── BEAT 4: TRUST METER ───────── */
+function calc(){
+  const runs = +document.getElementById('inCost').value;
+  let wrong = +document.getElementById('inPrice').value;
+  const blast = +document.getElementById('inUnits').value;
+  if (wrong > runs) wrong = runs;
+  const reliability = runs > 0 ? ((runs - wrong) / runs) * 100 : 0;
+  document.getElementById('oCost').textContent = runs;
+  document.getElementById('oPrice').textContent = wrong;
+  document.getElementById('oUnits').textContent = blast + ' / 5';
+  document.getElementById('vProfit').textContent = Math.round(reliability) + '%';
+  document.getElementById('vMargin').textContent = runs;
+  const tP = document.getElementById('tProfit'), tM = document.getElementById('tMargin');
+  tP.style.borderColor = reliability < 80 ? 'var(--red)' : (reliability >= 95 ? 'var(--green)' : 'transparent');
+  tP.style.background = reliability < 80 ? '#FEE' : (reliability >= 95 ? 'var(--green-light)' : 'var(--bg-light)');
+  tM.style.borderColor = runs < 10 ? 'var(--red)' : (runs >= 30 ? 'var(--green)' : 'transparent');
+  tM.style.background = runs < 10 ? '#FEE' : (runs >= 30 ? 'var(--green-light)' : 'var(--bg-light)');
+  const note = document.getElementById('calcNote');
+  if (runs < 10){
+    note.innerHTML = '🟡 <strong>Too few runs to trust anything.</strong> A handful of good runs isn\'t evidence — a shaky agent can pass 5 and fail the 11th. Run it more before you decide anything.';
+  } else if (reliability < 80){
+    note.innerHTML = '🚨 <strong>Fails too often.</strong> Below 80% means roughly one in five answers is wrong — nowhere near shippable. Find the failure pattern and fix it before trusting it with anything.';
+  } else if (reliability >= 95 && blast <= 2){
+    note.innerHTML = '✅ <strong>Ship it — narrow and autonomous.</strong> High reliability on a low-damage, reversible task is exactly where an agent earns its keep. Let it run on THIS job, and keep watching the trace.';
+  } else if (blast >= 4){
+    note.innerHTML = '⚠️ <strong>Reliable, but the stakes are high.</strong> Even at this accuracy, one silent slip on a severe, irreversible action is costly. Ship it, but keep a human approval step on the risky move — autonomous on the rest.';
+  } else {
+    note.innerHTML = '🟢 <strong>Getting there.</strong> Reliable enough for low-stakes autonomy. For anything you can\'t undo, keep the approval step until the numbers are higher and the sample is bigger.';
+  }
+}
+['inCost','inPrice','inUnits'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+calc();
+
+const judgeKey = {
+  A: {right:'act', fb:{
+    act:'✓ Correct — <strong>SHIP AUTONOMOUS.</strong> 20/20 correct, fully reversible, and a wrong label hurts no one. Cheap and undo-able is precisely where you let an agent act on its own. This is what earns back Maya\'s hour.',
+    watch:'△ You <em>could</em> require approval, but labelling is so cheap and reversible that gating it just recreates the manual work you\'re trying to remove. Let it run. Verdict: <strong>SHIP AUTONOMOUS</strong>.',
+    ignore:'✗ Nothing to fix — it\'s perfect on this behaviour and the blast radius is tiny. Blocking it here means doing the sorting yourself forever. Verdict: <strong>SHIP AUTONOMOUS</strong>.'}},
+  B: {right:'watch', fb:{
+    watch:'✓ Correct — <strong>REQUIRE APPROVAL.</strong> The drafts are great, but sending can\'t be undone and it goes to a real person. Even a reliable agent keeps a human on the irreversible action — at least until it\'s earned far more trust. Draft freely; send on Maya\'s nod.',
+    act:'△ Tempting — the drafts are 20/20. But "un-sendable" is the line. One confident wrong send to a customer is exactly the failure an approval step exists to catch. Verdict: <strong>REQUIRE APPROVAL</strong>.',
+    ignore:'△ The drafting itself is fine — you don\'t need to fix it. You just don\'t let it hit send unsupervised yet. Verdict: <strong>REQUIRE APPROVAL</strong>.'}},
+  C: {right:'ignore', fb:{
+    ignore:'✓ Correct — <strong>FIX FIRST.</strong> Wrong-but-confident on 2/20, with no flag, on a question a customer acts on — that\'s the dangerous silent failure. Don\'t ship this behaviour at all until you add the source-of-truth guardrail (answer only from the doc, else say "I don\'t know"). Then re-test.',
+    act:'✗ Shipping a behaviour that\'s confidently wrong 1-in-10 with no flag is how an agent quietly does damage at scale. This one isn\'t ready. Verdict: <strong>FIX FIRST</strong>.',
+    watch:'△ Approval would catch some of these, but the real problem is the agent inventing facts. Fix the root cause — give it a source of truth — before you rely on it at all. Verdict: <strong>FIX FIRST</strong>.'}}
+};
+const judged = {};
+function judge(set, verdict, btn){
+  const k = judgeKey[set];
+  judged[set] = true;
+  const row = document.getElementById('op'+set);
+  const cls = k.right==='act' ? 'scale' : (k.right==='ignore' ? 'kill' : 'watch');
+  row.className = 'adset decided-' + cls;
+  row.querySelectorAll('.adset-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('fb'+set);
+  fb.className = 'adset-feedback show ' + (verdict===k.right ? 'good' : 'warn');
+  fb.innerHTML = k.fb[verdict];
+  if (judged.A && judged.B && judged.C){
+    setTimeout(()=>{ document.getElementById('weekVerdict').classList.add('show'); document.getElementById('weekVerdict').scrollIntoView({behavior:'smooth', block:'center'}); }, 600);
+  }
+}
+
+/* ───────── HONEST BEAT / FINAL ───────── */
+const finalFbs = [
+  {ok:false, fb:'✗ "More autonomy is always better" is the reflex that gets beginners burned. An agent that sends, refunds, and decides with zero oversight will quietly make expensive mistakes at scale — confidently, and with nobody watching.'},
+  {ok:true, fb:'✓ That\'s the builder\'s read. Agents genuinely offload real, multi-step work — that\'s durable. But they fail silently and can\'t own the irreversible call. <strong>"Zero oversight, while you sleep" is the reliable tell of hype.</strong> You ship narrow, keep a human on anything that can\'t be undone, and read the trace.'},
+  {ok:false, fb:'✗ Too far the other way. Agents aren\'t useless — you just spent four beats watching one read, reason, use tools, and draft real replies. The honest position isn\'t "magic" OR "fake" — it\'s "genuine leverage that still needs a human steering the risky moves."'}
+];
+function finalQ(i){
+  const r = finalFbs[i];
+  const btns = document.querySelectorAll('#s5 .scenario-panel:first-of-type .scenario-btn');
+  btns.forEach((b,j)=>{ b.disabled = true; if (finalFbs[j].ok) b.classList.add('correct'); else if (j===i) b.classList.add('wrong'); });
+  const fb = document.getElementById('finalFb');
+  fb.className = 'scenario-feedback show ' + (r.ok ? 'success' : 'fail');
+  fb.innerHTML = r.fb;
+}
+
+/* agent-builder instincts quiz */
+const opsQs = [
+  {q:"The safest way to build your first agent is to…", opts:["Give it every tool at once and ask for the whole job","Wire in one tool at a time and test after each","Skip testing — if the demo worked, ship it"], correct:1, explain:"One tool at a time means when something breaks, you know exactly which tool caused it. Adding everything at once turns debugging into a guessing game."},
+  {q:"Your agent answered a question confidently but wrong, and nobody noticed. The real fix is to…", opts:["Tell it 'don't make mistakes' and hope","Give it a source of truth and a rule to say 'I don't know', plus keep approval on the risky action","Ship it anyway — it's usually right"], correct:1, explain:"Silent wrong answers are the dangerous failure. You fix them by grounding the agent in real facts and letting it admit uncertainty — not by scolding it or shrugging."},
+  {q:"An agent is the right tool when…", opts:["The steps are identical every single time","The job repeats but the exact steps vary — a fixed script would need endless if-statements","You want the cheapest possible option, always"], correct:1, explain:"Fixed steps? Use a script. Varying steps that need judgment each run? That's where an agent's reason-act-observe loop earns its keep — and its guardrails."}
+];
+let oqIdx = 0;
+function renderOpsQ(){
+  const s = opsQs[oqIdx];
+  document.getElementById('opsQ').textContent = `Round ${oqIdx+1}/3 — ${s.q}`;
+  document.getElementById('opsOpts').innerHTML = s.opts.map((o,i)=>`<button class="scenario-btn" onclick="answerOpsQ(${i})">${o}</button>`).join('');
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback'; fb.innerHTML = '';
+  document.getElementById('opsNext').style.display = 'none';
+}
+function answerOpsQ(i){
+  const s = opsQs[oqIdx];
+  document.querySelectorAll('#opsOpts .scenario-btn').forEach((b,j)=>{
+    b.disabled = true;
+    if (j===s.correct) b.classList.add('correct'); else if (j===i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('opsFb');
+  fb.className = 'scenario-feedback show ' + (i===s.correct ? 'success' : 'fail');
+  fb.innerHTML = (i===s.correct ? '✓ Spot on! ' : '✗ Not quite. ') + s.explain + (oqIdx===opsQs.length-1 ? '<br><br>🎉 That\'s the whole build — knowing an agent from a script, designing the job, building one tool at a time, and trusting it only where it earned it. You didn\'t just read about agents. You <strong>built one.</strong>' : '');
+  document.getElementById('opsNext').style.display = oqIdx < opsQs.length-1 ? 'inline-block' : 'none';
+}
+function nextOpsQ(){ oqIdx++; if (oqIdx < opsQs.length) renderOpsQ(); }
+renderOpsQ();
+</script>
+</body>
+</html>
