@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 3 · Building With AI APIs — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── DRAG SORTER ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:80px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY 2: FAILURE DIAGNOSIS CARDS ── */
+.churn-grid{display:grid;gap:1.2rem;margin-top:1rem}
+.churn-case{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow-sm)}
+.churn-head{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.churn-gauge{width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);font-weight:600;font-size:1.05rem;color:#fff;position:relative}
+.churn-gauge.low{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.churn-gauge.med{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.churn-gauge.high{background:linear-gradient(135deg,#E04E3C,#C43A29)}
+.churn-meta h4{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:.15rem}
+.churn-meta .churn-signals{font-size:.78rem;color:var(--text-secondary);line-height:1.5}
+.churn-risk-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .6rem;border-radius:50px;display:inline-block;margin-top:.3rem}
+.churn-risk-label.low{background:var(--green-light);color:#256B29}
+.churn-risk-label.med{background:var(--orange-glow);color:var(--orange-dark)}
+.churn-risk-label.high{background:var(--red-light);color:#A03A2C}
+.churn-q{font-size:.82rem;font-weight:600;color:var(--navy);margin:.4rem 0 .7rem}
+.churn-opts{display:grid;gap:.5rem}
+.churn-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.82rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.churn-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.churn-opt:disabled{cursor:default;opacity:.75}
+.churn-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.churn-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.churn-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.churn-explain.show{display:block;animation:fadeIn .3s ease}
+.churn-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.churn-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── ACTIVITY 3: MATCH PIECES ── */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.match-grid{grid-template-columns:1fr}}
+.match-col h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.7rem}
+.match-terms{display:flex;flex-direction:column;gap:.6rem}
+.match-term{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;font-weight:600;color:var(--navy);cursor:pointer;transition:all .2s;user-select:none}
+.match-term:hover{border-color:var(--orange);transform:translateX(2px)}
+.match-term.selected{border-color:var(--orange);background:var(--orange-glow);box-shadow:var(--shadow-sm)}
+.match-term.matched{opacity:.45;pointer-events:none;border-color:var(--green);background:var(--green-light)}
+.match-defs{display:flex;flex-direction:column;gap:.6rem}
+.match-def{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.82rem;line-height:1.5;color:var(--text-secondary);cursor:pointer;transition:all .2s;min-height:52px}
+.match-def:hover{border-color:var(--orange)}
+.match-def.matched{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary);pointer-events:none}
+.match-def.matched .md-pair{display:block;font-size:.72rem;color:#256B29;font-weight:700;margin-bottom:.2rem}
+.match-def.shake{animation:shake .4s;border-color:var(--red);background:var(--red-light)}
+.md-pair{display:none}
+.match-instruct{font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem;font-style:italic}
+
+/* ── QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 3 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 5 · AI APIs</div>
+  <h1>Building With AI APIs — <em>wire the parts into something that works</em></h1>
+  <p class="hero-sub">Four hands-on activities. Decide when to call an AI API directly versus reach for a no-code tool, diagnose three failing API calls and pick the fix for each, assemble the pieces of a good structured-output instruction, then trace what a real build actually does. This is where an API stops being a scary word and becomes a part you can wire in on purpose.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: DIRECT API vs NO-CODE ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Direct API or no-code tool? — pick the right path</h2>
+    <p class="lesson-intro">An API is just a way for your build to ask another service to do something. Sometimes you should call it directly in code; often a no-code tool already wraps that same API and hands you the result. Getting this choice right saves days. Study the two paths, then drag each build into where it belongs. Wrong pills carry a hover hint explaining the better home.</p>
+
+    <div class="tip-note">💡 <strong>The core idea:</strong> reach for a good tool when one exists — it's faster and sturdier. Write the API calls yourself when you need control a tool can't give: your own data, custom formatting, unusual chaining, or scale with your own error handling. The skill isn't "always code" or "never code" — it's reading the job.</div>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="segList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="nocode">
+            <div class="bucket-title">Reach for a no-code tool</div>
+            <div class="bucket-sub">A reliable off-the-shelf tool already does this</div>
+            <div class="bucket-drop" data-drop="nocode"></div>
+          </div>
+          <div class="bucket" data-bucket="direct">
+            <div class="bucket-title">Call the AI API directly (write code)</div>
+            <div class="bucket-sub">You need control a template can't give</div>
+            <div class="bucket-drop" data-drop="direct"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetSeg()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswersSeg()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: DIAGNOSE THE FAILING CALL ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">The call failed — now what? Diagnose and fix</h2>
+    <p class="lesson-intro">Real API calls fail sometimes: the network stalls, you send too fast, or the AI returns something your code can't read. A build that assumes every call works is a build that breaks in front of a user. The skill is recognizing <em>which</em> failure you're seeing and choosing the fix that matches. Read each case and pick the smart move.</p>
+
+    <div class="lesson-card">
+      <div class="churn-grid" id="churnGrid"></div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetChurn()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: BUILD A STRUCTURED-OUTPUT INSTRUCTION ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Ask for structure — match each instruction piece to its job</h2>
+    <p class="lesson-intro">By default an AI model replies in chatty prose — lovely for humans, useless for code. To use a model inside a build, you tell it to return a <strong>predictable structure</strong> (like specific fields) so your program can read it every time. A good structured-output instruction is made of parts, each doing a job. Click a piece on the left, then click what it accomplishes. A wrong match shakes red.</p>
+
+    <div class="lesson-card">
+      <p class="match-instruct">Click an instruction piece, then click what it does. Six correct matches completes the activity.</p>
+      <div class="match-grid">
+        <div class="match-col">
+          <h4>A piece of the instruction</h4>
+          <div class="match-terms" id="matchTerms"></div>
+        </div>
+        <div class="match-col">
+          <h4>What it accomplishes</h4>
+          <div class="match-defs" id="matchDefs"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetMatch()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">Read the build — the check-yourself quiz</h2>
+    <p class="lesson-intro">Five questions on tracing a build, chaining calls in the right order, surviving failures, choosing direct-API versus no-code, and why structure matters. Every option explains itself — the wrong answers are the assumptions that turn a working build into a broken one.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of something you'd like to build. Which parts could a no-code tool handle, and what one piece might genuinely need a direct API call?</div>
+        <textarea placeholder="Most of it a tool could do... but the part that needs a direct call is..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">Pick one failure — a timeout, a rate limit, or unreadable output. In your own words, how would you make your build survive it instead of crashing?</div>
+        <textarea placeholder="If the call ..., my build would... instead of just failing."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 4 · Capstone: Putting It All Together</h3>
+      <p>You can wire APIs into a build and keep them from breaking. In the final lesson, connect everything — programming, apps, agents, automation, and APIs — into one project you plan, build, harden, and ship. This is where the whole course becomes a single thing you can point to and say: I built that.</p>
+      <a href="04-capstone-putting-it-all-together.html" class="btn btn-primary">Continue to the Capstone →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Direct API vs no-code ─── */
+const SEGMENTS = [
+  {id:'c1', text:'You want a contact form on your site that emails you every time someone submits it.', hint:'A common, well-solved need — a tool already does this.', bucket:'nocode', why:'Emailing form submissions is a standard need dozens of no-code tools handle in a few clicks. Writing API calls yourself would add work for no real gain.'},
+  {id:'c2', text:'You need to auto-post the same announcement to three accounts on a set schedule.', hint:'Scheduling and posting is a solved, off-the-shelf job.', bucket:'nocode', why:'Connector and scheduling tools post to multiple destinations out of the box. There\'s no custom logic here, so a no-code tool is faster and sturdier than hand-written calls.'},
+  {id:'c3', text:'You want a website chatbot that answers common questions from a help document you upload.', hint:'Many builders take a document and hand you a ready bot.', bucket:'nocode', why:'Plenty of no-code assistant builders accept a document and give you an embeddable FAQ bot. Reaching for the raw API here reinvents something that already works well.'},
+  {id:'c4', text:'You want survey answers to drop into a spreadsheet automatically as they arrive.', hint:'Form-to-sheet is a classic no-code pattern.', bucket:'nocode', why:'A form tool plus an automation collects responses into a sheet with clicks, not code. It\'s a textbook no-code job — no direct API call needed.'},
+  {id:'c5', text:'Your app must send each message to an AI model, then reshape the reply into your own exact fields before saving it.', hint:'Custom formatting + your own storage = beyond a template.', bucket:'direct', why:'Chaining a model call with custom output formatting and your own storage is more than any template offers. You call the API directly so you control each step.'},
+  {id:'c6', text:'You need to run 10,000 records through an AI step every night, with retries and logging you control.', hint:'Scale plus your own error handling points to code.', bucket:'direct', why:'Batch scale with custom retry logic and logging you own is exactly what direct API calls are for — a drag-and-drop tool won\'t give you that level of control.'},
+  {id:'c7', text:'You want AI to draft replies, but only after checking them against your private rules and adding live data from your own database.', hint:'Private logic + your live data = custom wiring.', bucket:'direct', why:'Combining your private rules, live data from your database, and the model is bespoke wiring no off-the-shelf tool can reach. That\'s a direct-API build.'},
+  {id:'c8', text:'Your build must call two different AI services and merge their outputs in a way no existing tool offers.', hint:'A novel multi-service combination.', bucket:'direct', why:'Orchestrating two services and merging results in a new way is custom by definition — you write the calls yourself because no tool does this exact thing.'}
+];
+const SEG_NAMES = {nocode:'Reach for a no-code tool', direct:'Call the AI API directly'};
+let segPlaced = {};
+function renderSeg(){
+  segPlaced = {};
+  const shuffled = [...SEGMENTS].sort(()=>Math.random()-0.5);
+  $('segList').innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+      <div class="scenario-hint">${s.hint}</div>
+    </div>`).join('');
+  attachDrag('segList');
+}
+function attachDrag(listId){
+  $(listId).querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupSegBuckets(){
+  document.querySelectorAll('#activity-1 .bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      segDrop(e.dataTransfer.getData('id'), b.dataset.bucket);
+    });
+  });
+}
+function segDrop(id, bucket){
+  const item = SEGMENTS.find(s => s.id === id);
+  if (!item || segPlaced[id]) return;
+  const correct = item.bucket === bucket;
+  segPlaced[id] = {bucket, correct};
+  const card = document.querySelector(`#activity-1 .scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const dropZone = document.querySelector(`#activity-1 [data-drop="${bucket}"]`);
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + item.text.substring(0, 30) + '…';
+  pill.title = correct ? item.why : `Better home: ${SEG_NAMES[item.bucket]}. ${item.why}`;
+  dropZone.appendChild(pill);
+  if (Object.keys(segPlaced).length === SEGMENTS.length){
+    const right = Object.values(segPlaced).filter(p => p.correct).length;
+    const fb = $('feedback1');
+    if (right === SEGMENTS.length){
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All eight sorted correctly.</strong> The deciding question is simple: <em>does a reliable tool already do exactly this?</em> If yes, use it — it's faster and sturdier. If the job needs your own data, custom formatting, unusual chaining, or scale with your own error handling, you write the API calls. Neither "always code" nor "never code" is right; the job decides.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 8.</strong> Hover the red pills. The common trap runs both ways: assuming custom-sounding tasks need code when a tool already nails them, and assuming a tool can stretch to cover private data or bespoke formatting when it can't. Ask each time: does a reliable tool already do <em>exactly</em> this? Click <em>Try again</em>.`;
+    }
+    $('prog1').classList.add('done');
+  }
+}
+function resetSeg(){
+  $('feedback1').className = 'activity-feedback';
+  document.querySelectorAll('#activity-1 .bucket-drop').forEach(d => d.innerHTML = '');
+  renderSeg();
+  $('prog1').classList.remove('done');
+}
+function showAnswersSeg(){
+  SEGMENTS.forEach(s => { if (!segPlaced[s.id]) segDrop(s.id, s.bucket); });
+}
+
+/* ─── ACTIVITY 2: Diagnose the failing call ─── */
+const CHURN = [
+  {
+    name:'Call to the AI model — no response',
+    score:'⏱', level:'med', label:'Request timed out',
+    signals:'Your build sent a request and waited. 30 seconds later: still nothing. It might answer eventually, or never.',
+    q:'The call hung with no reply. How should the build handle it?',
+    opts:[
+      {t:'Set a timeout, then retry a few times with growing waits (backoff) before giving up gracefully', ok:true, ex:'Right. Timeouts are usually temporary. A sensible timeout stops you waiting forever; retrying with backoff (wait 1s, then 2s, then 4s) rides out a brief hiccup without hammering the service. If it still fails, fail gracefully with a clear message instead of hanging.'},
+      {t:'Retry instantly, over and over, as fast as the code can loop', ok:false, ex:'Hammering a struggling service with instant retries usually makes things worse and can get you rate-limited or blocked. Space retries out with backoff — a growing wait between each — rather than firing them back-to-back.'},
+      {t:'Let the whole build freeze and wait indefinitely for a reply', ok:false, ex:'Waiting forever means one slow call can hang your entire build. Always set a timeout so a stuck request fails fast and your code can decide what to do next.'}
+    ]
+  },
+  {
+    name:'Looping through 500 records — rejected',
+    score:'429', level:'med', label:'429 · Too many requests',
+    signals:'You fired requests as fast as the loop could go. Partway through, the service starts returning 429 — you\'re sending faster than your plan allows.',
+    q:'The API is returning 429 (too many requests). What actually fixes it?',
+    opts:[
+      {t:'Slow down — space the calls out, queue them, and respect the "retry-after" the API gives you', ok:true, ex:'Right. 429 means "you\'re going too fast for your limit." The fix is pacing: add a small delay between calls, queue the work, and honor any retry-after hint. A big batch job should throttle itself to stay under the limit.'},
+      {t:'Ignore it and keep firing requests at exactly the same speed', ok:false, ex:'Ignoring 429 just gets more requests rejected and can escalate to a temporary block. The service is explicitly asking you to slow down — the fix is to actually slow down.'},
+      {t:'Delete half your data so there\'s less to send', ok:false, ex:'The problem isn\'t how much data you have — it\'s the speed you\'re sending it. Throttle and queue the work; you never need to destroy data to respect a rate limit.'}
+    ]
+  },
+  {
+    name:'Asked for structured data — got a mess',
+    score:'⚠', level:'high', label:'Bad output · can\'t parse',
+    signals:'You asked the model for clean data your code can read. This time it wrapped the answer in chatty text ("Sure! Here you go:"), so your parser choked.',
+    q:'The AI returned output your code can\'t read. Best response?',
+    opts:[
+      {t:'Validate the output; if it\'s broken, repair it or ask again with a stricter instruction — never blindly trust it', ok:true, ex:'Right. Model output is text, not guaranteed structure. Always check it before use. If it fails, you can strip the extra words, ask again with a firmer "reply with only the data" instruction, or fall back safely. Assuming perfect output is how builds crash in front of users.'},
+      {t:'Assume the output is always perfectly formatted and save it straight to your database', ok:false, ex:'Trusting unvalidated model output is a top cause of broken builds. Models sometimes add prose, miss a field, or return something malformed. Validate first, repair or retry if needed, then save.'},
+      {t:'Crash the whole program and dump a raw error at the user', ok:false, ex:'One bad response shouldn\'t take down your build. Catch the problem, try to repair or re-ask, and if all else fails show a friendly message — don\'t drop a raw crash on the user.'}
+    ]
+  }
+];
+let churnAnswered = 0, churnScore = 0;
+function renderChurn(){
+  churnAnswered = 0; churnScore = 0;
+  $('churnGrid').innerHTML = CHURN.map((c, ci) => {
+    const order = c.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="churn-case" id="churn${ci}">
+      <div class="churn-head">
+        <div class="churn-gauge ${c.level}">${c.score}</div>
+        <div class="churn-meta">
+          <h4>${c.name}</h4>
+          <div class="churn-signals">${c.signals}</div>
+          <span class="churn-risk-label ${c.level}">${c.label}</span>
+        </div>
+      </div>
+      <div class="churn-q">${c.q}</div>
+      <div class="churn-opts">${order.map(oi =>
+        `<button class="churn-opt" onclick="answerChurn(${ci}, ${oi}, this)">${c.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="churn-explain" id="churnEx${ci}"></div>
+    </div>`;
+  }).join('');
+  $('feedback2').className = 'activity-feedback';
+}
+function answerChurn(ci, oi, btn){
+  const c = CHURN[ci];
+  const box = $('churn' + ci);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = c.opts[oi];
+  const rightText = c.opts.find(o => o.ok).t;
+  box.querySelectorAll('.churn-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('churnEx' + ci);
+  ex.className = 'churn-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Smart move.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  churnAnswered++;
+  if (opt.ok) churnScore++;
+  if (churnAnswered === CHURN.length){
+    const fb = $('feedback2');
+    if (churnScore === CHURN.length){
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>3/3 — you handle failure like a builder.</strong> The pattern under all three: <em>expect calls to fail and plan the recovery.</em> Timeouts want a timeout + backoff. Rate limits want pacing and queuing. Bad output wants validation, then repair or re-ask. Never assume a call worked — check, recover, and only then move on.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${churnScore}/3.</strong> Re-read the explanations. The recurring trap is trusting the call blindly — retrying too hard, ignoring the limit, or saving output you never checked. Each failure has a matching fix: backoff, pacing, validation. Click <em>Try again</em>.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function resetChurn(){
+  renderChurn();
+  $('prog2').classList.remove('done');
+}
+
+/* ─── ACTIVITY 3: Match structured-output instruction pieces ─── */
+const PAIRS = [
+  {id:'fields', term:'"Return these exact fields: name, date, amount"', def:'The model gives back a predictable shape your code can read the same way every time.'},
+  {id:'example', term:'"Here is one example of the output I want: …"', def:'Shows the format instead of describing it — the model copies the example and stops guessing.'},
+  {id:'jsononly', term:'"Reply with only the data — no greeting, no explanation"', def:'Stops chatty prose from sneaking in and breaking the code that reads the reply.'},
+  {id:'types', term:'"amount is a number; date is YYYY-MM-DD"', def:'Pins down each field\'s type so a date never lands where a number belongs.'},
+  {id:'unknown', term:'"If a value is missing, use null — do not guess"', def:'Gives a safe default so the model won\'t invent data just to fill a gap.'},
+  {id:'allowed', term:'"category must be one of: refund, question, complaint"', def:'Limits a field to known values so later steps can reliably branch on it.'}
+];
+let selectedTerm = null, matchedCount = 0;
+function renderMatch(){
+  matchedCount = 0; selectedTerm = null;
+  const terms = [...PAIRS].sort(()=>Math.random()-0.5);
+  const defs = [...PAIRS].sort(()=>Math.random()-0.5);
+  $('matchTerms').innerHTML = terms.map(p =>
+    `<div class="match-term" data-id="${p.id}" onclick="pickTerm('${p.id}', this)">${p.term}</div>`).join('');
+  $('matchDefs').innerHTML = defs.map(p =>
+    `<div class="match-def" data-id="${p.id}" onclick="pickDef('${p.id}', this)"><span class="md-pair"></span>${p.def}</div>`).join('');
+}
+function pickTerm(id, el){
+  if (el.classList.contains('matched')) return;
+  document.querySelectorAll('.match-term').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTerm = id;
+}
+function pickDef(id, el){
+  if (el.classList.contains('matched') || !selectedTerm) return;
+  if (id === selectedTerm){
+    const termEl = document.querySelector(`.match-term[data-id="${id}"]`);
+    const pair = PAIRS.find(p => p.id === id);
+    termEl.classList.remove('selected');
+    termEl.classList.add('matched');
+    el.classList.add('matched');
+    el.querySelector('.md-pair').textContent = '✓ ' + pair.term;
+    selectedTerm = null;
+    matchedCount++;
+    if (matchedCount === PAIRS.length){
+      const fb = $('feedback3');
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six matched.</strong> Put them together and you have a structured-output instruction: name the exact fields, give an example, ban the small talk, fix each field's type, say what to do when a value is unknown, and limit categories to allowed values. That's how you turn a chatty model into a dependable part of a build — one that returns the same clean shape every single run.`;
+      $('prog3').classList.add('done');
+    }
+  } else {
+    el.classList.remove('shake'); void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 450);
+  }
+}
+function resetMatch(){
+  $('feedback3').className = 'activity-feedback';
+  renderMatch();
+  $('prog3').classList.remove('done');
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {
+    q:'A build does this: (1) pull a new form submission, (2) send its text to an AI model asking for a category and a one-line summary, (3) reshape the reply into your fields, (4) save it to your sheet and alert you. What is this build, in plain terms?',
+    opts:[
+      {t:'An automated intake pipeline — it fetches input, uses AI to understand it, formats the result, and delivers it onward', ok:true, ex:'Right. Read the steps in order: fetch → AI step → format → send. That fetch-think-format-deliver shape is the backbone of most AI builds. Naming what a build does from its steps is the core skill of reading code you (or an AI) wrote.'},
+      {t:'A single live chat conversation with a person', ok:false, ex:'There\'s no live person chatting here — it runs on a form submission, calls the model once, and files the result. It\'s an automated pipeline, not a back-and-forth chat.'},
+      {t:'Nothing useful — the four steps are unrelated', ok:false, ex:'The steps are tightly linked: each feeds the next (submission → model → formatted fields → saved + alert). That\'s a coherent pipeline, not random actions.'}
+    ]
+  },
+  {
+    q:'You\'re chaining several calls into one flow. Which ORDER is correct?',
+    opts:[
+      {t:'Fetch the input → send it to the AI step → format the AI\'s reply → send the result where it needs to go', ok:true, ex:'Right. You can\'t send a result before it\'s formatted, format a reply before the AI produces it, or call the AI before you\'ve fetched the input. Each step depends on the one before — that dependency is what fixes the order.'},
+      {t:'Send the result → format it → call the AI → fetch the input', ok:false, ex:'That\'s the flow backwards. You have nothing to send until the AI has run and its reply is formatted, and the AI has nothing to work on until you\'ve fetched the input. Data flows forward through the chain.'},
+      {t:'Order doesn\'t matter — run the four steps in any sequence', ok:false, ex:'Order is everything in a chained flow. Each step consumes what the previous one produced; shuffle them and later steps receive empty or wrong input.'}
+    ]
+  },
+  {
+    q:'One call in your flow returns a 500 (the service had an internal error). What\'s the sound way to handle it?',
+    opts:[
+      {t:'Retry a couple of times with backoff; if it still fails, stop safely and don\'t corrupt the rest of the run', ok:true, ex:'Right. A 500 is the service\'s fault and is often temporary, so a few backed-off retries are worth it. But if it keeps failing, fail safe — log it, skip or pause, and protect the data you already have. Never let one bad call silently write garbage.'},
+      {t:'Assume the call worked and keep going with empty data', ok:false, ex:'Pretending a failed call succeeded pushes empty or broken data downstream, corrupting everything after it. Detect the failure and handle it — don\'t march on blindly.'},
+      {t:'Retry forever until it succeeds, no matter how long that takes', ok:false, ex:'Infinite retries can hang your build for hours and run up cost. Cap the attempts, back off between them, and have a plan for when it truly won\'t recover.'}
+    ]
+  },
+  {
+    q:'When is writing direct API calls the better choice over a no-code tool?',
+    opts:[
+      {t:'When you need control a tool can\'t give — custom formatting, your own data and logic, or chaining steps in a way no template offers', ok:true, ex:'Right. No-code tools win for common, well-solved needs. You reach for direct API calls when the task is custom: combining your private data, precise output shaping, unusual multi-service chains, or scale with your own error handling.'},
+      {t:'Always — real builders never touch no-code tools', ok:false, ex:'That\'s ego, not engineering. If a reliable tool already solves your problem, using it is the smart, fast choice. Write code when it genuinely buys you control or capability you can\'t get otherwise.'},
+      {t:'Never — no-code tools can do absolutely everything', ok:false, ex:'No-code tools are powerful but bounded. Custom logic, private data, precise formatting, and novel chains eventually hit their limits — that\'s exactly where direct API calls earn their place.'}
+    ]
+  },
+  {
+    q:'Why bother telling an AI model the exact output format instead of just asking your question?',
+    opts:[
+      {t:'So the reply comes back in a predictable structure your code can read reliably, every single time', ok:true, ex:'Right. Your program can\'t act on a friendly paragraph — it needs known fields in a known shape. Specifying exact fields, types, an example, and what to do when a value is unknown turns a chatty model into a dependable part of your build.'},
+      {t:'It makes no difference — the model always returns perfect data anyway', ok:false, ex:'Models reply in free-form text by default and vary run to run. Without format instructions you\'ll get prose, missing fields, or something malformed — and your code breaks. Structure has to be asked for.'},
+      {t:'Only to make the answer shorter', ok:false, ex:'Structured-output instructions aren\'t about length — they\'re about shape and reliability. The goal is a consistent, machine-readable result your code can trust, not just fewer words.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length){
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you can read and reason about a build.</strong> You trace a pipeline from its steps, chain calls in the order data flows, plan for timeouts and 500s, choose direct-API only when a tool can't reach, and ask models for structure so your code can trust the reply. That's what it means to build <em>with</em> APIs, not just be scared of them.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the misses — the wrong options share one flaw: trusting a call or a reply to just work. The habit that fixes it: understand the flow, plan for failure, and ask for structure. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderSeg();
+  setupSegBuckets();
+  renderChurn();
+  renderMatch();
+  renderQuiz();
+});
+</script>
+</body>
+</html>

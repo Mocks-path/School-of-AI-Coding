@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 1 · What Is an API? — MokshPath</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#E87A2E;--orange-dark:#D06A20;--orange-light:#F5943E;--orange-glow:rgba(232,122,46,0.12);
+  --navy:#2B2D42;--navy-dark:#1A1B2E;
+  --bg:#F3EDE7;--bg-card:#FFFFFF;--bg-light:#F9F5F0;
+  --text-primary:#2B2D42;--text-secondary:#6B6D7B;--text-muted:#9597A6;
+  --border:#E5DDD4;--green:#4CAF50;--green-light:#E8F5E9;--red:#E04E3C;--red-light:#FDECEA;
+  --shadow-sm:0 2px 8px rgba(43,45,66,0.06);--shadow-md:0 8px 24px rgba(43,45,66,0.08);
+  --shadow-lg:0 16px 48px rgba(43,45,66,0.12);
+  --radius:14px;--radius-sm:8px;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
+.nav-left{display:flex;align-items:center;gap:.7rem}
+.lesson-badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-glow);padding:.3rem .7rem;border-radius:50px}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:auto;height:48px;display:block;object-fit:contain}
+.nav-logo-text{display:flex;flex-direction:column;line-height:1.15}
+.nav-logo-name{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--navy)}
+.nav-logo-name span{color:var(--orange)}
+.nav-logo-tag{font-size:.62rem;color:var(--text-muted);font-weight:500;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{padding:3.5rem 2rem 2.5rem;text-align:center;position:relative}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem 1rem;border-radius:50px;background:var(--orange-glow);color:var(--orange);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.13;color:var(--navy);margin-bottom:1rem;max-width:780px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.7;max-width:620px;margin:0 auto}
+
+/* ── PROGRESS RAIL ── */
+.progress-rail{max-width:760px;margin:1.8rem auto 0;display:flex;align-items:center;gap:.5rem}
+.progress-dot{flex:1;height:6px;background:var(--border);border-radius:3px;transition:background .3s}
+.progress-dot.done{background:linear-gradient(90deg,var(--orange),var(--orange-light))}
+.progress-label{font-size:.7rem;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+
+/* ── SECTIONS ── */
+section.lesson{padding:3rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--orange);color:#fff;font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:.9rem}
+.lesson-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,2.5vw,2.1rem);color:var(--navy);margin-bottom:.55rem;line-height:1.2}
+.lesson-intro{font-size:.95rem;color:var(--text-secondary);line-height:1.7;max-width:680px;margin-bottom:2rem}
+.lesson-card{background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:2rem;margin-top:1.5rem}
+
+/* ── DRAG SORTER (Activities 1, 2, 3) ── */
+.classify-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.classify-grid{grid-template-columns:1fr}}
+.classify-scenarios{display:flex;flex-direction:column;gap:.7rem}
+.scenario-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.1rem;cursor:grab;transition:all .25s;position:relative;user-select:none}
+.scenario-card:hover{border-color:var(--orange);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.scenario-card.dragging{opacity:.4}
+.scenario-card.placed{opacity:.35;cursor:not-allowed;pointer-events:none}
+.scenario-card.placed.correct{border-color:var(--green);background:var(--green-light)}
+.scenario-card.placed.wrong{border-color:var(--red);background:var(--red-light)}
+.scenario-text{font-size:.86rem;color:var(--text-primary);line-height:1.5;font-weight:500}
+.scenario-hint{font-size:.72rem;color:var(--text-muted);margin-top:.3rem;font-style:italic}
+.bucket-stack{display:flex;flex-direction:column;gap:1rem}
+.bucket{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;min-height:88px;transition:all .25s;background:rgba(255,255,255,0.5)}
+.bucket.drag-over{border-color:var(--orange);background:var(--orange-glow);border-style:solid}
+.bucket-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--navy);margin-bottom:.25rem}
+.bucket-sub{font-size:.7rem;color:var(--text-muted);margin-bottom:.6rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.bucket-drop{display:flex;flex-wrap:wrap;gap:.4rem;min-height:32px}
+.dropped-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:.3rem .7rem;font-size:.72rem;font-weight:500;color:var(--text-primary)}
+.dropped-pill.correct{background:var(--green-light);border-color:var(--green);color:#256B29}
+.dropped-pill.wrong{background:var(--red-light);border-color:var(--red);color:#933}
+.activity-feedback{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);font-size:.85rem;line-height:1.5;display:none}
+.activity-feedback.show{display:block;animation:fadeIn .4s ease}
+.activity-feedback.success{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.activity-feedback.partial{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.activity-toolbar{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,122,46,0.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-secondary)}.btn-ghost:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── COMPARE CARDS ── */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media (max-width:760px){.compare-grid{grid-template-columns:1fr}}
+.compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.2rem;transition:all .3s}
+.compare-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:transparent}
+.compare-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.05rem;font-weight:700;font-family:'DM Serif Display',serif;color:#fff}
+.compare-card:nth-child(1) .compare-icon{background:linear-gradient(135deg,var(--orange),var(--orange-light))}
+.compare-card:nth-child(2) .compare-icon{background:linear-gradient(135deg,#5B8FE0,#3D72C9)}
+.compare-card:nth-child(3) .compare-icon{background:linear-gradient(135deg,#66BB6A,#4CAF50)}
+.compare-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.3rem}
+.compare-card p{font-size:.82rem;color:var(--text-secondary);line-height:1.55}
+.compare-card ul{list-style:none;padding:0;margin-top:.6rem;border-top:1px dashed var(--border);padding-top:.55rem}
+.compare-card li{font-size:.74rem;color:var(--text-secondary);padding:.15rem 0;display:flex;gap:.4rem;align-items:flex-start;line-height:1.45}
+.compare-card li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.tip-note{margin-top:.9rem;padding:.7rem .9rem;background:var(--orange-glow);border-left:3px solid var(--orange);border-radius:4px;font-size:.78rem;color:var(--text-primary);line-height:1.55}
+
+/* ── ACTIVITY: MATCH PAIRS ── */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem}
+@media (max-width:760px){.match-grid{grid-template-columns:1fr}}
+.match-col h4{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--navy);margin-bottom:.7rem}
+.match-terms{display:flex;flex-direction:column;gap:.6rem}
+.match-term{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;font-weight:600;color:var(--navy);cursor:pointer;transition:all .2s;user-select:none}
+.match-term:hover{border-color:var(--orange);transform:translateX(2px)}
+.match-term.selected{border-color:var(--orange);background:var(--orange-glow);box-shadow:var(--shadow-sm)}
+.match-term.matched{opacity:.45;pointer-events:none;border-color:var(--green);background:var(--green-light)}
+.match-defs{display:flex;flex-direction:column;gap:.6rem}
+.match-def{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.82rem;line-height:1.5;color:var(--text-secondary);cursor:pointer;transition:all .2s;min-height:52px}
+.match-def:hover{border-color:var(--orange)}
+.match-def.matched{border-style:solid;border-color:var(--green);background:var(--green-light);color:var(--text-primary);pointer-events:none}
+.match-def.matched .md-pair{display:block;font-size:.72rem;color:#256B29;font-weight:700;margin-bottom:.2rem}
+.match-def.shake{animation:shake .4s;border-color:var(--red);background:var(--red-light)}
+.md-pair{display:none}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.match-instruct{font-size:.78rem;color:var(--text-muted);margin-bottom:.8rem;font-style:italic}
+
+/* ── JSON BLOCK ── */
+.json-block{font-family:var(--mono);font-size:.78rem;background:var(--navy-dark);color:#E8E1D8;padding:.9rem 1.1rem;border-radius:8px;overflow:auto;margin:.6rem 0 0;line-height:1.55;white-space:pre}
+.json-block .k{color:#F5943E}
+.json-block .v{color:#8FD19E}
+
+/* ── QUIZ ── */
+.quiz-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.4rem;margin-top:1rem}
+.quiz-q-num{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.quiz-q-text{font-size:.92rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:.9rem}
+.quiz-opts{display:grid;gap:.5rem}
+.quiz-opt{text-align:left;background:var(--bg-light);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.83rem;line-height:1.5;cursor:pointer;transition:all .2s;font-family:inherit;color:var(--text-primary)}
+.quiz-opt:hover:not(:disabled){border-color:var(--orange);transform:translateX(2px)}
+.quiz-opt:disabled{cursor:default;opacity:.75}
+.quiz-opt.right{background:var(--green-light);border-color:var(--green);color:#1F5723;opacity:1;font-weight:600}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red);color:#7A2A1E;opacity:1}
+.quiz-explain{margin-top:.7rem;padding:.7rem .9rem;border-radius:6px;font-size:.78rem;line-height:1.6;display:none}
+.quiz-explain.show{display:block;animation:fadeIn .3s ease}
+.quiz-explain.ok{background:var(--green-light);color:#1F5723;border-left:3px solid var(--green)}
+.quiz-explain.no{background:#FFF4E5;color:#7A4A0A;border-left:3px solid #E89B2E}
+
+/* ── REFLECTION ── */
+.reflect-prompt{display:grid;grid-template-columns:1fr;gap:.8rem;margin-top:1rem}
+.reflect-q{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.2rem}
+.reflect-q-text{font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:.5rem}
+.reflect-q textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:.6rem .8rem;font-family:inherit;font-size:.85rem;color:var(--text-primary);background:var(--bg-light);resize:vertical;min-height:60px}
+.reflect-q textarea:focus{outline:none;border-color:var(--orange)}
+
+/* ── FOOTER NEXT ── */
+.next-up{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:var(--radius);padding:2.4rem;color:#fff;margin-top:2rem;text-align:center;position:relative;overflow:hidden}
+.next-up::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(232,122,46,0.12)}
+.next-up h3{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.5rem;position:relative}
+.next-up p{font-size:.92rem;color:rgba(255,255,255,0.75);margin-bottom:1.2rem;position:relative}
+.next-up .btn-primary{position:relative}
+
+@media (max-width:760px){
+  .nav{padding:0 1rem}
+  .nav-logo-tag{display:none}
+  .hero{padding:2.5rem 1.2rem 2rem}
+  section.lesson{padding:2rem 1.2rem}
+  .lesson-card{padding:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="lesson-badge">Lesson 1 of 4</span>
+  </div>
+  <a href="https://mokshpath.org/" class="nav-logo">
+    <img class="nav-logo-icon" src="hero.svg" alt="MokshPath logo">
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Moksh<span>Path</span></span>
+      <span class="nav-logo-tag">Guided Path to True Learning</span>
+    </div>
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> Week 5 · AI APIs</div>
+  <h1>What Is an API? — <em>the doorway between your idea and a working AI</em></h1>
+  <p class="hero-sub">Four hands-on activities. Decode the status codes an API answers with, sort the round trip into what you send and what comes back, tell who can call an API (your app or a no-code automation), then lock it in with a myth-vs-reality quiz. By the end, "API" stops being jargon and becomes the shortcut you reach for.</p>
+  <div class="progress-rail">
+    <span class="progress-label">Progress</span>
+    <div class="progress-dot" id="prog1"></div>
+    <div class="progress-dot" id="prog2"></div>
+    <div class="progress-dot" id="prog3"></div>
+    <div class="progress-dot" id="prog4"></div>
+  </div>
+</header>
+
+<!-- ── ACTIVITY 1: MATCH STATUS CODES TO MEANING ── -->
+<section class="lesson" id="activity-1">
+  <div class="container">
+    <span class="lesson-num">1</span>
+    <h2 class="lesson-title">Match the status code to what it's telling you</h2>
+    <p class="lesson-intro">Every time you call an API, it answers with a <strong>status code</strong> — a three-digit number that says how the request went. Learn the common ones once and an "error" stops being scary; it becomes a clue. Click a code on the left, then click the meaning on the right that fits it. A wrong match shakes red so you can try again.</p>
+
+    <div class="tip-note">💡 <strong>Plain-English promise:</strong> an <em>API</em> — Application Programming Interface — is just a doorway one program uses to ask another to do something. You send a <em>request</em>; you get back a <em>response</em> with a status code and (usually) some data. Master these six codes and half of "debugging" is already done.</div>
+
+    <div class="lesson-card">
+      <p class="match-instruct">Click a status code, then click its meaning. Six correct matches completes the activity.</p>
+      <div class="match-grid">
+        <div class="match-col">
+          <h4>The status code</h4>
+          <div class="match-terms" id="matchTerms"></div>
+        </div>
+        <div class="match-col">
+          <h4>What it means</h4>
+          <div class="match-defs" id="matchDefs"></div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback1"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetMatch()">↻ Try again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 2: SORT THE ROUND TRIP ── -->
+<section class="lesson" id="activity-2" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#5B8FE0">2</span>
+    <h2 class="lesson-title">Sort the round trip — what you SEND vs what comes BACK</h2>
+    <p class="lesson-intro">Every API call is a round trip. You send a <strong>request</strong>; the API sends back a <strong>response</strong>. Knowing which piece lives on which side makes any API doc suddenly readable. Drag each piece into <strong>Part of the request</strong> (what you send out) or <strong>Part of the response</strong> (what comes back to you).</p>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="recordList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="req">
+            <div class="bucket-title">Part of the request</div>
+            <div class="bucket-sub">What you send out</div>
+            <div class="bucket-drop" data-drop="req"></div>
+          </div>
+          <div class="bucket" data-bucket="res">
+            <div class="bucket-title">Part of the response</div>
+            <div class="bucket-sub">What comes back to you</div>
+            <div class="bucket-drop" data-drop="res"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback2"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetRecord()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswersRecord()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 3: WHO CALLS THE API? ── -->
+<section class="lesson" id="activity-3">
+  <div class="container">
+    <span class="lesson-num" style="background:#66BB6A">3</span>
+    <h2 class="lesson-title">Who's calling the API? — app or automation</h2>
+    <p class="lesson-intro">APIs aren't only for coders typing commands. Almost anything can be the thing that <em>calls</em> an API — an app you build, or a no-code automation that wires services together. Either way, you never build the AI; you just send it a request. Study the two cards, then drag each example into the bucket it belongs to.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-icon">A</div>
+        <h4>An app calling an API</h4>
+        <p>Something <strong>you build</strong> — a website, a chatbot, or a script — sends the request itself and uses the response.</p>
+        <ul>
+          <li>A chatbot that calls an AI model per reply</li>
+          <li>A website calling a maps or weather API</li>
+          <li>A script you run each morning</li>
+          <li>Your own tool asking an AI to summarize</li>
+        </ul>
+      </div>
+      <div class="compare-card" style="border-color:#E5DDD4">
+        <div class="compare-icon" style="background:linear-gradient(135deg,#9597A6,#6B6D7B)!important">N</div>
+        <h4>An automation calling an API</h4>
+        <p>A <strong>no-code tool</strong> calls the API for you, on a trigger or schedule — nothing to build.</p>
+        <ul style="border-color:var(--border)">
+          <li style="--x:1">A workflow that emails you on a new form</li>
+          <li>A scheduler that posts every day</li>
+          <li>A "when X happens, do Y" automation</li>
+          <li>A spreadsheet add-on that calls an AI</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip-note">💡 <strong>The point:</strong> the API doesn't care <em>who</em> is calling. Your app, your script, or a drag-and-drop automation all send the same kind of request and read the same kind of response. You never build the AI — you just ask it. That's what makes APIs the shortcut from idea to working feature.</div>
+
+    <div class="lesson-card">
+      <div class="classify-grid">
+        <div class="classify-scenarios" id="aiList"></div>
+        <div class="bucket-stack">
+          <div class="bucket" data-bucket="app">
+            <div class="bucket-title">App ↔ API</div>
+            <div class="bucket-sub">Code you built does the calling</div>
+            <div class="bucket-drop" data-drop="app"></div>
+          </div>
+          <div class="bucket" data-bucket="auto">
+            <div class="bucket-title">Automation ↔ API</div>
+            <div class="bucket-sub">A no-code tool calls it for you</div>
+            <div class="bucket-drop" data-drop="auto"></div>
+          </div>
+        </div>
+      </div>
+      <div class="activity-feedback" id="feedback3"></div>
+      <div class="activity-toolbar">
+        <button class="btn btn-ghost" onclick="resetAI()">↻ Try again</button>
+        <button class="btn btn-primary" onclick="showAnswersAI()">Show me the answers</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ACTIVITY 4: QUIZ ── -->
+<section class="lesson" id="activity-4" style="background:var(--bg-light)">
+  <div class="container">
+    <span class="lesson-num" style="background:#8E6BC0">4</span>
+    <h2 class="lesson-title">APIs — myth vs reality quiz</h2>
+    <p class="lesson-intro">Five questions on what an API really is and how you use one. Every option carries an explanation — the wrong answers are the exact myths that make beginners think APIs are harder (or scarier) than they are.</p>
+
+    <div id="quizWrap"></div>
+    <div class="activity-feedback" id="feedback4"></div>
+    <div class="activity-toolbar">
+      <button class="btn btn-ghost" onclick="resetQuiz()">↻ Retake quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFLECT ── -->
+<section class="lesson" style="padding-bottom:1.5rem">
+  <div class="container">
+    <h2 class="lesson-title" style="font-size:1.5rem">Quick reflect — make it stick</h2>
+    <p class="lesson-intro" style="margin-bottom:1rem">A sentence each is enough. Writing it in your own words is what moves it into memory. (Nothing is saved or sent.)</p>
+    <div class="reflect-prompt">
+      <div class="reflect-q">
+        <div class="reflect-q-text">Think of one feature you'd love in a project — a summary, a translation, a smart reply. Which existing AI could you call over an API instead of building it yourself? What has stopped you from trying?</div>
+        <textarea placeholder="The feature is... I could call... and what stopped me is..."></textarea>
+      </div>
+      <div class="reflect-q">
+        <div class="reflect-q-text">The last time an online tool showed you an error, was it a "your side" problem (wrong login, too many tries) or a "their side" problem (their server was down)? How would knowing the status code have changed what you did next?</div>
+        <textarea placeholder="It was a ... side problem, and knowing the code would have..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT UP -->
+<section class="lesson" style="padding-top:0">
+  <div class="container">
+    <div class="next-up">
+      <h3>Lesson 2 · Calling an AI API</h3>
+      <p>You know what an API is and how to read its answers. Next: actually make the call. Assemble a valid AI request piece by piece, keep your API key safe, read the answer out of the response, and see honestly how tokens turn into cost.</p>
+      <a href="02-calling-an-ai-api.html" class="btn btn-primary">Continue to Lesson 2 →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ─── ACTIVITY 1: Match Status Codes to Meaning ─── */
+const PAIRS = [
+  {id:'c200', term:'200 OK', def:'It worked. Your request succeeded and the data you asked for is right there in the response.'},
+  {id:'c400', term:'400 Bad Request', def:'You sent something malformed — a typo or a missing piece in the request itself. Fix what you sent.'},
+  {id:'c401', term:'401 Unauthorized', def:'Your API key is missing, wrong, or expired. The door stays shut until you prove who you are.'},
+  {id:'c404', term:'404 Not Found', def:'The endpoint you called doesn\'t exist — usually a wrong URL or a typo in the address.'},
+  {id:'c429', term:'429 Too Many Requests', def:'You\'re sending faster than allowed. Slow down, wait a moment, then try again.'},
+  {id:'c500', term:'500 Server Error', def:'Something broke on their side, not yours. Wait and retry — it\'s the provider\'s problem to fix.'}
+];
+let selectedTerm = null, matchedCount = 0;
+function renderMatch(){
+  matchedCount = 0; selectedTerm = null;
+  const terms = [...PAIRS].sort(()=>Math.random()-0.5);
+  const defs = [...PAIRS].sort(()=>Math.random()-0.5);
+  $('matchTerms').innerHTML = terms.map(p =>
+    `<div class="match-term" data-id="${p.id}" onclick="pickTerm('${p.id}', this)">${p.term}</div>`).join('');
+  $('matchDefs').innerHTML = defs.map(p =>
+    `<div class="match-def" data-id="${p.id}" onclick="pickDef('${p.id}', this)"><span class="md-pair"></span>${p.def}</div>`).join('');
+}
+function pickTerm(id, el){
+  if (el.classList.contains('matched')) return;
+  document.querySelectorAll('.match-term').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTerm = id;
+}
+function pickDef(id, el){
+  if (el.classList.contains('matched') || !selectedTerm) return;
+  if (id === selectedTerm){
+    const termEl = document.querySelector(`.match-term[data-id="${id}"]`);
+    const pair = PAIRS.find(p => p.id === id);
+    termEl.classList.remove('selected');
+    termEl.classList.add('matched');
+    el.classList.add('matched');
+    el.querySelector('.md-pair').textContent = '✓ ' + pair.term;
+    selectedTerm = null;
+    matchedCount++;
+    if (matchedCount === PAIRS.length){
+      const fb = $('feedback1');
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All six matched — you can read an API's answer now.</strong> Notice the pattern: <em>2xx</em> means success, <em>4xx</em> means the problem is on <em>your</em> side (your key, your URL, your rate), and <em>5xx</em> means the problem is on <em>their</em> side. That one rule decodes almost every error you'll ever meet.`;
+      $('prog1').classList.add('done');
+    }
+  } else {
+    el.classList.remove('shake'); void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 450);
+  }
+}
+function resetMatch(){
+  $('feedback1').className = 'activity-feedback';
+  renderMatch();
+  $('prog1').classList.remove('done');
+}
+
+/* ─── ACTIVITY 2: Sort the round trip ─── */
+const RECORD_ITEMS = [
+  {id:'r1', text:'The endpoint — the URL address you\'re calling', hint:'The address you send to.', bucket:'req', why:'The endpoint is where you send your request; you choose it and send it out, so it belongs to the request.'},
+  {id:'r2', text:'Your API key that proves who you are', hint:'You attach it when you send.', bucket:'req', why:'You include your key in the request so the API knows you\'re allowed in. It goes out, not back.'},
+  {id:'r3', text:'The model name plus your prompt and parameters', hint:'What you want the AI to do.', bucket:'req', why:'The model, your prompt, and settings like length are all things you package up and send — the request.'},
+  {id:'r4', text:'The method — whether you\'re fetching data or sending some', hint:'Describes the kind of call you make.', bucket:'req', why:'The method (GET, POST, and so on) describes the request you\'re making; it goes out with the call.'},
+  {id:'r5', text:'The status code telling you how it went', hint:'It only exists after the API answers.', bucket:'res', why:'The status code comes back to report success or failure — it\'s part of the response.'},
+  {id:'r6', text:'The JSON body containing the AI\'s answer', hint:'The data you asked for, returning.', bucket:'res', why:'The data you requested — usually JSON — arrives in the response after the API processes your call.'},
+  {id:'r7', text:'The generated text you\'ll show your user', hint:'The finished output.', bucket:'res', why:'The finished answer is tucked inside the response JSON — it comes back to you.'},
+  {id:'r8', text:'An error message explaining what went wrong', hint:'Appears only if something failed.', bucket:'res', why:'If a call fails, the explanation comes back in the response, alongside the status code.'}
+];
+const REC_NAMES = {req:'Part of the request', res:'Part of the response'};
+let recPlaced = {};
+function renderRecord(){
+  recPlaced = {};
+  const shuffled = [...RECORD_ITEMS].sort(()=>Math.random()-0.5);
+  $('recordList').innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+      <div class="scenario-hint">${s.hint}</div>
+    </div>`).join('');
+  attachDrag('recordList');
+}
+function renderRecordBuckets(){ setupBuckets('#activity-2', RECORD_ITEMS, recPlaced, REC_NAMES, checkRecordDone); }
+
+/* ─── ACTIVITY 3: App vs Automation ─── */
+const AI_ITEMS = [
+  {id:'a1', text:'A support chatbot you built calls an AI model for every reply.', hint:'You wrote the app that calls it.', bucket:'app', why:'An application you built making the call directly is app ↔ API.'},
+  {id:'a2', text:'A no-code tool posts your update to social media every morning — no app written.', hint:'A scheduled no-code workflow.', bucket:'auto', why:'A hands-off, scheduled no-code workflow calling the API for you is automation ↔ API.'},
+  {id:'a3', text:'A weather website calls a forecast API to fill its homepage.', hint:'A running app requesting data.', bucket:'app', why:'A running application requesting data to display is app ↔ API.'},
+  {id:'a4', text:'A "when a form is submitted, add a row and email me" workflow.', hint:'A trigger stitches services together.', bucket:'auto', why:'A trigger-based automation wiring services together, with no app to build, is automation ↔ API.'},
+  {id:'a5', text:'A script you wrote asks an AI API to summarize each new document.', hint:'Code you wrote does the calling.', bucket:'app', why:'Custom code you wrote calling the API is app ↔ API — a small script counts as an app here.'},
+  {id:'a6', text:'A spreadsheet automation tags every new row by calling an AI, untouched by you.', hint:'A no-code trigger runs it for you.', bucket:'auto', why:'A no-code automation calling the API on a trigger, hands-off, is automation ↔ API.'}
+];
+const AI_NAMES = {app:'App ↔ API', auto:'Automation ↔ API'};
+let aiPlaced = {};
+function renderAI(){
+  aiPlaced = {};
+  const shuffled = [...AI_ITEMS].sort(()=>Math.random()-0.5);
+  $('aiList').innerHTML = shuffled.map(s => `
+    <div class="scenario-card" draggable="true" data-id="${s.id}">
+      <div class="scenario-text">${s.text}</div>
+      <div class="scenario-hint">${s.hint}</div>
+    </div>`).join('');
+  attachDrag('aiList');
+}
+function renderAIBuckets(){ setupBuckets('#activity-3', AI_ITEMS, aiPlaced, AI_NAMES, checkAIDone); }
+
+/* ─── SHARED DRAG-DROP ENGINE ─── */
+function attachDrag(listId){
+  $(listId).querySelectorAll('.scenario-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('id', card.dataset.id);
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+function setupBuckets(sectionSel, items, placedObj, names, doneFn){
+  document.querySelectorAll(sectionSel + ' .bucket').forEach(b => {
+    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
+    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
+    b.addEventListener('drop', e => {
+      e.preventDefault();
+      b.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('id');
+      genericDrop(sectionSel, id, b.dataset.bucket, items, placedObj, names, doneFn);
+    });
+  });
+}
+function genericDrop(sectionSel, id, bucket, items, placedObj, names, doneFn){
+  const item = items.find(s => s.id === id);
+  if (!item || placedObj[id]) return;
+  const correct = item.bucket === bucket;
+  placedObj[id] = {bucket, correct};
+  const card = document.querySelector(`${sectionSel} .scenario-card[data-id="${id}"]`);
+  card.classList.add('placed', correct ? 'correct' : 'wrong');
+  const dropZone = document.querySelector(`${sectionSel} [data-drop="${bucket}"]`);
+  const pill = document.createElement('span');
+  pill.className = 'dropped-pill ' + (correct ? 'correct' : 'wrong');
+  pill.textContent = (correct ? '✓ ' : '✗ ') + item.text.substring(0, 34) + (item.text.length > 34 ? '…' : '');
+  pill.title = correct ? item.why : `Correct: ${names[item.bucket]}. ${item.why}`;
+  dropZone.appendChild(pill);
+  doneFn();
+}
+function checkRecordDone(){
+  if (Object.keys(recPlaced).length === RECORD_ITEMS.length){
+    const right = Object.values(recPlaced).filter(p => p.correct).length;
+    const fb = $('feedback2');
+    if (right === RECORD_ITEMS.length){
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>All eight sorted correctly.</strong> The round trip in one line: you send a <em>request</em> (endpoint + key + model + prompt) and the API sends back a <em>response</em> (status code + JSON data + the text, or an error). Read any API doc through that lens and it clicks into place.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 8.</strong> Hover any red pill for the reasoning. Simple test: if it's something you package up and <em>send</em>, it's the request. If it only exists <em>after</em> the API answers, it's the response. Click <em>Try again</em>.`;
+    }
+    $('prog2').classList.add('done');
+  }
+}
+function checkAIDone(){
+  if (Object.keys(aiPlaced).length === AI_ITEMS.length){
+    const right = Object.values(aiPlaced).filter(p => p.correct).length;
+    const fb = $('feedback3');
+    if (right === AI_ITEMS.length){
+      fb.className = 'activity-feedback show success';
+      fb.innerHTML = `<strong>Six for six.</strong> The big idea: the API doesn't care who's calling — your own app, a script, or a no-code automation. In every case you send a request and read the response, and you never build the AI. That's exactly why APIs are the fastest path from idea to working feature.`;
+    } else {
+      fb.className = 'activity-feedback show partial';
+      fb.innerHTML = `<strong>You got ${right} of 6.</strong> Hover the red pills. The tell: did <em>you write code</em> that calls it (app or script), or did a <em>no-code tool</em> call it on a trigger or schedule (automation)? Either way, you're just sending requests. Click <em>Try again</em>.`;
+    }
+    $('prog3').classList.add('done');
+  }
+}
+function resetRecord(){
+  $('feedback2').className = 'activity-feedback';
+  document.querySelectorAll('#activity-2 .bucket-drop').forEach(d => d.innerHTML = '');
+  renderRecord();
+  $('prog2').classList.remove('done');
+}
+function showAnswersRecord(){
+  RECORD_ITEMS.forEach(s => { if (!recPlaced[s.id]) genericDrop('#activity-2', s.id, s.bucket, RECORD_ITEMS, recPlaced, REC_NAMES, checkRecordDone); });
+}
+function resetAI(){
+  $('feedback3').className = 'activity-feedback';
+  document.querySelectorAll('#activity-3 .bucket-drop').forEach(d => d.innerHTML = '');
+  renderAI();
+  $('prog3').classList.remove('done');
+}
+function showAnswersAI(){
+  AI_ITEMS.forEach(s => { if (!aiPlaced[s.id]) genericDrop('#activity-3', s.id, s.bucket, AI_ITEMS, aiPlaced, AI_NAMES, checkAIDone); });
+}
+
+/* ─── ACTIVITY 4: Quiz ─── */
+const QUIZ = [
+  {
+    q:'To put a powerful AI inside your own product, do you first have to build and train the AI yourself?',
+    opts:[
+      {t:'Myth — you call someone else\'s already-trained model over an API and pay per use', ok:true, ex:'Right. The whole point of an AI API is that the hard, expensive part — training the model — is already done. You send a request and get a completion back. You bring the idea; the provider brings the model.'},
+      {t:'Reality — there is no other way to get AI into a product', ok:false, ex:'Not so. Building and training a model from scratch takes enormous data, money, and expertise. Calling an existing model over an API is exactly how most products add AI without any of that.'},
+      {t:'Reality — the API only works if you also train your own model alongside it', ok:false, ex:'No — an AI API works entirely on its own. You never train anything; you just send prompts and read the responses. That is the shortcut it exists to give you.'}
+    ]
+  },
+  {
+    q:'A response comes back as the JSON below. What is the value of <code>reply</code>?<div class="json-block">{\n  "status": "ok",\n  "user": { "name": "Aisha", "plan": "free" },\n  "reply": "Here is your summary."\n}</div>',
+    opts:[
+      {t:'"Here is your summary."', ok:true, ex:'Correct. In JSON, each label (the "key") points to a value after the colon. The key "reply" points to the text "Here is your summary." — that\'s the value you\'d pull out and show the user.'},
+      {t:'"ok"', ok:false, ex:'That\'s the value of "status", not "reply". Watch the labels: "status" is "ok", but "reply" is a different key with a different value.'},
+      {t:'"Aisha"', ok:false, ex:'"Aisha" is nested inside "user" as the value of "name". The key you were asked about is "reply", which holds "Here is your summary."'}
+    ]
+  },
+  {
+    q:'Your API call comes back with a 401. What is the most likely fix?',
+    opts:[
+      {t:'Check your API key — a 401 means your identity wasn\'t accepted', ok:true, ex:'Right. 401 = Unauthorized. The key is missing, wrong, or expired. Fix the key and the call goes through. It has nothing to do with the servers being down or with rate limits.'},
+      {t:'Wait a few minutes — the provider\'s servers must be down', ok:false, ex:'That would be a 5xx (like 500), a problem on their side. A 401 is on your side: your credentials weren\'t accepted. Waiting won\'t help; fixing the key will.'},
+      {t:'Slow down — you\'ve clearly sent too many requests', ok:false, ex:'"Too many requests" is a 429, not a 401. A 401 is about who you are, not how often you\'re calling. Check the key first.'}
+    ]
+  },
+  {
+    q:'Which best describes what an API actually is?',
+    opts:[
+      {t:'A doorway and set of rules that lets one program ask another to do something, called over the internet', ok:true, ex:'Exactly. An API is an agreement: "send a request shaped like this, and I\'ll send back a response shaped like that." You don\'t download or install it — you call it over the network.'},
+      {t:'A program you download and install on your computer first', ok:false, ex:'That describes an app, not an API. You don\'t install an API — you send requests to it over the internet and use what comes back.'},
+      {t:'A type of file you open in your web browser', ok:false, ex:'An API isn\'t a file you open. It\'s a doorway a program talks to. Your code (or an automation) sends it a request and reads the response.'}
+    ]
+  },
+  {
+    q:'Do you need to be a professional programmer to use an AI API?',
+    opts:[
+      {t:'No — no-code tools and short scripts let non-coders send requests and use the responses', ok:true, ex:'Right. Plenty of people use AI APIs through drag-and-drop automations or a few lines an AI assistant helps them write. Understanding the request/response idea matters far more than being a career engineer.'},
+      {t:'Yes — only trained software engineers can send any API request', ok:false, ex:'Not true. The request/response pattern is simple, and no-code tools handle the plumbing. You can call an AI API without writing much (or any) code by hand.'},
+      {t:'Yes — using an API means building an entire app in a low-level language', ok:false, ex:'Calling an API is a small, focused action — send a request, read the response. It doesn\'t require a whole app or a low-level language.'}
+    ]
+  }
+];
+let quizAnswered = 0, quizScore = 0;
+function renderQuiz(){
+  quizAnswered = 0; quizScore = 0;
+  $('quizWrap').innerHTML = QUIZ.map((q, qi) => {
+    const order = q.opts.map((_, i) => i).sort(()=>Math.random()-0.5);
+    return `<div class="quiz-q" id="q${qi}">
+      <div class="quiz-q-num">Question ${qi+1} of ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-opts">${order.map(oi =>
+        `<button class="quiz-opt" onclick="answerQuiz(${qi}, ${oi}, this)">${q.opts[oi].t}</button>`).join('')}
+      </div>
+      <div class="quiz-explain" id="qx${qi}"></div>
+    </div>`;
+  }).join('');
+  $('feedback4').className = 'activity-feedback';
+}
+function answerQuiz(qi, oi, btn){
+  const q = QUIZ[qi];
+  const box = $('q' + qi);
+  if (box.dataset.done) return;
+  box.dataset.done = '1';
+  const opt = q.opts[oi];
+  const rightText = q.opts.find(o => o.ok).t;
+  box.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === rightText) b.classList.add('right');
+  });
+  if (!opt.ok) btn.classList.add('wrong');
+  const ex = $('qx' + qi);
+  ex.className = 'quiz-explain show ' + (opt.ok ? 'ok' : 'no');
+  ex.innerHTML = (opt.ok ? '<strong>Right.</strong> ' : '<strong>Not quite.</strong> ') + opt.ex;
+  quizAnswered++;
+  if (opt.ok) quizScore++;
+  if (quizAnswered === QUIZ.length) finishQuiz();
+}
+function finishQuiz(){
+  const fb = $('feedback4');
+  if (quizScore === QUIZ.length){
+    fb.className = 'activity-feedback show success';
+    fb.innerHTML = `<strong>5/5 — you've got the honest picture.</strong> An API is a doorway you send a request to and get a response from; status codes tell you how it went; you never build the AI; and non-coders can absolutely use them. Next lesson, you'll actually make the call.`;
+  } else {
+    fb.className = 'activity-feedback show partial';
+    fb.innerHTML = `<strong>You scored ${quizScore}/5.</strong> Re-read the explanations on the misses — those wrong options are the myths that make APIs sound harder than they are. The core truth: you don't build the AI, you don't install anything, and you read the response (often JSON) that comes back. Retake for a clean 5/5.`;
+  }
+  $('prog4').classList.add('done');
+}
+function resetQuiz(){
+  renderQuiz();
+  $('prog4').classList.remove('done');
+}
+
+/* ─── INIT ─── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderMatch();
+  renderRecord();
+  renderRecordBuckets();
+  renderAI();
+  renderAIBuckets();
+  renderQuiz();
+});
+</script>
+</body>
+</html>
