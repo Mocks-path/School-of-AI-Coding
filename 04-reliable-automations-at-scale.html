@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reliability, Monitoring &amp; Scaling · Lesson 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);background-size:24px 24px}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(255,252,246,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{font-family:'Fraunces',serif;font-weight:800;font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;margin:18px 0 20px;color:var(--brown-dark)}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;margin:10px 0 22px;color:var(--brown-dark);max-width:720px}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:32px;margin:24px 0;position:relative;overflow:hidden}
+.illus-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);border:1px solid var(--line);color:var(--brown);padding:6px 12px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;transition:all .2s}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{background:var(--brown-dark);color:var(--paper);border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden}
+.takeaway::after{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){.topbar{padding:12px 18px}.page{padding:30px 18px 70px}.illus{padding:20px}.takeaway{padding:28px}.logo-slot{width:38px;height:38px}}
+
+/* ===== Figure 1 · workflow builder ===== */
+.wf{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.wf-canvas{display:flex;flex-direction:column;gap:0;align-items:center}
+.wf-node{
+  width:min(100%,460px);border-radius:12px;padding:16px 18px;position:relative;
+  cursor:pointer;transition:transform .25s,box-shadow .25s;opacity:0;transform:translateY(12px);
+}
+.wf.built .wf-node{animation:wfIn .5s forwards}
+.wf.built .wf-node:nth-child(1){animation-delay:.1s}
+.wf.built .wf-node:nth-child(3){animation-delay:.4s}
+.wf.built .wf-node:nth-child(5){animation-delay:.7s}
+.wf.built .wf-node:nth-child(7){animation-delay:1s}
+.wf.built .wf-node:nth-child(9){animation-delay:1.3s}
+@keyframes wfIn{to{opacity:1;transform:none}}
+.wf-node.active{transform:scale(1.02);box-shadow:0 8px 20px rgba(65,44,35,0.18);outline:3px solid var(--yellow)}
+.wf-node .wf-kind{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.wf-node h5{font-family:'Fraunces',serif;font-size:17px;line-height:1.2}
+.wf-node p{font-size:12.5px;margin:4px 0 0;max-width:none;line-height:1.45}
+.wf-trigger{background:#FDEBD7;border:2px solid var(--orange)}
+.wf-trigger .wf-kind{color:var(--orange-dark)}
+.wf-trigger h5{color:var(--brown-dark)}
+.wf-trigger p{color:var(--brown)}
+.wf-action{background:var(--cream);border:2px solid var(--line)}
+.wf-action .wf-kind{color:var(--tan)}
+.wf-action h5{color:var(--brown-dark)}
+.wf-action p{color:var(--muted)}
+.wf-cond{background:var(--brown-dark);border:2px solid var(--brown-dark)}
+.wf-cond .wf-kind{color:var(--yellow)}
+.wf-cond h5{color:var(--paper)}
+.wf-cond p{color:#E8D9C5}
+.wf-conn{width:3px;height:24px;background:var(--line);position:relative;opacity:0}
+.wf.built .wf-conn{animation:connIn .3s forwards}
+.wf.built .wf-conn:nth-child(2){animation-delay:.3s}
+.wf.built .wf-conn:nth-child(4){animation-delay:.6s}
+.wf.built .wf-conn:nth-child(6){animation-delay:.9s}
+.wf.built .wf-conn:nth-child(8){animation-delay:1.2s}
+@keyframes connIn{to{opacity:1}}
+.wf-conn::after{content:"▾";position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);color:var(--line);font-size:14px}
+.wf-detail{margin-top:18px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--brown);line-height:1.55;min-height:70px}
+.wf-detail b{color:var(--orange-dark)}
+
+/* ===== Figure 3 widget · transform panel ===== */
+.n2f{display:grid;grid-template-columns:1fr 60px 1fr;gap:14px;align-items:stretch}
+.n2f-box{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column}
+.n2f-box.notes{border-style:dashed}
+.n2f-box.out{border-color:var(--orange)}
+.n2f-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-weight:600}
+.n2f-box.out .n2f-h{color:var(--orange-dark)}
+.n2f-notes-body{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brown);line-height:1.7;white-space:pre-wrap;flex:1}
+.n2f-out-body{flex:1}
+.n2f-item{opacity:0;transform:translateY(6px);margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.n2f-item:last-child{border-bottom:none;margin-bottom:0}
+.n2f-item.in{animation:n2fIn .45s forwards}
+@keyframes n2fIn{to{opacity:1;transform:none}}
+.n2f-item .ni-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--tan);font-weight:600;display:block;margin-bottom:4px}
+.n2f-item .ni-txt{font-size:13px;color:var(--ink);line-height:1.5}
+.n2f-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--orange)}
+.n2f-arrow .na-ico{width:38px;height:38px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 4px 12px rgba(239,127,26,0.35)}
+.n2f-arrow.spin .na-ico{animation:naspin 1s linear infinite}
+@keyframes naspin{to{transform:rotate(360deg)}}
+.n2f-arrow .na-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.3}
+@media(max-width:700px){.n2f{grid-template-columns:1fr;gap:10px}.n2f-arrow{flex-direction:row}}
+
+/* ===== Figure 4 widget · coverage meter ===== */
+.crm{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.crm-grid{display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:center}
+.crm-checks{display:grid;gap:10px}
+.cchk{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s}
+.cchk:hover{border-color:var(--orange)}
+.cchk.on{background:#FDEBD7;border-color:var(--orange)}
+.cchk .ctxt{font-size:13px;color:var(--brown-dark);font-weight:500}
+.cchk .cbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+.cchk.on .cbox{background:var(--orange);border-color:var(--orange)}
+.crm-out{text-align:center}
+.crm-num{font-family:'Fraunces',serif;font-weight:800;font-size:64px;line-height:1;color:var(--brown-dark);transition:color .3s}
+.crm-lab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.crm-bar{height:14px;border-radius:8px;background:var(--cream);border:1px solid var(--line);overflow:hidden;margin:16px 0 12px}
+.crm-fill{height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--orange-dark));transition:width .4s ease}
+.crm-verdict{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;font-weight:600;padding:7px 16px;border-radius:999px;transition:all .3s}
+.crm-verdict.bad{background:rgba(213,82,34,0.12);color:var(--orange-dark)}
+.crm-verdict.mid{background:rgba(254,204,0,0.2);color:#8A6D00}
+.crm-verdict.good{background:rgba(46,125,70,0.12);color:#2E7D46}
+.crm-action{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5;max-width:none}
+@media(max-width:700px){.crm-grid{grid-template-columns:1fr}}
+
+/* ===== Figure 4 · balance cards ===== */
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bcard{height:210px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.bgrid.show .bcard{animation:hIn .5s forwards}
+.bgrid.show .bcard:nth-child(1){animation-delay:.05s}
+.bgrid.show .bcard:nth-child(2){animation-delay:.2s}
+.bgrid.show .bcard:nth-child(3){animation-delay:.35s}
+.bgrid.show .bcard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.binner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.bcard.flipped .binner{transform:rotateY(180deg)}
+.bface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center}
+.bfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.bfront .bclaim{font-family:'Fraunces',serif;font-weight:800;font-size:23px;line-height:1.1;margin-bottom:8px}
+.bfront .bsub{font-size:13px;opacity:.92;max-width:260px}
+.bfront .bhint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.bback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.bback .blab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.bback p{font-size:13px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){.bgrid{grid-template-columns:1fr}.bcard{height:205px}.bfront .bclaim{font-size:20px}}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 04 · AI Automation</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="20" fill="#412C23"/>
+      <path d="M13 22l6 6 12-13" stroke="#EF7F1A" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="11" r="3.5" fill="#FECC00"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 4 · Lesson 04 · AI Automation</div>
+  <h1>Automations that <em>keep</em> working.</h1>
+  <p class="lede">Building an automation is the easy part. Keeping it running — quietly, correctly, for months, while the apps around it change and the volume climbs — is the real skill. This final lesson is the unglamorous engineering that separates a demo from a system you can trust: knowing why flows break, handling errors on purpose, refusing to do the same thing twice, and seeing failures before your users do.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Why automations break</h2>
+  <p class="lead">A flow that worked perfectly on Tuesday can quietly stop working on Wednesday — and the reasons are boringly predictable. Almost every failure is one of a handful of usual suspects. Learn to recognise them and you'll debug in minutes instead of hours.</p>
+
+  <p>The important shift in mindset: <strong>a working flow is not a finished flow</strong>. It runs in a world of other people's apps, networks, and limits, none of which asked your permission before changing. The goal isn't a flow that never fails — that doesn't exist — it's a flow that fails in ways you anticipated and handled.</p>
+  <p>Trace the flow below. Each stage lights up in turn; click any stage to see its characteristic failure — and the guard that stops it.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 · Where a flow breaks</span>
+      <div class="controls">
+        <button onclick="wfBuild()">&#9654; Trace the flow</button>
+        <button onclick="wfReset()">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="wf" id="wf">
+      <div class="wf-canvas">
+        <div class="wf-node wf-trigger" data-i="0" onclick="wfPick(0)">
+          <div class="wf-kind">&#9670; Trigger</div>
+          <h5>Trigger double-fires</h5>
+          <p>The same event arrives twice — a webhook retry or an overlapping poll — so everything downstream runs twice.</p>
+        </div>
+        <div class="wf-conn"></div>
+        <div class="wf-node wf-action" data-i="1" onclick="wfPick(1)">
+          <div class="wf-kind">&#9656; Data step</div>
+          <h5>An app changed a field</h5>
+          <p>An upstream app renamed or dropped a field. Your step reads blank and passes empty data on — with no error at all.</p>
+        </div>
+        <div class="wf-conn"></div>
+        <div class="wf-node wf-action" data-i="2" onclick="wfPick(2)">
+          <div class="wf-kind">&#9656; API call</div>
+          <h5>Rate limit hit</h5>
+          <p>Too many requests too fast. The other app replies "slow down" and refuses — a temporary, expected wall.</p>
+        </div>
+        <div class="wf-conn"></div>
+        <div class="wf-node wf-cond" data-i="3" onclick="wfPick(3)">
+          <div class="wf-kind">&#8623; AI step</div>
+          <h5>AI step returns junk</h5>
+          <p>Prose instead of JSON, an invented field, a confident wrong answer. It looks fine and quietly poisons the next step.</p>
+        </div>
+        <div class="wf-conn"></div>
+        <div class="wf-node wf-action" data-i="4" onclick="wfPick(4)">
+          <div class="wf-kind">&#9656; End step</div>
+          <h5>Silent failure</h5>
+          <p>A step fails but the flow reports success. Nobody notices for days. The most dangerous failure is the one you never see.</p>
+        </div>
+      </div>
+      <div class="wf-detail" id="wfDetail">Press <b>&#9654; Trace the flow</b> to light up each stage, then tap any stage to see its failure mode and its fix.</div>
+    </div>
+  </div>
+
+  <h3>Expect the failure, then handle it</h3>
+  <p>Every one of these has a known answer, and the next three sections are those answers: retries and alerts for the temporary breaks, a de-dup check for the double-fire, and monitoring for the silent one. Naming the failure is ninety percent of fixing it.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Handle errors on purpose</h2>
+  <p class="lead">When a step fails, the flow needs a plan — decided by you, in advance, not improvised by a machine at 3am. There are three good responses, and the whole art is matching the right one to the right kind of failure. Flip each card for when to reach for it.</p>
+
+  <p>The wrong instinct is to make everything retry, or to make everything stop and shout. Retrying a payment can charge someone twice; stopping for every network blip buries you in false alarms. Good error handling is a set of deliberate choices, one per risky step.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 · Three ways to handle a failure</span>
+      <div class="controls">
+        <button onclick="allReal()">Show all answers</button>
+        <button onclick="allHype()">&#8635; Back to labels</button>
+      </div>
+    </div>
+    <div class="bgrid" id="bgrid">
+      <div class="bcard" onclick="this.classList.toggle('flipped')">
+        <div class="binner">
+          <div class="bface bfront"><div class="bclaim">Retry with backoff</div><div class="bsub">When should you use it?</div><div class="bhint">tap to flip</div></div>
+          <div class="bface bback"><div class="blab">For temporary blips</div><p>A timeout, a brief rate limit, a network hiccup — these fix themselves. Don't give up; retry after a short wait, then a longer one, then longer still. Most transient errors vanish by the second try. Just cap the attempts so it can't loop forever.</p></div>
+        </div>
+      </div>
+      <div class="bcard" onclick="this.classList.toggle('flipped')">
+        <div class="binner">
+          <div class="bface bfront"><div class="bclaim">Alert a human</div><div class="bsub">When should you use it?</div><div class="bhint">tap to flip</div></div>
+          <div class="bface bback"><div class="blab">For judgement calls</div><p>Some failures aren't safe to retry — a payment, an ambiguous AI output, anything with real consequences. Stop, and send a clear alert with what broke and the data. A person decides. Automation that knows when to ask for help is the trustworthy kind.</p></div>
+        </div>
+      </div>
+      <div class="bcard" onclick="this.classList.toggle('flipped')">
+        <div class="binner">
+          <div class="bface bfront"><div class="bclaim">Fail safe, not messy</div><div class="bsub">When should you use it?</div><div class="bhint">tap to flip</div></div>
+          <div class="bface bback"><div class="blab">For anything that writes data</div><p>If a step can't finish, it should stop in a known-safe state: skip rather than half-write, keep the item for later, never leave data half-changed. A flow that fails cleanly can simply be re-run; one that fails messily corrupts what it touched.</p></div>
+        </div>
+      </div>
+      <div class="bcard" onclick="this.classList.toggle('flipped')">
+        <div class="binner">
+          <div class="bface bfront"><div class="bclaim">Which one, when?</div><div class="bsub">How do you choose?</div><div class="bhint">tap to flip</div></div>
+          <div class="bface bback"><div class="blab">Match response to failure</div><p>Temporary and reversible &#8594; retry with backoff. Consequential or ambiguous &#8594; alert a human. Anything that could corrupt data &#8594; fail safe first. Real flows use all three, at different steps. Decide the response before the failure, not during it.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>A retry cap and an alert path</h3>
+  <p>Two settings turn a fragile flow into a resilient one: a limit on how many times a step may retry (so a permanent error doesn't loop forever), and a place your alerts actually land — a channel a human reads, not a folder nobody opens. Set both once and every future step inherits a safety net.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Do it once, even when the trigger fires twice</h2>
+  <p class="lead">Remember the very first failure: a trigger that double-fires. It's so common it has its own solution, and its own intimidating word — <strong>idempotency</strong>. It only means this: running the same thing twice should have the same effect as running it once. No double charges, no duplicate messages.</p>
+
+  <p>The danger is real. Webhooks retry when they're unsure you received them; polling windows overlap; a user double-clicks. Any of these can hand your flow the same event twice, a second apart. Without a guard, the flow dutifully does everything twice. The fix is a small, deliberate <strong>de-dup check</strong> — and it's the difference between an automation you trust with real actions and one you have to babysit.</p>
+  <p>Watch the guard work below. On the left, the same event arriving twice. On the right, the three-part check that turns two triggers into exactly one action.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 · Two triggers, one action</span>
+      <div class="controls">
+        <button id="n2fBtn" onclick="runN2F()">&#9654; Run the de-dup</button>
+        <button onclick="resetN2F()">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="n2f">
+      <div class="n2f-box notes">
+        <div class="n2f-h">The problem &mdash; one event, twice</div>
+        <div class="n2f-notes-body">09:00:01  event #A17  &#8594; trigger fires
+09:00:01  event #A17  &#8594; trigger fires AGAIN
+
+same event delivered twice
+(webhook retry / overlapping poll)
+
+with no guard, the flow runs
+the work 2x &#8212; double action,
+double message, real damage</div>
+      </div>
+      <div class="n2f-arrow" id="n2fArrow">
+        <div class="na-ico">&#10003;</div>
+        <div class="na-lbl">de-dup<br>check</div>
+      </div>
+      <div class="n2f-box out">
+        <div class="n2f-h">The guard &mdash; act exactly once</div>
+        <div class="n2f-out-body">
+          <div class="n2f-item" data-i="0">
+            <span class="ni-lab">1 &middot; Give each event an ID</span>
+            <div class="ni-txt">Every event carries a unique key &mdash; here, <code>#A17</code>. That key is how the flow will recognise a repeat later.</div>
+          </div>
+          <div class="n2f-item" data-i="1">
+            <span class="ni-lab">2 &middot; Check before you act</span>
+            <div class="ni-txt">Before doing any work, the flow asks: "have I already handled <code>#A17</code>?" It looks the key up in a small list of what it has processed.</div>
+          </div>
+          <div class="n2f-item" data-i="2">
+            <span class="ni-lab">3 &middot; Act once, record it</span>
+            <div class="ni-txt">First time: do the work, then store the key. Second time: the key is already there, so the flow skips. One event, one action &mdash; that's idempotency.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The key you already have</h3>
+  <p>You rarely need to invent an ID — the data usually carries one: an order number, a message ID, a row's unique reference. Store the ones you've handled, check against that store before acting, and a double-fire becomes a harmless no-op. This one small habit is what makes it safe to automate actions that actually matter.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Monitoring: catch the failure you never see</h2>
+  <p class="lead">The worst failure isn't the loud one that crashes and emails you an error. It's the <strong>silent</strong> one: a step quietly stops working, the flow reports success, and everything looks fine — until days later you discover nothing has actually run. You can't fix what you can't see. Monitoring is how you see.</p>
+
+  <p>Three simple habits give you eyes. <strong>Logs</strong> record what each run did, so you can look back. <strong>Alerts</strong> ping a human the moment something errors, so you don't have to watch. And a <strong>heartbeat</strong> — the clever one — expects the flow to check in on schedule; if the 9am run simply never happens, the missing heartbeat raises the alarm. That last one is the only thing that catches a flow that failed by <em>not running at all</em>.</p>
+  <p>Toggle the monitoring habits below and watch your coverage rise. Notice how, without the heartbeat, a silent failure still slips right past you.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 · Monitoring coverage</span>
+      <div class="controls">
+        <button onclick="crmAll()">Turn on full monitoring</button>
+        <button onclick="crmReset()">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="crm">
+      <div class="crm-grid">
+        <div class="crm-checks" id="crmChecks">
+          <div class="cchk" data-pts="20" onclick="toggleCrm(this)"><div class="cbox">&#10003;</div><span class="ctxt">Every run writes a log you can read back</span></div>
+          <div class="cchk" data-pts="20" onclick="toggleCrm(this)"><div class="cbox">&#10003;</div><span class="ctxt">Any error raises an alert automatically</span></div>
+          <div class="cchk" data-pts="22" onclick="toggleCrm(this)"><div class="cbox">&#10003;</div><span class="ctxt">A heartbeat catches a run that never happened</span></div>
+          <div class="cchk" data-pts="18" onclick="toggleCrm(this)"><div class="cbox">&#10003;</div><span class="ctxt">One dashboard shows every flow's status</span></div>
+          <div class="cchk" data-pts="20" onclick="toggleCrm(this)"><div class="cbox">&#10003;</div><span class="ctxt">Alerts reach a channel a human actually reads</span></div>
+        </div>
+        <div class="crm-out">
+          <div class="crm-num" id="crmNum">0</div>
+          <div class="crm-lab">monitoring coverage</div>
+          <div class="crm-bar"><div class="crm-fill" id="crmFill"></div></div>
+          <div class="crm-verdict bad" id="crmVerdict">Flying blind</div>
+          <div class="crm-action" id="crmAction">Toggle the habits. Without logs, alerts and a heartbeat, a broken flow just fails in the dark and you find out far too late.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Scale is just reliability, repeated</h3>
+  <p>Scaling an automation isn't about doing something clever — it's about doing the boring things above, everywhere. Every new flow gets error handling, a de-dup guard, and monitoring from day one. Ten flows you can see beat a hundred you can't. Build each one to fail safely and report loudly, and growth stops being scary.</p>
+</section>
+
+<div class="takeaway">
+  <h2>Week 4 · What you carry forward</h2>
+  <p>You can build an automation — now you can keep it alive. Failures are predictable: fields change, triggers double-fire, rate limits bite, AI steps return junk, and the worst ones fail silently. Handle each on purpose — retry the blips, alert a human for judgement calls, fail safe when data is at stake. Guard against double-fires with a de-dup check. And see everything with logs, alerts, and a heartbeat. Reliability, repeated, is what scaling actually means.</p>
+  <ul>
+    <li>A working flow isn't a finished flow &mdash; expect the usual failures</li>
+    <li>Retry with backoff &middot; alert a human &middot; fail safe &mdash; match it to the risk</li>
+    <li>Idempotency: give events an ID, check before acting, do it once</li>
+    <li>Monitor with logs + alerts + a heartbeat to catch silent failures</li>
+    <li>Scaling is just reliability applied to every flow, from day one</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath · Lesson 04 of 04 · Week 4 complete — you can build automations that last →</footer>
+<script>
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · workflow builder ===== */
+const wfEl=el('wf');
+const WF_DETAIL=[
+  'This is the <b>trigger</b>, and the classic first failure: it <b>double-fires</b>. A webhook retries, or a poll overlaps, and the same event arrives twice. Downstream, every action runs twice. The fix is in section 3: a de-dup check.',
+  'A <b>data step</b> reading a field from another app. The quiet killer: someone <b>renamed or removed that field</b> upstream. Your flow read "Full Name"; now it\'s "Name" and comes back blank. Nothing errors — it just carries empty data forward.',
+  'An <b>API call</b> to another app. Push too many requests too fast and you hit a <b>rate limit</b> — the app says "slow down" and refuses. This one is temporary and expected; the right answer is a retry with backoff, not a crash.',
+  'An <b>AI step</b>. Its danger is unique: it can <b>return junk that looks fine</b> — prose instead of JSON, an invented field, a confident wrong answer. Always validate the shape of what it returns before the next step trusts it.',
+  'The <b>end step</b>, and the worst failure of all: the <b>silent one</b>. A step quietly fails, the flow reports success, and nobody notices for days. You cannot fix what you cannot see — which is exactly why monitoring, in section 4, exists.'
+];
+function wfClear(){document.querySelectorAll('#wf .wf-node').forEach(n=>n.classList.remove('active'))}
+function wfPick(i){
+  wfClear();
+  const n=document.querySelector('#wf .wf-node[data-i="'+i+'"]');
+  n.classList.add('active');
+  el('wfDetail').innerHTML=WF_DETAIL[i];
+}
+function wfBuild(){
+  wfEl.classList.remove('built');void wfEl.offsetWidth;wfEl.classList.add('built');
+  el('wfDetail').innerHTML='Tracing the flow… each stage lights up in turn. Tap any stage to see how it breaks and how to guard it.';
+  setTimeout(()=>wfPick(0),1600);
+}
+function wfReset(){
+  wfEl.classList.remove('built');wfClear();
+  el('wfDetail').innerHTML='Press <b>▶ Trace the flow</b> to light up each stage, then tap any stage to see its failure mode and its fix.';
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){wfBuild();o.unobserve(e.target)}}),{threshold:0.25}).observe(wfEl);
+
+/* ===== Figure 3 widget · transform panel ===== */
+let n2fTimers=[];
+function resetN2F(){
+  n2fTimers.forEach(t=>clearTimeout(t));n2fTimers=[];
+  document.querySelectorAll('.n2f-item').forEach(x=>x.classList.remove('in'));
+  el('n2fArrow').classList.remove('spin');
+}
+function runN2F(){
+  resetN2F();
+  el('n2fArrow').classList.add('spin');
+  const items=document.querySelectorAll('.n2f-item');
+  items.forEach((x,i)=>n2fTimers.push(setTimeout(()=>x.classList.add('in'),600+i*800)));
+  n2fTimers.push(setTimeout(()=>el('n2fArrow').classList.remove('spin'),600+items.length*800));
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runN2F();o.unobserve(e.target)}}),{threshold:0.35}).observe(el('n2fArrow'));
+
+/* ===== coverage meter ===== */
+function calcCrm(){
+  let sum=0;
+  document.querySelectorAll('#crmChecks .cchk.on').forEach(c=>sum+=parseInt(c.dataset.pts,10));
+  el('crmNum').textContent=sum;
+  el('crmFill').style.width=Math.min(100,sum)+'%';
+  const v=el('crmVerdict'),a=el('crmAction');
+  v.classList.remove('bad','mid','good');
+  if(sum>=90){v.classList.add('good');v.textContent='Fully observable';a.textContent='Nothing fails in the dark. Logs, alerts and a heartbeat mean you learn about a problem before your users do.';}
+  else if(sum>=50){v.classList.add('mid');v.textContent='Partial visibility';a.textContent='You\'ll catch the loud failures and miss the quiet ones. A run that simply never happened will slip past unseen. Close the gaps.';}
+  else{v.classList.add('bad');v.textContent='Flying blind';a.textContent='When this breaks, you\'ll hear it from an angry user, days late. Add logging, alerts and a heartbeat before you scale.';}
+}
+function toggleCrm(c){c.classList.toggle('on');calcCrm();}
+function crmAll(){document.querySelectorAll('#crmChecks .cchk').forEach(c=>c.classList.add('on'));calcCrm();}
+function crmReset(){document.querySelectorAll('#crmChecks .cchk').forEach(c=>c.classList.remove('on'));calcCrm();}
+calcCrm();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){crmAll();o.unobserve(e.target)}}),{threshold:0.35}).observe(el('crmChecks'));
+
+/* ===== Figure 4 · balance cards ===== */
+const bgrid=el('bgrid');
+function allReal(){document.querySelectorAll('.bcard').forEach(c=>c.classList.add('flipped'))}
+function allHype(){document.querySelectorAll('.bcard').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){bgrid.classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(bgrid);
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Designing an Automation · Lesson 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);background-size:24px 24px}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(255,252,246,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{font-family:'Fraunces',serif;font-weight:800;font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;margin:18px 0 20px;color:var(--brown-dark)}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;margin:10px 0 22px;color:var(--brown-dark);max-width:720px}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:32px;margin:24px 0;position:relative;overflow:hidden}
+.illus-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);border:1px solid var(--line);color:var(--brown);padding:6px 12px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.1em;transition:all .2s}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{background:var(--brown-dark);color:var(--paper);border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden}
+.takeaway::after{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){.topbar{padding:12px 18px}.page{padding:30px 18px 70px}.illus{padding:20px}.takeaway{padding:28px}.logo-slot{width:38px;height:38px}}
+
+/* ===== Figure 1 · flow-map builder ===== */
+.icp{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.icp-in{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px}
+.icp-field{margin-bottom:16px}
+.icp-field:last-child{margin-bottom:0}
+.icp-field label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--brown);font-weight:600;display:block;margin-bottom:7px}
+.chipset{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--cream);border:1px solid var(--line);color:var(--brown);padding:6px 12px;border-radius:999px;cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--orange)}
+.chip.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.icp-card{background:var(--brown-dark);border-radius:14px;padding:24px;color:#F3E7D5;position:relative;overflow:hidden;min-height:280px}
+.icp-card::after{content:"";position:absolute;bottom:-30px;right:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:.35}
+.icp-card .icptag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.icp-card h4{font-family:'Fraunces',serif;font-size:22px;color:var(--paper);margin-bottom:14px;line-height:1.2}
+.icp-line{font-size:14px;line-height:1.6;margin-bottom:10px;position:relative;z-index:1}
+.icp-line b{color:var(--yellow)}
+.icp-summary{font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--paper);border-top:1px solid rgba(255,255,255,0.15);padding-top:14px;margin-top:6px;position:relative;z-index:1;line-height:1.5}
+@media(max-width:700px){.icp{grid-template-columns:1fr}}
+
+/* ===== Figure 2 · field-mapping animation ===== */
+.enr{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.enr-flow{display:grid;grid-template-columns:1fr 60px 1fr;gap:14px;align-items:center}
+.enr-box{border:2px solid var(--line);border-radius:12px;padding:18px;background:var(--cream)}
+.enr-box.raw{border-style:dashed}
+.enr-box.rich{border-color:var(--orange);background:#FDEBD7}
+.enr-box .enr-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-weight:600}
+.enr-box.rich .enr-h{color:var(--orange-dark)}
+.erow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.erow:last-child{border-bottom:none}
+.erow .ek{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)}
+.erow .ev{color:var(--ink);text-align:right;font-weight:500}
+.erow .ev.empty{color:#C9BBAA;font-style:italic}
+.erow.new{opacity:0;transform:translateX(8px)}
+.erow.new.in{animation:erIn .5s forwards}
+@keyframes erIn{to{opacity:1;transform:none}}
+.enr-arrow{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--orange)}
+.enr-arrow .ea-ico{width:38px;height:38px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 4px 12px rgba(239,127,26,0.35)}
+.enr-arrow.spin .ea-ico{animation:easpin 1s linear infinite}
+@keyframes easpin{to{transform:rotate(360deg)}}
+.enr-arrow .ea-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.3}
+.enr-note{margin-top:16px;font-size:13px;color:var(--muted);background:var(--cream);border-radius:10px;padding:12px 16px;border:1px solid var(--line);line-height:1.5}
+@media(max-width:700px){.enr-flow{grid-template-columns:1fr;gap:10px}.enr-arrow{flex-direction:row;justify-content:center}}
+
+/* ===== Figure 3 · risk / approval meter ===== */
+.score{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.score-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:center}
+.score-toggles{display:grid;gap:10px}
+.stog{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .18s}
+.stog:hover{border-color:var(--orange)}
+.stog.on{background:#FDEBD7;border-color:var(--orange)}
+.stog .stxt{font-size:13.5px;color:var(--brown-dark);font-weight:500}
+.stog .spts{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+.stog.on .spts{color:var(--orange-dark)}
+.stog .sbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+.stog.on .sbox{background:var(--orange);border-color:var(--orange)}
+.score-dial{text-align:center}
+.dial-num{font-family:'Fraunces',serif;font-weight:800;font-size:72px;line-height:1;color:var(--brown-dark);transition:color .3s}
+.dial-max{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+.dial-bar{height:14px;border-radius:8px;background:var(--cream);border:1px solid var(--line);overflow:hidden;margin:16px 0 10px}
+.dial-fill{height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--orange-dark));transition:width .4s ease}
+.dial-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;padding:7px 16px;border-radius:999px;transition:all .3s}
+.dial-badge.cold{background:rgba(0,141,210,0.12);color:var(--accent)}
+.dial-badge.warm{background:rgba(254,204,0,0.2);color:#8A6D00}
+.dial-badge.hot{background:rgba(213,82,34,0.14);color:var(--orange-dark)}
+.dial-action{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5;max-width:none}
+@media(max-width:700px){.score-grid{grid-template-columns:1fr}}
+
+/* ===== Figure 4 · AI-step cards ===== */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.scard{height:210px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.sgrid.show .scard{animation:hIn .5s forwards}
+.sgrid.show .scard:nth-child(1){animation-delay:.05s}
+.sgrid.show .scard:nth-child(2){animation-delay:.2s}
+.sgrid.show .scard:nth-child(3){animation-delay:.35s}
+.sgrid.show .scard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.sinner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.scard.flipped .sinner{transform:rotateY(180deg)}
+.sface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center}
+.sfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.sfront .sclaim{font-family:'Fraunces',serif;font-weight:800;font-size:23px;line-height:1.1;margin-bottom:8px}
+.sfront .ssub{font-size:13px;opacity:.92;max-width:260px}
+.sfront .shint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.sback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.sback .slab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.sback p{font-size:13px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){.sgrid{grid-template-columns:1fr}.scard{height:205px}.sfront .sclaim{font-size:20px}}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 02 · AI Automation</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="20" fill="#412C23"/>
+      <circle cx="20" cy="20" r="9" stroke="#EF7F1A" stroke-width="3.4" fill="none"/>
+      <path d="M27 27L35 35" stroke="#FECC00" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="20" cy="20" r="3" fill="#EF7F1A"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 4 · Lesson 02 · AI Automation</div>
+  <h1>Designing an <em>automation</em>.</h1>
+  <p class="lede">Last lesson you learned to see the world as triggers and actions. Now you design one for real. Good automation isn&rsquo;t about the tool &mdash; it is about decomposing a fuzzy manual chore into a clear map: a trigger, ordered steps, decision points, and honest error paths. Get the map right and the building is easy. Get it wrong and no tool can save you.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Decompose the chore into a map</h2>
+  <p class="lead">Before you touch any tool, you draw the workflow on paper. Decomposing means breaking a vague chore &mdash; &ldquo;deal with the inbox&rdquo; &mdash; into the concrete pieces a machine can follow: one <strong>trigger</strong>, a handful of <strong>ordered steps</strong>, and the <strong>decision points</strong> where the flow branches.</p>
+
+  <p>Most beginners skip this and jump straight into clicking around inside a tool. It always ends the same way: a tangled flow that half-works and nobody understands. The fix is boring and powerful &mdash; write the map first, in plain language. What starts it? What happens, and in what order? Where does it need to make a choice?</p>
+  <p>A good map is specific enough that a stranger could follow it. &ldquo;When a new email arrives, pull out the key details, then &mdash; only if it looks urgent &mdash; flag it for me.&rdquo; Build one below by tapping a trigger, a step, and a decision point, and watch the map assemble into a single readable flow.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 &middot; Interactive flow-map builder</span>
+      <div class="controls">
+        <button onclick="icpPreset('triage')">Inbox-triage example</button>
+        <button onclick="icpPreset('digest')">Daily-digest example</button>
+        <button onclick="icpReset()">&#8635; Clear</button>
+      </div>
+    </div>
+    <div class="icp">
+      <div class="icp-in" id="icpIn">
+        <div class="icp-field">
+          <label>The trigger &mdash; what starts it</label>
+          <div class="chipset" data-group="trigger">
+            <span class="chip" data-v="a new email arrives">New email arrives</span>
+            <span class="chip" data-v="a new form response comes in">New form response</span>
+            <span class="chip" data-v="a file is uploaded">File uploaded</span>
+            <span class="chip" data-v="it&rsquo;s 8am on a weekday">8am each weekday</span>
+          </div>
+        </div>
+        <div class="icp-field">
+          <label>The main step &mdash; what happens</label>
+          <div class="chipset" data-group="step">
+            <span class="chip" data-v="pull out the key details">Extract key details</span>
+            <span class="chip" data-v="save a tidy row to a sheet">Save to a sheet</span>
+            <span class="chip" data-v="draft a reply for you to review">Draft a reply</span>
+            <span class="chip" data-v="post a short summary to the team">Summarize to the team</span>
+          </div>
+        </div>
+        <div class="icp-field">
+          <label>The decision point &mdash; where it branches</label>
+          <div class="chipset" data-group="decision">
+            <span class="chip" data-v="is it urgent?">Is it urgent?</span>
+            <span class="chip" data-v="is the amount over your limit?">Over the limit?</span>
+            <span class="chip" data-v="did the AI step look confident?">AI confident?</span>
+            <span class="chip" data-v="is anything missing?">Anything missing?</span>
+          </div>
+        </div>
+      </div>
+      <div class="icp-card" id="icpCard">
+        <div class="icptag">Your automation, mapped</div>
+        <h4 id="icpTitle">Tap pieces to build it &rarr;</h4>
+        <div class="icp-line">Trigger: <b id="icpTrigger">&mdash; pick what starts it &mdash;</b></div>
+        <div class="icp-line">Step: <b id="icpStep">&mdash; pick the main step &mdash;</b></div>
+        <div class="icp-line">Decision: <b id="icpDecision">&mdash; pick a branch point &mdash;</b></div>
+        <div class="icp-summary" id="icpSummary">Your flow sentence appears here once you&rsquo;ve chosen one of each.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>The map is the hard part</h3>
+  <p>Once the map is clear, choosing a tool and wiring it up is the easy 20%. The 80% that decides whether your automation actually works is the thinking you do here &mdash; naming every step and every branch before a single connection is made. A messy map becomes a messy automation; a clean map almost builds itself.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Connect the fields between steps</h2>
+  <p class="lead">Here is the single most common reason a beginner&rsquo;s automation breaks: the steps all run fine, but the <strong>data doesn&rsquo;t flow between them</strong>. Each step hands off a set of fields, and the next step expects fields with particular names. If you don&rsquo;t connect them by hand, the next step receives blanks.</p>
+
+  <p>Think of every step as a box with output plugs on one side and input sockets on the other. Step 1 might output a field it calls <code>email_addr</code>. Step 2 has a socket labelled <code>to</code>. They mean the same thing, but the automation has no idea that <code>email_addr</code> should plug into <code>to</code> &mdash; you have to wire it. Miss one wire and that field silently arrives empty.</p>
+  <p>This is why automations fail &ldquo;for no reason&rdquo;: the flow ran, but a step got fed nothing. Press the button below to map Step 1&rsquo;s outputs onto the inputs Step 2 expects, and watch the connections form field by field.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 &middot; Wire the fields between two steps</span>
+      <div class="controls">
+        <button id="enrBtn" onclick="runMap()">&#9654; Map fields</button>
+        <button onclick="resetMap()">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="enr">
+      <div class="enr-flow">
+        <div class="enr-box raw">
+          <div class="enr-h">Step 1 output &mdash; what it gives you</div>
+          <div class="erow"><span class="ek">full_name</span><span class="ev">Jane Miller</span></div>
+          <div class="erow"><span class="ek">email_addr</span><span class="ev">jane@site.com</span></div>
+          <div class="erow"><span class="ek">msg_body</span><span class="ev">&ldquo;my order&hellip;&rdquo;</span></div>
+          <div class="erow"><span class="ek">amount</span><span class="ev">1,240</span></div>
+        </div>
+        <div class="enr-arrow" id="enrArrow">
+          <div class="ea-ico">&#8644;</div>
+          <div class="ea-lbl">map<br>fields</div>
+        </div>
+        <div class="enr-box rich" id="enrRich">
+          <div class="enr-h">Step 2 input &mdash; what it expects</div>
+          <div class="erow new" data-i="0"><span class="ek">to</span><span class="ev">&larr; email_addr</span></div>
+          <div class="erow new" data-i="1"><span class="ek">name</span><span class="ev">&larr; full_name</span></div>
+          <div class="erow new" data-i="2"><span class="ek">note</span><span class="ev">&larr; msg_body</span></div>
+          <div class="erow new" data-i="3"><span class="ek">total</span><span class="ev">&larr; amount</span></div>
+        </div>
+      </div>
+      <div class="enr-note" id="enrNote">Press <b>&#9654; Map fields</b> and watch each output from Step 1 get wired to the input Step 2 expects.</div>
+    </div>
+  </div>
+
+  <h3>Wire it, then test with real data</h3>
+  <p>Field mapping is fiddly, and it&rsquo;s exactly where careful beginners beat careless experts. After you wire every field, run the flow once with a real example and confirm each value landed where it should. A five-minute test here saves hours of &ldquo;why is this blank?&rdquo; later.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Slot the AI step in at the right spot</h2>
+  <p class="lead">An AI step is powerful, but a little slower, pricier and less predictable than plain logic &mdash; so you place exactly one, exactly where ordinary automation gets stuck. Usually that is the moment a step has to understand or write language. Everywhere else, keep it boring.</p>
+
+  <p>The trick is spotting the stuck step. If a step needs to decide what some text <em>means</em>, that&rsquo;s a <strong>classify</strong> job. If it needs a specific fact buried in messy text, that&rsquo;s <strong>extract</strong>. If it needs to write something, that&rsquo;s <strong>draft</strong>. If it needs to shrink a lot into a little, that&rsquo;s <strong>summarize</strong>. Flip each card to see a stuck step and the AI job that unsticks it.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 &middot; Which AI step unsticks each spot?</span>
+      <div class="controls">
+        <button onclick="allReal()">Show all answers</button>
+        <button onclick="allHype()">&#8635; Back to spots</button>
+      </div>
+    </div>
+    <div class="sgrid" id="sgrid">
+      <div class="scard" onclick="this.classList.toggle('flipped')">
+        <div class="sinner">
+          <div class="sface sfront"><div class="sclaim">A question, a complaint, or spam?</div><div class="ssub">Plain rules can&rsquo;t tell which one it is.</div><div class="shint">tap to flip</div></div>
+          <div class="sface sback"><div class="slab">Slot in &middot; Classify</div><p>Add an AI step that labels each message, then let a normal condition route it. The AI decides the label; your fixed rule does the routing. Language in, clean category out.</p></div>
+        </div>
+      </div>
+      <div class="scard" onclick="this.classList.toggle('flipped')">
+        <div class="sinner">
+          <div class="sface sfront"><div class="sclaim">The order number is in here somewhere</div><div class="ssub">It sits in a different spot every time.</div><div class="shint">tap to flip</div></div>
+          <div class="sface sback"><div class="slab">Slot in &middot; Extract</div><p>An AI step pulls the specific field out of messy text and hands the next step clean, structured data to act on &mdash; the classic &ldquo;unstructured to structured&rdquo; move.</p></div>
+        </div>
+      </div>
+      <div class="scard" onclick="this.classList.toggle('flipped')">
+        <div class="sinner">
+          <div class="sface sfront"><div class="sclaim">Every request needs a tailored reply</div><div class="ssub">Far too many to write by hand.</div><div class="shint">tap to flip</div></div>
+          <div class="sface sback"><div class="slab">Slot in &middot; Draft</div><p>An AI step writes a first version from a template. Put a human approval checkpoint immediately after it, so nothing reaches a real person without a glance from you.</p></div>
+        </div>
+      </div>
+      <div class="scard" onclick="this.classList.toggle('flipped')">
+        <div class="sinner">
+          <div class="sface sfront"><div class="sclaim">A 40-message thread just landed</div><div class="ssub">You only need the gist of it.</div><div class="shint">tap to flip</div></div>
+          <div class="sface sback"><div class="slab">Slot in &middot; Summarize</div><p>An AI step condenses it to a few bullets so a person can decide in seconds. A checkable digest handed to you &mdash; not an action taken blindly on your behalf.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>One smart step, well placed</h3>
+  <p>You&rsquo;re not building an &ldquo;AI workflow&rdquo; &mdash; you&rsquo;re building a plain workflow with one smart step slotted in where language lives. That mindset keeps your automation reliable, your costs low, and the one place things might go wrong small enough for a human to watch.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Error paths and a human checkpoint</h2>
+  <p class="lead">Every automation you design must answer two questions the happy-path version ignores: <strong>what happens when a step fails?</strong> and <strong>who approves the risky moves?</strong> Skip these and your flow works beautifully &mdash; right up until the day it quietly doesn&rsquo;t.</p>
+
+  <p>First, error paths. Steps fail: an input goes missing, a service is down, the AI step returns nonsense. A good design plans for it &mdash; retry, skip, or stop and alert a human &mdash; instead of failing silently and leaving you to discover the damage later. Silent failure is the enemy; a loud, logged failure is a friend.</p>
+  <p>Second, the human-in-the-loop checkpoint, and the rule is <strong>reversible vs. irreversible</strong>. If a mistake is cheap to undo, let the flow run and review later. If it sends something to a real person, spends money, or can&rsquo;t be undone, put a human approval step in front of it. Toggle the traits of an action below to see whether it should auto-run, be reviewed, or wait for your approval.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 &middot; Auto-run or ask a human?</span>
+      <div class="controls">
+        <button onclick="scorePreset('irrev')">Irreversible action</button>
+        <button onclick="scorePreset('safe')">Reversible action</button>
+        <button onclick="scoreReset()">&#8635; Reset</button>
+      </div>
+    </div>
+    <div class="score">
+      <div class="score-grid">
+        <div class="score-toggles" id="scoreTog">
+          <div class="stog" data-pts="12" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">Sends something to a real person</span><span class="spts">+12</span></div>
+          <div class="stog" data-pts="14" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">Moves or deletes real data</span><span class="spts">+14</span></div>
+          <div class="stog" data-pts="18" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">Spends money or commits you</span><span class="spts">+18</span></div>
+          <div class="stog" data-pts="20" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">Hard or impossible to undo</span><span class="spts">+20</span></div>
+          <div class="stog" data-pts="8" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">Runs automatically at high volume</span><span class="spts">+8</span></div>
+          <div class="stog" data-pts="10" onclick="toggleSig(this)"><div class="sbox">&#10003;</div><span class="stxt">The AI step could get it wrong here</span><span class="spts">+10</span></div>
+        </div>
+        <div class="score-dial">
+          <div class="dial-num" id="dialNum">0</div>
+          <div class="dial-max">out of 82 risk points</div>
+          <div class="dial-bar"><div class="dial-fill" id="dialFill"></div></div>
+          <div class="dial-badge cold" id="dialBadge">Safe to auto-run</div>
+          <div class="dial-action" id="dialAction">Toggle the traits of an action. Reversible, low-stakes steps can run on their own; risky, irreversible ones should wait for a human.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Design for the bad day</h3>
+  <p>Amateurs design for the day everything works. Professionals design for the day it doesn&rsquo;t. Add the error path, add a checkpoint on anything irreversible, and your automation becomes something you can actually trust to run while you&rsquo;re not watching.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>Designing an automation is mostly thinking, done before you touch a tool. Decompose the chore into a trigger, ordered steps, and decision points. Wire the fields between steps by hand &mdash; the mismatch is the number-one beginner bug. Slot in a single AI step exactly where language understanding is needed. And design for the bad day: give every risky step an error path, and put a human checkpoint in front of anything you can&rsquo;t undo. Do that, and you have an automation you can trust.</p>
+  <ul>
+    <li>Map first: trigger &rarr; ordered steps &rarr; decision points, in plain language</li>
+    <li>Connect every field between steps &mdash; unmapped fields arrive blank (the #1 bug)</li>
+    <li>Slot in one AI step where language lives: classify, extract, draft, summarize</li>
+    <li>Plan error paths &mdash; a loud, logged failure beats a silent one</li>
+    <li>Human checkpoint on anything irreversible; auto-run only what is reversible</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath &middot; Lesson 02 of 04 &middot; Next up: Lesson 03 &rarr;</footer>
+<script>
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · flow-map builder ===== */
+const icpState={trigger:null,step:null,decision:null};
+function icpRender(){
+  el('icpTrigger').textContent=icpState.trigger||'— pick what starts it —';
+  el('icpStep').textContent=icpState.step||'— pick the main step —';
+  el('icpDecision').textContent=icpState.decision||'— pick a branch point —';
+  if(icpState.trigger&&icpState.step&&icpState.decision){
+    el('icpTitle').textContent='Flow mapped ✓';
+    el('icpSummary').textContent='"When '+icpState.trigger+', '+icpState.step+' — then branch on: '+icpState.decision+'" That single sentence is your automation, mapped and ready to build.';
+  }else{
+    el('icpTitle').textContent='Tap pieces to build it →';
+    el('icpSummary').textContent='Your flow sentence appears here once you’ve chosen one of each.';
+  }
+}
+document.querySelectorAll('#icpIn .chipset').forEach(set=>{
+  const grp=set.dataset.group;
+  set.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      const already=chip.classList.contains('on');
+      set.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      if(!already){chip.classList.add('on');icpState[grp]=chip.dataset.v}
+      else{icpState[grp]=null}
+      icpRender();
+    });
+  });
+});
+function icpSet(trigger,step,decision){
+  const map={trigger,step,decision};
+  document.querySelectorAll('#icpIn .chipset').forEach(set=>{
+    const grp=set.dataset.group;
+    set.querySelectorAll('.chip').forEach(c=>{
+      c.classList.toggle('on',c.dataset.v===map[grp]);
+    });
+    icpState[grp]=map[grp];
+  });
+  icpRender();
+}
+function icpPreset(k){
+  if(k==='triage')icpSet('a new email arrives','pull out the key details','is it urgent?');
+  else icpSet('a file is uploaded','post a short summary to the team','is anything missing?');
+}
+function icpReset(){
+  document.querySelectorAll('#icpIn .chip').forEach(c=>c.classList.remove('on'));
+  icpState.trigger=icpState.step=icpState.decision=null;
+  icpRender();
+}
+icpRender();
+
+/* ===== Figure 2 · field mapping ===== */
+let enrTimers=[];
+function resetMap(){
+  enrTimers.forEach(t=>clearTimeout(t));enrTimers=[];
+  document.querySelectorAll('#enrRich .erow.new').forEach(r=>r.classList.remove('in'));
+  el('enrArrow').classList.remove('spin');
+  el('enrNote').innerHTML='Press <b>▶ Map fields</b> and watch each output from Step 1 get wired to the input Step 2 expects.';
+}
+function runMap(){
+  resetMap();
+  el('enrArrow').classList.add('spin');
+  const rows=document.querySelectorAll('#enrRich .erow.new');
+  rows.forEach((r,i)=>{
+    enrTimers.push(setTimeout(()=>r.classList.add('in'),500+i*650));
+  });
+  enrTimers.push(setTimeout(()=>{
+    el('enrArrow').classList.remove('spin');
+    el('enrNote').innerHTML='<b>This wiring is the #1 beginner bug.</b> The field names rarely match — Step 1 calls it <code>email_addr</code>, Step 2 wants <code>to</code>. Miss one connection and that input arrives blank, so the flow runs yet quietly does nothing. Always check every field is plugged into the right source.';
+  },500+rows.length*650+400));
+}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){runMap();o.unobserve(e.target)}}),{threshold:0.4}).observe(el('enrRich'));
+
+/* ===== Figure 3 · AI-step cards ===== */
+const sgrid=el('sgrid');
+function allReal(){document.querySelectorAll('.scard').forEach(c=>c.classList.add('flipped'))}
+function allHype(){document.querySelectorAll('.scard').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){sgrid.classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(sgrid);
+
+/* ===== Figure 4 · risk / approval meter ===== */
+function calcScore(){
+  let sum=0;
+  document.querySelectorAll('#scoreTog .stog.on').forEach(t=>sum+=parseInt(t.dataset.pts,10));
+  if(sum<0)sum=0;
+  el('dialNum').textContent=sum;
+  const pct=Math.min(100,(sum/82)*100);
+  el('dialFill').style.width=pct+'%';
+  const badge=el('dialBadge'),act=el('dialAction');
+  badge.classList.remove('cold','warm','hot');
+  if(sum>=45){badge.classList.add('hot');badge.textContent='Needs approval 🔒';act.textContent='Risky and hard to undo. Put a human-in-the-loop checkpoint before this step runs, and design an error path for when it fails. Never let this one fire on its own.';}
+  else if(sum>=22){badge.classList.add('warm');badge.textContent='Review recommended';act.textContent='Let it run, but log every step and review the output. Add a clear error path so a failure alerts you loudly instead of failing silently.';}
+  else{badge.classList.add('cold');badge.textContent='Safe to auto-run';act.textContent='Low stakes and reversible. Fine to run automatically — still add a simple error notification so you hear about any failures.';}
+}
+function toggleSig(t){t.classList.toggle('on');calcScore();}
+function scorePreset(k){
+  const tog=document.querySelectorAll('#scoreTog .stog');
+  tog.forEach(t=>t.classList.remove('on'));
+  if(k==='irrev'){tog[0].classList.add('on');tog[1].classList.add('on');tog[2].classList.add('on');tog[3].classList.add('on');}
+  else{tog[4].classList.add('on');}
+  calcScore();
+}
+function scoreReset(){document.querySelectorAll('#scoreTog .stog').forEach(t=>t.classList.remove('on'));calcScore();}
+calcScore();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){scorePreset('irrev');o.unobserve(e.target)}}),{threshold:0.35}).observe(el('scoreTog'));
+</script>
+</body>
+</html>

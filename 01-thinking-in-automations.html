@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thinking in Automations · Lesson 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,0,800;9..144,1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --orange:#EF7F1A; --orange-light:#FF9429; --orange-dark:#D55222;
+  --brown:#412C23; --brown-dark:#2F1D19; --tan:#A34E1C;
+  --yellow:#FECC00; --cream:#FBF6EE; --paper:#FFFCF6;
+  --ink:#1C1410; --muted:#6E5C50; --line:#E8DCC8; --accent:#008DD2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.6; overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(65,44,35,0.05) 1px,transparent 0);
+  background-size:24px 24px;
+}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,252,246,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:var(--brown-dark)}
+.brand .dot{color:var(--orange)}
+.brand .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;color:var(--muted);font-weight:500;text-transform:uppercase;margin-left:8px}
+.logo-slot{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-slot svg{width:100%;height:100%;display:block}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 40px 100px}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--orange-dark);font-weight:600;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--orange)}
+h1{
+  font-family:'Fraunces',serif;font-weight:800;
+  font-size:clamp(38px,7vw,80px);line-height:0.98;letter-spacing:-0.03em;
+  margin:18px 0 20px;color:var(--brown-dark);
+}
+h1 em{font-style:italic;color:var(--orange-dark);font-weight:600}
+.lede{font-size:19px;max-width:680px;color:var(--muted)}
+section{padding:70px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.08em}
+h2{
+  font-family:'Fraunces',serif;font-weight:700;
+  font-size:clamp(28px,4.5vw,48px);line-height:1.05;letter-spacing:-0.02em;
+  margin:10px 0 22px;color:var(--brown-dark);max-width:720px;
+}
+h3{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:var(--brown-dark);margin:28px 0 12px}
+p{max-width:680px;margin-bottom:14px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:680px;margin-bottom:26px}
+code{font-family:'JetBrains Mono',monospace;font-size:0.92em;background:var(--cream);padding:2px 6px;border-radius:4px;color:var(--brown-dark)}
+.illus{
+  background:var(--cream);border:1px solid var(--line);border-radius:18px;
+  padding:32px;margin:24px 0;position:relative;overflow:hidden;
+}
+.illus-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls button{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);color:var(--brown);
+  padding:6px 12px;border-radius:6px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:0.1em;transition:all .2s;
+}
+.controls button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
+.controls button.active{background:var(--brown-dark);color:#fff;border-color:var(--brown-dark)}
+.takeaway{
+  background:var(--brown-dark);color:var(--paper);
+  border-radius:18px;padding:44px;margin-top:50px;position:relative;overflow:hidden;
+}
+.takeaway::after{
+  content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  border-radius:50%;background:radial-gradient(circle,var(--orange),transparent 70%);opacity:0.4;
+}
+.takeaway h2{color:var(--paper);margin-bottom:16px}
+.takeaway p{color:#E8D9C5;font-size:16px;max-width:680px}
+.takeaway ul{list-style:none;margin-top:18px;display:grid;gap:8px}
+.takeaway li{font-family:'JetBrains Mono',monospace;font-size:13px;padding-left:22px;position:relative;color:#FBE7CB}
+.takeaway li::before{content:"→";position:absolute;left:0;color:var(--orange);font-weight:bold}
+footer{text-align:center;padding:36px;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em}
+@media(max-width:700px){
+  .topbar{padding:12px 18px}
+  .page{padding:30px 18px 70px}
+  .illus{padding:20px}
+  .takeaway{padding:28px}
+  .logo-slot{width:38px;height:38px}
+}
+
+/* ============ Figure 1 · the flow ============ */
+.funnel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:28px 24px 22px}
+.funnel-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;align-items:center}
+.fstack{display:flex;flex-direction:column;align-items:center;gap:10px}
+.fstage{
+  cursor:pointer;color:#fff;border-radius:10px;text-align:center;
+  padding:16px 10px;transition:transform .3s,box-shadow .3s,filter .2s;
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.fstage:hover{filter:brightness(1.07)}
+.fstage.active{transform:scale(1.03);box-shadow:0 10px 24px rgba(65,44,35,0.25);outline:3px solid var(--yellow)}
+.fstage .fslabel{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-weight:600;opacity:.9}
+.fstage .fsname{font-family:'Fraunces',serif;font-size:19px;font-weight:700;line-height:1.1;margin-top:2px}
+.fstage .fscount{font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:5px;opacity:.92}
+.fs0{width:100%;background:var(--orange)}
+.fs1{width:94%;background:var(--tan)}
+.fs2{width:88%;background:var(--orange-dark)}
+.fs3{width:82%;background:var(--brown)}
+.fconv{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.06em}
+.fconv b{color:var(--orange-dark)}
+.fpanel{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:20px;min-height:230px}
+.fpanel.swap{animation:panelIn .4s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fpanel .fptag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:4px}
+.fpanel h4{font-family:'Fraunces',serif;font-size:21px;color:var(--brown-dark);margin-bottom:8px}
+.fpanel p{font-size:13.5px;color:var(--ink);max-width:none;margin-bottom:12px;line-height:1.5}
+.fpanel ul{list-style:none;display:grid;gap:7px}
+.fpanel li{font-size:13px;color:var(--ink);padding-left:20px;position:relative;line-height:1.45}
+.fpanel li::before{content:"✦";position:absolute;left:0;color:var(--orange);font-size:12px}
+@media(max-width:700px){.funnel-grid{grid-template-columns:1fr}}
+
+/* ============ Figure 2 · leak calculator ============ */
+.leak{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px}
+.lrow{display:grid;grid-template-columns:210px 1fr 62px;gap:14px;align-items:center;margin-bottom:16px}
+.lrow label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--brown);font-weight:600}
+.lrow .lval{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange-dark);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--cream);border:1px solid var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--orange);border:3px solid var(--paper);box-shadow:0 1px 5px rgba(65,44,35,0.35);cursor:pointer}
+.lout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.lcell{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.lcell .lk{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.lcell .lv{font-family:'Fraunces',serif;font-size:26px;font-weight:800;color:var(--brown-dark);line-height:1}
+.lcell.hero{background:var(--brown-dark)}
+.lcell.hero .lk{color:var(--yellow)}
+.lcell.hero .lv{color:var(--paper)}
+.lverdict{margin-top:18px;padding:14px 18px;border-radius:10px;background:var(--cream);border:1px solid var(--line);font-size:14px;color:var(--brown);line-height:1.5}
+@media(max-width:700px){
+  .lrow{grid-template-columns:1fr 60px;gap:8px}
+  .lrow label{grid-column:1/-1}
+  .lout{grid-template-columns:1fr 1fr}
+}
+
+/* ============ Figure 3 · the four AI steps ============ */
+.stack-chain{display:flex;align-items:stretch;gap:0;margin-bottom:18px}
+.snode{
+  flex:1;text-align:center;padding:14px 8px;background:var(--paper);
+  border:2px solid var(--line);border-radius:12px;cursor:pointer;
+  transition:all .25s;
+}
+.snode .sidx{display:block;font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:var(--line);margin-bottom:3px;transition:color .25s}
+.snode .snm{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--brown);font-weight:600}
+.snode:hover{border-color:var(--orange);transform:translateY(-2px)}
+.snode.active{background:var(--brown-dark);border-color:var(--brown-dark)}
+.snode.active .snm{color:var(--paper)}
+.snode.active .sidx{color:var(--orange)}
+.slink{width:22px;flex-shrink:0;align-self:center;height:3px;background:var(--line);position:relative}
+.slink::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);border-left:7px solid var(--line);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.spanel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;min-height:250px}
+.spanel.swap{animation:panelIn .4s ease}
+.spanel h4{font-family:'Fraunces',serif;font-size:22px;color:var(--brown-dark);margin-bottom:4px}
+.spanel .stag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange-dark);font-weight:600;display:block;margin-bottom:14px}
+.spanel ul{list-style:none;display:grid;gap:9px;margin-bottom:16px}
+.spanel li{font-size:14px;color:var(--ink);padding-left:24px;position:relative;line-height:1.5}
+.spanel li::before{content:"✦";position:absolute;left:0;color:var(--orange);font-size:13px}
+.s-human{background:var(--cream);border-left:3px solid var(--brown);border-radius:0 10px 10px 0;padding:13px 16px;font-size:13.5px;color:var(--brown);line-height:1.5}
+.s-human strong{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brown-dark);display:block;margin-bottom:3px}
+@media(max-width:700px){
+  .stack-chain{flex-wrap:wrap;gap:8px}
+  .snode{flex:1 1 40%}
+  .slink{display:none}
+}
+
+/* ============ Figure 4 · tool-vs-role cards ============ */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tcard{height:210px;perspective:1100px;cursor:pointer;opacity:0;transform:translateY(12px)}
+.tgrid.show .tcard{animation:hIn .5s forwards}
+.tgrid.show .tcard:nth-child(1){animation-delay:.05s}
+.tgrid.show .tcard:nth-child(2){animation-delay:.2s}
+.tgrid.show .tcard:nth-child(3){animation-delay:.35s}
+.tgrid.show .tcard:nth-child(4){animation-delay:.5s}
+@keyframes hIn{to{opacity:1;transform:translateY(0)}}
+.tinner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.1,.2,1)}
+.tcard.flipped .tinner{transform:rotateY(180deg)}
+.tface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:center}
+.tfront{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-dark) 100%);color:#fff;text-align:center;align-items:center}
+.tfront .tclaim{font-family:'Fraunces',serif;font-weight:800;font-size:24px;line-height:1.1;margin-bottom:8px}
+.tfront .tsub{font-size:13px;opacity:.92;max-width:260px}
+.tfront .thint{position:absolute;bottom:12px;left:0;right:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.15em;text-transform:uppercase;opacity:.75}
+.tback{background:var(--brown-dark);color:#F3E7D5;transform:rotateY(180deg);border:1px solid var(--brown)}
+.tback .tlab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--yellow);font-weight:600;margin-bottom:8px}
+.tback p{font-size:13px;line-height:1.55;color:#F3E7D5;margin:0;max-width:none}
+@media(max-width:700px){.tgrid{grid-template-columns:1fr}.tcard{height:200px}.tfront .tclaim{font-size:21px}}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">MokshPath <span class="dot">·</span> <span class="sub">Lesson 01 · AI Automation</span></div>
+  <div class="logo-slot" aria-label="MokshPath logo">
+    <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="13" width="36" height="27" rx="6" fill="#412C23"/>
+      <path d="M14 13 C14 4.5 30 4.5 30 13" stroke="#EF7F1A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M12 32 L12 22 L17 28 L22 21 L27 28 L32 22 L32 32" stroke="#FECC00" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="9" r="4.5" fill="#EF7F1A"/>
+    </svg>
+  </div>
+</div>
+<div class="page">
+
+<section class="hero">
+  <div class="eyebrow">Week 4 · Lesson 01 · AI Automation</div>
+  <h1>Thinking in <em>automations</em>.</h1>
+  <p class="lede">This week we stop doing chores by hand and start describing them once so they run themselves. An automation is nothing exotic — it is a plain sentence: <strong>when this happens, do that</strong>. Learn to see any routine task as a trigger, a few ordered actions, and the occasional &ldquo;only if&rdquo;, and you can build reliable little workflows without writing much code at all.</p>
+</section>
+
+<section>
+  <div class="section-num">01 / 04</div>
+  <h2>Every automation is &ldquo;when X, do Y&rdquo;</h2>
+  <p class="lead">The fastest way to understand automation is to stop thinking in &ldquo;apps&rdquo; and start thinking in one sentence: <strong>when X happens, do Y</strong>. Every automation you will ever build &mdash; no matter the tool &mdash; is some version of that sentence, with a few optional twists.</p>
+
+  <p>The first half, &ldquo;when X happens&rdquo;, is the <strong>trigger</strong>: the single event that wakes the automation up. A form gets a new response. A file lands in a folder. The clock hits 9am. Until the trigger fires, nothing runs &mdash; which is exactly what you want. Automations are patient; they wait.</p>
+  <p>The second half, &ldquo;do Y&rdquo;, is the <strong>action</strong> &mdash; the actual work: send a message, save a row, create a file, move some data. You can chain several actions in a fixed order, and because the order never changes, the whole thing is predictable and testable. Sometimes you add a <strong>condition</strong> &mdash; an &ldquo;only if&rdquo; &mdash; so the flow can branch: if the amount is large, send it for a check; otherwise just file it. Click through the flow below to see each piece in order.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 1 &middot; The shape of every automation</span>
+      <div class="controls">
+        <button onclick="funStep(-1)">&#9664; Prev step</button>
+        <button onclick="funStep(1)">Next step &#9654;</button>
+      </div>
+    </div>
+    <div class="funnel">
+      <div class="funnel-grid">
+        <div class="fstack" id="fstack">
+          <div class="fstage fs0 active" data-k="trigger" onclick="pickStage('trigger')">
+            <span class="fslabel">Step 1 &middot; Trigger</span>
+            <span class="fsname">When this happens</span>
+            <span class="fscount">e.g. a new form reply arrives</span>
+          </div>
+          <div class="fconv">&darr; <b>then</b> do the action</div>
+          <div class="fstage fs1" data-k="action" onclick="pickStage('action')">
+            <span class="fslabel">Step 2 &middot; Action</span>
+            <span class="fsname">Do this</span>
+            <span class="fscount">e.g. save it to a sheet</span>
+          </div>
+          <div class="fconv">&darr; <b>optionally</b> check a condition</div>
+          <div class="fstage fs2" data-k="condition" onclick="pickStage('condition')">
+            <span class="fslabel">Step 3 &middot; Condition</span>
+            <span class="fsname">Only if&hellip;</span>
+            <span class="fscount">e.g. if it looks urgent</span>
+          </div>
+          <div class="fconv">&darr; <b>and</b> produce the result</div>
+          <div class="fstage fs3" data-k="result" onclick="pickStage('result')">
+            <span class="fslabel">Step 4 &middot; Result</span>
+            <span class="fsname">You get this</span>
+            <span class="fscount">e.g. a tidy, checked record</span>
+          </div>
+        </div>
+        <div class="fpanel" id="fpanel"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Read it as one sentence</h3>
+  <p>Whenever a tool overwhelms you with buttons, shrink the task back to the sentence. &ldquo;When a new response comes in (trigger), save it to my sheet and send myself a summary (actions) &mdash; but only flag it if it looks urgent (condition).&rdquo; If you can say the sentence out loud, you can build the automation. If you can&rsquo;t, you don&rsquo;t yet understand the task well enough &mdash; and understanding the task <em>is</em> the real work of this week.</p>
+</section>
+
+<section>
+  <div class="section-num">02 / 04</div>
+  <h2>Automation vs. agent: a fixed path vs. a decider</h2>
+  <p class="lead">Two words get mixed up constantly: <strong>automation</strong> and <strong>agent</strong>. They are cousins, but they behave very differently &mdash; and picking the wrong one is a common, expensive beginner mistake.</p>
+
+  <p>An <strong>automation</strong> follows a path you drew in advance. Same trigger, same steps, same order, every single time. It is a train on rails: fast, cheap, and utterly predictable &mdash; but it can only go where you laid the track. An <strong>agent</strong>, by contrast, is handed a goal and decides its own next step as it goes. It is more like a driver than a train: flexible enough to handle situations you didn&rsquo;t foresee, but harder to predict, harder to test, and quicker to surprise you.</p>
+  <p>The rule of thumb is simple and it will save you a lot of grief: <strong>if you can draw the path, automate it</strong>. Only reach for a deciding agent when the path genuinely can&rsquo;t be drawn in advance &mdash; when the right next step depends on what the last step turned up. Most everyday work is more fixed than it feels. Flip each card to test your instinct.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 2 &middot; Fixed path or decider?</span>
+      <div class="controls">
+        <button onclick="allReal()">Show all answers</button>
+        <button onclick="allHype()">&#8635; Back to prompts</button>
+      </div>
+    </div>
+    <div class="tgrid" id="tgrid">
+      <div class="tcard" onclick="this.classList.toggle('flipped')">
+        <div class="tinner">
+          <div class="tface tfront"><div class="tclaim">&ldquo;Runs the same steps every time&rdquo;</div><div class="tsub">You draw the path; it never deviates.</div><div class="thint">tap to flip</div></div>
+          <div class="tface tback"><div class="tlab">Automation</div><p>A fixed flow: same trigger, same steps, same order. Predictable, testable, cheap to run &mdash; and it only ever does what you designed. This is your default tool, and most of this course lives here.</p></div>
+        </div>
+      </div>
+      <div class="tcard" onclick="this.classList.toggle('flipped')">
+        <div class="tinner">
+          <div class="tface tfront"><div class="tclaim">&ldquo;Chooses its own next step&rdquo;</div><div class="tsub">You give a goal; it decides how to reach it.</div><div class="thint">tap to flip</div></div>
+          <div class="tface tback"><div class="tlab">Agent</div><p>An agent decides which actions to take toward a goal. More flexible, but harder to predict and test. You trade control for adaptability &mdash; worth it only when the path truly can&rsquo;t be drawn in advance.</p></div>
+        </div>
+      </div>
+      <div class="tcard" onclick="this.classList.toggle('flipped')">
+        <div class="tinner">
+          <div class="tface tfront"><div class="tclaim">&ldquo;Save a receipt when a payment lands&rdquo;</div><div class="tsub">Which is this &mdash; automation or agent?</div><div class="thint">tap to flip</div></div>
+          <div class="tface tback"><div class="tlab">Automation territory</div><p>The rule is obvious and identical every time, so a fixed flow is perfect. Reaching for an &ldquo;agent&rdquo; here just adds cost and unpredictability for no benefit at all.</p></div>
+        </div>
+      </div>
+      <div class="tcard" onclick="this.classList.toggle('flipped')">
+        <div class="tinner">
+          <div class="tface tfront"><div class="tclaim">&ldquo;Research options and recommend one&rdquo;</div><div class="tsub">Which is this &mdash; automation or agent?</div><div class="thint">tap to flip</div></div>
+          <div class="tface tback"><div class="tlab">Agent territory</div><p>The steps depend on what it finds along the way, so you can&rsquo;t pre-draw them. This is where a deciding agent earns its keep &mdash; with a human reviewing the recommendation before anyone acts.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Why default to the simpler one</h3>
+  <p>A fixed automation fails in boring, visible ways you can fix. A deciding agent can fail in creative, surprising ways that are harder to catch. Beginners do best starting with automations, adding a single AI step where judgment is needed, and graduating to full agents only once they can clearly say <em>why</em> a fixed path won&rsquo;t do.</p>
+</section>
+
+<section>
+  <div class="section-num">03 / 04</div>
+  <h2>Where AI fits: as one step inside the flow</h2>
+  <p class="lead">Here is the reframe that makes AI far less intimidating: in a workflow, <strong>AI is just one step</strong> &mdash; a box in the flow like any other. It is the box you reach for when a step involves reading or writing language, because that is the part ordinary automation can&rsquo;t do.</p>
+
+  <p>Plain automations are brilliant at moving data around, but they are helpless the moment a step needs to <em>understand</em> something written in human words. That is the gap an AI step fills. And it usually does one of four jobs: <strong>classify</strong> (sort text into buckets), <strong>extract</strong> (pull specific facts out of messy text), <strong>draft</strong> (write a first version of something), or <strong>summarize</strong> (shrink a lot into a little). Learn these four and you can spot exactly where an AI step belongs.</p>
+  <p>Notice what stays true from earlier lessons: the AI does the fuzzy language work, but the flow around it is still plain, predictable automation &mdash; and a human still checks anything that matters. Click each AI step to see what it does and where it slots in.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 3 &middot; The four AI steps, as a chain</span>
+      <div class="controls">
+        <button onclick="stackStep(-1)">&#9664; Prev</button>
+        <button onclick="stackStep(1)">Next &#9654;</button>
+      </div>
+    </div>
+    <div class="stack-chain" id="stackChain">
+      <div class="snode" data-k="classify" onclick="pickStack('classify')"><span class="sidx">1</span><span class="snm">Classify</span></div>
+      <div class="slink"></div>
+      <div class="snode" data-k="extract" onclick="pickStack('extract')"><span class="sidx">2</span><span class="snm">Extract</span></div>
+      <div class="slink"></div>
+      <div class="snode" data-k="draft" onclick="pickStack('draft')"><span class="sidx">3</span><span class="snm">Draft</span></div>
+      <div class="slink"></div>
+      <div class="snode" data-k="summarize" onclick="pickStack('summarize')"><span class="sidx">4</span><span class="snm">Summarize</span></div>
+    </div>
+    <div class="spanel" id="spanel"></div>
+  </div>
+
+  <h3>One step, not the whole machine</h3>
+  <p>You almost never want AI to run an entire workflow. You want a mostly-boring automation with a single smart step dropped in at the exact spot where language understanding is needed. That keeps the flow cheap and testable, and it keeps the one place AI might get things wrong small enough for a human to watch.</p>
+</section>
+
+<section>
+  <div class="section-num">04 / 04</div>
+  <h2>Should you automate this?</h2>
+  <p class="lead">Not everything should be automated. The skill isn&rsquo;t automating more &mdash; it is knowing <strong>what is worth automating</strong> and what to leave in human hands. A few honest questions settle it.</p>
+
+  <p>Good automation candidates share a shape: they are <strong>repetitive</strong> (you do them again and again), <strong>rule-based</strong> (the steps are clear, not a judgment call), <strong>high-volume</strong> (they happen often enough to be worth the setup), and <strong>reversible</strong> (a mistake is cheap to undo). The more boxes a task ticks, the stronger the case for building a flow.</p>
+  <p>The opposite shape is a warning sign: tasks that are <strong>rare</strong>, <strong>high-stakes</strong>, or full of <strong>judgment</strong> usually cost more to automate badly than to simply do by hand. Move the sliders below to weigh a task on these dimensions and see where it lands &mdash; automate, pilot, or keep human.</p>
+
+  <div class="illus">
+    <div class="illus-title">
+      <span>Figure 4 &middot; The automate-or-not meter</span>
+      <div class="controls">
+        <button onclick="leakPreset('good')">Great fit</button>
+        <button onclick="leakPreset('weak')">Poor fit</button>
+        <button onclick="leakPreset('reset')">&#8635; Defaults</button>
+      </div>
+    </div>
+    <div class="leak" id="leak">
+      <div class="lrow">
+        <label for="lVis">Times you&rsquo;d run it / month</label>
+        <input type="range" id="lVis" min="4" max="400" step="4" value="60" oninput="calcLeak()">
+        <div class="lval" id="vVis">60/mo</div>
+      </div>
+      <div class="lrow">
+        <label for="lC1">How rule-based (clear steps) %</label>
+        <input type="range" id="lC1" min="0" max="100" step="5" value="60" oninput="calcLeak()">
+        <div class="lval" id="vC1">60%</div>
+      </div>
+      <div class="lrow">
+        <label for="lC2">How predictable the input %</label>
+        <input type="range" id="lC2" min="0" max="100" step="5" value="60" oninput="calcLeak()">
+        <div class="lval" id="vC2">60%</div>
+      </div>
+      <div class="lrow">
+        <label for="lC3">How reversible if it errs %</label>
+        <input type="range" id="lC3" min="0" max="100" step="5" value="60" oninput="calcLeak()">
+        <div class="lval" id="vC3">60%</div>
+      </div>
+      <div class="lout">
+        <div class="lcell"><span class="lk">Runs / year</span><span class="lv" id="oClicks">&ndash;</span></div>
+        <div class="lcell"><span class="lk">Hrs saved / mo</span><span class="lv" id="oLeads">&ndash;</span></div>
+        <div class="lcell"><span class="lk">Fit score</span><span class="lv" id="oRate">&ndash;</span></div>
+        <div class="lcell hero"><span class="lk">Verdict</span><span class="lv" id="oCust">&ndash;</span></div>
+      </div>
+      <div class="lverdict" id="lVerdict"></div>
+    </div>
+  </div>
+
+  <h3>Automate the chore, not the choice</h3>
+  <p>The honest goal for a beginner isn&rsquo;t a fully automated life &mdash; it is reclaiming the repetitive minutes so your attention goes to the decisions that actually need a person. Automate the chore. Keep the choice. Next lesson, we take one real workflow and design it end to end.</p>
+</section>
+
+<div class="takeaway">
+  <h2>What to carry forward</h2>
+  <p>You now have the mental model the rest of the week stands on. Every automation is a sentence &mdash; when X happens, do Y &mdash; with the occasional &ldquo;only if&rdquo; to branch it. Automations follow a fixed path; agents decide their own, so prefer the fixed path whenever you can draw it. AI enters as a single step that reads or writes language: classify, extract, draft, summarize. And before you build anything, ask whether the task is even worth automating. Next lesson: designing a real automation, step by step.</p>
+  <ul>
+    <li>Every automation = a trigger (&ldquo;when X&rdquo;) plus one or more actions (&ldquo;do Y&rdquo;)</li>
+    <li>Conditions add branches &mdash; still just rules you write, no guessing</li>
+    <li>Automation follows a fixed path; an agent decides its own &mdash; prefer the fixed path</li>
+    <li>AI slots in as a step: classify, extract, draft, summarize the language parts</li>
+    <li>Automate the repetitive, rule-ish, high-volume, reversible work &mdash; keep judgment human</li>
+  </ul>
+</div>
+
+</div>
+<footer>MokshPath &middot; Lesson 01 of 04 &middot; Next up: Designing an Automation &rarr;</footer>
+<script>
+function el(id){return document.getElementById(id)}
+
+/* ===== Figure 1 · the flow (trigger -> action -> condition -> result) ===== */
+const FUN={
+  trigger:{tag:'Step 1 · The trigger · "when this happens"',t:'Trigger — the event that starts everything',p:'Every automation waits for one thing to happen. That event is the trigger. Nothing runs until it fires — automations are patient by design.',li:['A new form response, a new file, an incoming email','A clock: every morning at 9, every Monday at noon','A status changes or someone taps a button','No trigger, no automation — this is always step one']},
+  action:{tag:'Step 2 · The action · "do this"',t:'Action — the &ldquo;do Y&rdquo; the flow performs',p:'Once the trigger fires, the automation performs one or more actions — the actual work you wanted done, in a fixed order you set in advance.',li:['Send a message, save a row, create a file, move data','Actions run in the exact order you chose, every time','Each action is small, boring, and completely predictable','Chain a few together and a whole chore quietly disappears']},
+  condition:{tag:'Step 3 · The condition · "only if…"',t:'Condition — the fork in the road',p:'A condition lets the flow branch. If something is true, do one thing; if not, do another — or stop. This is where a flow starts to feel smart.',li:['&ldquo;If the amount is over 1,000, send it for a check&rdquo;','&ldquo;Only reply if the message is a question&rdquo;','Conditions keep the flow from doing the wrong thing','Still just rules you wrote — no guessing involved']},
+  result:{tag:'Step 4 · The result · "and you get"',t:'Result — the outcome you can check',p:'The end of the flow: a finished, checkable outcome. Good automations end somewhere you can look and confirm nothing went wrong.',li:['A saved record, a sent reply, an updated sheet','You can inspect the result and trust it or reject it','A clear result is what makes an automation testable','If you can&rsquo;t tell whether it worked, redesign it']}
+};
+const FORDER=['trigger','action','condition','result'];
+let funCur='trigger';
+function pickStage(k){
+  funCur=k;
+  document.querySelectorAll('#fstack .fstage').forEach(n=>n.classList.toggle('active',n.dataset.k===k));
+  const d=FUN[k],pan=el('fpanel');
+  let html='<span class="fptag">'+d.tag+'</span><h4>'+d.t+'</h4><p>'+d.p+'</p><ul>';
+  d.li.forEach(x=>html+='<li>'+x+'</li>');
+  html+='</ul>';
+  pan.innerHTML=html;
+  pan.classList.remove('swap');void pan.offsetWidth;pan.classList.add('swap');
+}
+function funStep(dir){
+  let i=FORDER.indexOf(funCur)+dir;
+  if(i<0)i=FORDER.length-1;if(i>=FORDER.length)i=0;
+  pickStage(FORDER[i]);
+}
+pickStage('trigger');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickStage('trigger');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('fstack'));
+
+/* ===== Figure 3 · the four AI steps ===== */
+const STACK={
+  classify:{t:'Classify — sort something into buckets',tag:'AI step · label & route',li:['&ldquo;Is this message a question, a complaint, or spam?&rdquo;','Turns messy input into a clean category the flow can branch on','Perfect right before a condition — AI picks the label, the rule does the routing','You supply the categories; the AI chooses one'],h:'AI is fast but not perfect at edge cases. Send the low-confidence ones to a person instead of guessing.'},
+  extract:{t:'Extract — pull specific fields out of text',tag:'AI step · read & lift',li:['Pull the date, name, amount or address out of a messy email','Turns a paragraph a computer can&rsquo;t read into neat fields it can','The classic &ldquo;unstructured &rarr; structured&rdquo; move','Feeds the next step clean data to act on'],h:'Extraction is roughly 80–90% reliable, not 100%. For anything costly, have a person confirm the fields before acting.'},
+  draft:{t:'Draft — write a first version',tag:'AI step · generate text',li:['Draft a reply, a summary note, a description, a caption','You get a solid first pass in seconds, not a finished send','Give it a template and a voice so drafts stay consistent','Best paired with an approval step before anything goes out'],h:'A draft is a starting point, never a final answer. Keep a human approval checkpoint before it reaches a real person.'},
+  summarize:{t:'Summarize — shrink a lot into a little',tag:'AI step · condense',li:['Turn a long thread, document or call into three bullet points','Great for &ldquo;what changed?&rdquo; or &ldquo;what needs my attention?&rdquo;','Lets a person skim in seconds what would take ten minutes','Pairs well as the last step, handing you a checkable digest'],h:'Summaries can quietly drop the one detail that mattered. Skim the source yourself when the stakes are high.'}
+};
+const SORDER=['classify','extract','draft','summarize'];
+let stackCur='classify';
+function pickStack(k){
+  stackCur=k;
+  document.querySelectorAll('#stackChain .snode').forEach(n=>n.classList.toggle('active',n.dataset.k===k));
+  const d=STACK[k],pan=el('spanel');
+  let html='<span class="stag">'+d.tag+'</span><h4>'+d.t+'</h4><ul>';
+  d.li.forEach(x=>html+='<li>'+x+'</li>');
+  html+='</ul><div class="s-human"><strong>Where a human checks</strong>'+d.h+'</div>';
+  pan.innerHTML=html;
+  pan.classList.remove('swap');void pan.offsetWidth;pan.classList.add('swap');
+}
+function stackStep(dir){
+  let i=SORDER.indexOf(stackCur)+dir;
+  if(i<0)i=SORDER.length-1;if(i>=SORDER.length)i=0;
+  pickStack(SORDER[i]);
+}
+pickStack('classify');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){pickStack('classify');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('stackChain'));
+
+/* ===== Figure 4 · flip cards (automation vs agent) ===== */
+const tgrid=el('tgrid');
+function allReal(){document.querySelectorAll('.tcard').forEach(c=>c.classList.add('flipped'))}
+function allHype(){document.querySelectorAll('.tcard').forEach(c=>c.classList.remove('flipped'))}
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){tgrid.classList.add('show');o.unobserve(e.target)}}),{threshold:0.25}).observe(tgrid);
+
+/* ===== Figure 4b · should-you-automate meter ===== */
+function fmt(n){return Math.round(n).toLocaleString()}
+function calcLeak(){
+  const runs=+el('lVis').value,c1=+el('lC1').value,c2=+el('lC2').value,c3=+el('lC3').value;
+  el('vVis').textContent=fmt(runs)+'/mo';
+  el('vC1').textContent=c1+'%';el('vC2').textContent=c2+'%';el('vC3').textContent=c3+'%';
+  const perYear=runs*12;
+  const hrs=runs*6/60;
+  const fit=Math.round(c1*0.4+c2*0.3+c3*0.3);
+  el('oClicks').textContent=fmt(perYear);
+  el('oLeads').textContent=hrs.toFixed(1)+'h';
+  el('oRate').textContent=fit+'%';
+  let verdict;
+  if(fit>=66&&runs>=40)verdict='Automate';
+  else if(fit>=45)verdict='Pilot';
+  else verdict='Human';
+  el('oCust').textContent=verdict;
+  const dims=[['how rule-based it is',c1],['how predictable the inputs are',c2],['how reversible mistakes are',c3]];
+  dims.sort((a,b)=>a[1]-b[1]);
+  const weak=dims[0];
+  let msg;
+  if(verdict==='Automate'){msg='Strong fit. It&rsquo;s repetitive, predictable and forgiving of small errors &mdash; exactly what a fixed flow handles well. Build it, then add a quick check on the output.';}
+  else if(verdict==='Pilot'){msg='Borderline. Automate the boring middle, but the weakest signal here is <b>'+weak[0]+'</b> ('+weak[1]+'%). Keep a human glancing at the results until you trust it.';}
+  else{msg='Probably keep this one human for now. The weakest signal is <b>'+weak[0]+'</b> ('+weak[1]+'%). Rare, high-judgment or hard-to-undo tasks cost more to automate badly than to just do by hand.';}
+  el('lVerdict').innerHTML=msg;
+}
+function leakPreset(w){
+  const vis=el('lVis'),c1=el('lC1'),c2=el('lC2'),c3=el('lC3');
+  if(w==='good'){vis.value=160;c1.value=85;c2.value=80;c3.value=75}
+  else if(w==='weak'){vis.value=8;c1.value=25;c2.value=30;c3.value=20}
+  else{vis.value=60;c1.value=60;c2.value=60;c3.value=60}
+  calcLeak();
+}
+calcLeak();
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){leakPreset('good');o.unobserve(e.target)}}),{threshold:0.3}).observe(el('leak'));
+</script>
+</body>
+</html>
